@@ -313,6 +313,8 @@ def is_valid_name(name: str) -> bool:
         "maybe",
         "potential",
         "new",
+        "small",
+        "massive",
     ]
     return not any(word in lowered for word in blocked)
 
