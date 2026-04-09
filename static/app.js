@@ -40,6 +40,28 @@
   let audioUnlocked = false;
   let pendingAutoplay = false;
 
+  function requestLocation() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          await fetchJson("/api/location", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              lat: position.coords.latitude,
+              lon: position.coords.longitude,
+            }),
+          });
+        } catch (_error) {
+          // Keep current fallback origin if location save fails.
+        }
+      },
+      () => {},
+      { enableHighAccuracy: true, maximumAge: 300000, timeout: 8000 }
+    );
+  }
+
   function setLoading(visible) {
     loadingOverlay.classList.toggle("hidden", !visible);
   }
@@ -203,6 +225,19 @@
 
   async function syncMap() {
     openModal("Sync Map", qs("#syncMapTemplate").content.cloneNode(true));
+    qs("#undoSyncButton").addEventListener("click", async () => {
+      setLoading(true);
+      try {
+        const result = await fetchJson("/api/sync-kml/undo", { method: "POST" });
+        closeModal();
+        await refreshStats();
+        drawMessage(`Removed ${result.removed} drains from the last sync.`);
+      } catch (error) {
+        drawMessage(error.message);
+      } finally {
+        setLoading(false);
+      }
+    });
     qs("#syncMapForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       setLoading(true);
@@ -332,8 +367,6 @@
       return;
     }
     audioUnlocked = true;
-    audioPlayer.load();
-    meowPlayer.load();
     if (pendingAutoplay) {
       pendingAutoplay = false;
       startPlaybackAt(state.playlistIndex);
@@ -374,12 +407,14 @@
       .join("");
 
     const features = ["Junction", "Split", "Slide", "Grille Room", "Chamber", "Waterfall", "Side-Pipe"];
+    const showDelete = drain.source === "custom" || drain.source === "synced";
 
     return `
       <div class="detail-section detail-actions">
         <button class="retro-button" type="button" id="nearbyButton">Nearby</button>
         <button class="retro-button" type="button" id="routeFromHereButton">Build Route</button>
         <a class="retro-button" href="${escapeHtml(drain.maps_url)}" target="_blank" rel="noreferrer">Google Earth</a>
+        ${showDelete ? '<button class="retro-button" type="button" id="deleteDrainButton">Delete Drain</button>' : ""}
       </div>
       <div class="detail-section nearby-list" id="nearbyArea"></div>
       <div class="detail-section">
@@ -452,6 +487,15 @@
       renderRoute(await fetchJson(`/api/drains/${encodeURIComponent(name)}/route`));
       closeModal();
     });
+    const deleteDrainButton = modalBody.querySelector("#deleteDrainButton");
+    if (deleteDrainButton) {
+      deleteDrainButton.addEventListener("click", async () => {
+        await fetchJson(`/api/drains/${encodeURIComponent(name)}/delete`, { method: "POST" });
+        await refreshStats();
+        closeModal();
+        drawMessage(`Deleted ${name}.`);
+      });
+    }
 
     modalBody.querySelectorAll(".difficulty-button").forEach((button) => {
       button.addEventListener("click", () => {
@@ -1255,7 +1299,7 @@
   qs("#routeButton").addEventListener("click", buildRoute);
   qs("#linksButton").addEventListener("click", openLinks);
   qs("#addDrainButton").addEventListener("click", openAddDrain);
-  qs("#syncMapButton").addEventListener("click", syncMap);
+  if (qs("#syncMapButton")) qs("#syncMapButton").addEventListener("click", syncMap);
   qs("#miniGamesButton").addEventListener("click", openGames);
   qs("#closeModal").addEventListener("click", closeModal);
 
@@ -1283,6 +1327,7 @@
   setupLoadingDots();
   setupSmiley();
   setupMusic();
+  requestLocation();
   window.addEventListener("resize", () => {
     fitDesktop();
     syncSliders();

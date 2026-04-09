@@ -143,6 +143,7 @@ def create_account(username: str, password: str) -> dict[str, Any]:
         "username": normalized,
         "password_hash": generate_password_hash(password),
         "approved": False,
+        "map_uploaded": False,
     }
     save_accounts(accounts)
     save_user_metadata(normalized, load_user_metadata(normalized))
@@ -176,6 +177,56 @@ def approve_account(username: str) -> None:
     account["approved"] = True
     accounts[normalized] = account
     save_accounts(accounts)
+
+
+def mark_account_map_uploaded(username: str) -> None:
+    normalized = normalize_username(username)
+    accounts = load_accounts()
+    account = accounts.get(normalized)
+    if not isinstance(account, dict):
+        raise ValueError("Account not found.")
+    account["map_uploaded"] = True
+    accounts[normalized] = account
+    save_accounts(accounts)
+
+
+def account_uses_personal_map(username: str | None) -> bool:
+    if not username:
+        return False
+    account = load_accounts().get(normalize_username(username))
+    if not isinstance(account, dict):
+        return False
+    if "map_uploaded" not in account:
+        return False
+    return bool(account.get("map_uploaded"))
+
+
+def include_shared_map(username: str | None) -> bool:
+    if not username:
+        return True
+    account = load_accounts().get(normalize_username(username))
+    if not isinstance(account, dict):
+        return True
+    if "map_uploaded" not in account:
+        return True
+    return False
+
+
+def get_user_origin(username: str | None) -> tuple[float, float]:
+    metadata = load_user_metadata(username)
+    origin = metadata.get("_origin", {}) if isinstance(metadata, dict) else {}
+    lat = origin.get("lat")
+    lon = origin.get("lon")
+    try:
+        return float(lat), float(lon)
+    except (TypeError, ValueError):
+        return BASE_LAT, BASE_LON
+
+
+def save_user_origin(username: str, lat: float, lon: float) -> None:
+    metadata = load_user_metadata(username)
+    metadata["_origin"] = {"lat": float(lat), "lon": float(lon)}
+    save_user_metadata(username, metadata)
 
 
 def distance_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -269,10 +320,11 @@ def _parse_kml_root(root: ET.Element) -> list[dict[str, Any]]:
     ns = {"kml": "http://www.opengis.net/kml/2.2"}
     drains: list[dict[str, Any]] = []
     seen: set[str] = set()
+    seen_coords: set[tuple[float, float]] = set()
 
     for placemark in root.findall(".//kml:Placemark", ns):
         name_elem = placemark.find("kml:name", ns)
-        coords_elem = placemark.find(".//kml:coordinates", ns)
+        coords_elem = placemark.find(".//kml:Point/kml:coordinates", ns)
         desc_elem = placemark.find("kml:description", ns)
 
         if name_elem is None or coords_elem is None:
@@ -289,15 +341,15 @@ def _parse_kml_root(root: ET.Element) -> list[dict[str, Any]]:
 
         coord_text = coords_elem.text.strip().split()[0]
         lon, lat, _alt = map(float, coord_text.split(","))
-        dist = distance_km(BASE_LAT, BASE_LON, lat, lon)
-
+        coord_key = (round(lat, 7), round(lon, 7))
+        if coord_key in seen_coords:
+            continue
+        seen_coords.add(coord_key)
         drains.append(
             {
                 "name": name,
                 "lat": lat,
                 "lon": lon,
-                "distance_km": round(dist, 2),
-                "drive_minutes": km_to_drive_minutes(dist),
                 "description": clean_description(desc_elem.text if desc_elem is not None else ""),
                 "source": "kml",
                 "custom": False,
@@ -360,15 +412,16 @@ def _drain_identity_key(name: str, lat: float, lon: float) -> tuple[str, float, 
     return (name.casefold(), round(float(lat), 7), round(float(lon), 7))
 
 
-def sync_kml_payload(payload: bytes) -> dict[str, Any]:
+def sync_kml_payload(username: str, payload: bytes) -> dict[str, Any]:
     kml_bytes = _extract_kml_bytes(payload)
     imported_drains = _parse_kml_bytes_to_drains(kml_bytes)
-    metadata = load_metadata()
+    metadata = load_user_metadata(username)
     existing_keys = {
         _drain_identity_key(drain["name"], drain["lat"], drain["lon"])
-        for drain in get_all_drains()
+        for drain in get_all_drains(username)
     }
     added = 0
+    added_names: list[str] = []
 
     for drain in imported_drains:
         key = _drain_identity_key(drain["name"], drain["lat"], drain["lon"])
@@ -386,9 +439,12 @@ def sync_kml_payload(payload: bytes) -> dict[str, Any]:
         metadata[drain["name"]] = current
         existing_keys.add(key)
         added += 1
+        added_names.append(drain["name"])
 
+    metadata["_last_sync_added"] = added_names
     if added:
-        save_metadata(metadata)
+        mark_account_map_uploaded(username)
+    save_user_metadata(username, metadata)
 
     return {
         "ok": True,
@@ -397,7 +453,7 @@ def sync_kml_payload(payload: bytes) -> dict[str, Any]:
     }
 
 
-def sync_kml_from_source(source: str | None = None) -> dict[str, Any]:
+def sync_kml_from_source(username: str, source: str | None = None) -> dict[str, Any]:
     sync_source = (source or KML_SYNC_URL or "").strip()
     if not sync_source:
         raise ValueError("No sync URL is configured.")
@@ -415,28 +471,45 @@ def sync_kml_from_source(source: str | None = None) -> dict[str, Any]:
     except urllib.error.URLError as error:
         raise ValueError(f"Could not download the KML source: {error}") from error
 
-    result = sync_kml_payload(payload)
+    result = sync_kml_payload(username, payload)
     result["source_url"] = sync_source
     return result
+
+
+def undo_last_sync(username: str) -> dict[str, Any]:
+    metadata = load_user_metadata(username)
+    added_names = metadata.get("_last_sync_added", [])
+    if not isinstance(added_names, list) or not added_names:
+        return {"removed": 0}
+
+    removed = 0
+    for name in added_names:
+        item = metadata.get(name)
+        if isinstance(item, dict) and item.get("synced"):
+            metadata.pop(name, None)
+            removed += 1
+
+    metadata["_last_sync_added"] = []
+    save_user_metadata(username, metadata)
+    return {"removed": removed}
 
 
 def _custom_drains(metadata: dict[str, Any]) -> list[dict[str, Any]]:
     drains: list[dict[str, Any]] = []
     for name, item in metadata.items():
+        if str(name).startswith("_"):
+            continue
         if not isinstance(item, dict) or not (item.get("custom") or item.get("synced")):
             continue
         lat = item.get("lat")
         lon = item.get("lon")
         if lat is None or lon is None:
             continue
-        dist = distance_km(BASE_LAT, BASE_LON, lat, lon)
         drains.append(
             {
                 "name": name,
                 "lat": lat,
                 "lon": lon,
-                "distance_km": round(dist, 2),
-                "drive_minutes": km_to_drive_minutes(dist),
                 "description": clean_description(item.get("description", "")),
                 "source": "synced" if item.get("synced") else "custom",
                 "custom": bool(item.get("custom")),
@@ -461,25 +534,49 @@ def _merge_metadata(base: dict[str, Any], item: dict[str, Any] | None) -> dict[s
     return merged
 
 
+def _apply_origin(drain: dict[str, Any], username: str | None) -> dict[str, Any]:
+    merged = dict(drain)
+    origin_lat, origin_lon = get_user_origin(username)
+    dist = distance_km(origin_lat, origin_lon, float(merged["lat"]), float(merged["lon"]))
+    merged["distance_km"] = round(dist, 2)
+    merged["drive_minutes"] = km_to_drive_minutes(dist)
+    return merged
+
+
+def _source_rank(source: str) -> int:
+    return {"custom": 0, "synced": 1, "kml": 2}.get(source, 9)
+
+
 def get_all_drains(username: str | None = None) -> list[dict[str, Any]]:
     metadata = load_metadata()
     user_metadata = load_user_metadata(username)
     combined: dict[str, dict[str, Any]] = {}
 
-    for drain in _parse_kml_drains():
-        combined[drain["name"]] = drain
+    if include_shared_map(username):
+        for drain in _parse_kml_drains():
+            combined[drain["name"]] = drain
 
-    for drain in _custom_drains(metadata):
-        combined[drain["name"]] = drain
+    if include_shared_map(username):
+        for drain in _custom_drains(metadata):
+            combined[drain["name"]] = drain
 
     for drain in _custom_drains(user_metadata):
         combined[drain["name"]] = drain
 
-    merged = []
+    merged_raw = []
     for drain in combined.values():
         merged_item = _merge_metadata(drain, metadata.get(drain["name"]))
         merged_item = _merge_metadata(merged_item, user_metadata.get(drain["name"]))
-        merged.append(merged_item)
+        merged_raw.append(_apply_origin(merged_item, username))
+
+    deduped_by_coords: dict[tuple[float, float], dict[str, Any]] = {}
+    for drain in merged_raw:
+        key = (round(float(drain["lat"]), 7), round(float(drain["lon"]), 7))
+        current = deduped_by_coords.get(key)
+        if current is None or _source_rank(drain.get("source", "")) < _source_rank(current.get("source", "")):
+            deduped_by_coords[key] = drain
+
+    merged = list(deduped_by_coords.values())
     merged.sort(key=lambda item: item["distance_km"])
     return merged
 
@@ -827,6 +924,25 @@ def remove_photo(name: str, username: str, path: str) -> None:
         absolute = os.path.join(UPLOAD_DIR, target.removeprefix("uploads/").replace("/", os.sep))
         if os.path.exists(absolute):
             os.remove(absolute)
+
+
+def delete_user_drain(username: str, name: str) -> bool:
+    metadata = load_user_metadata(username)
+    current = metadata.get(name)
+    if not isinstance(current, dict):
+        return False
+    if not (current.get("custom") or current.get("synced")):
+        return False
+
+    for photo in [normalize_photo_path(photo) for photo in current.get("photos", [])]:
+        if photo.startswith("uploads/"):
+            absolute = os.path.join(UPLOAD_DIR, photo.removeprefix("uploads/").replace("/", os.sep))
+            if os.path.exists(absolute):
+                os.remove(absolute)
+
+    metadata.pop(name, None)
+    save_user_metadata(username, metadata)
+    return True
 
 
 def result_rows(

@@ -172,7 +172,10 @@
     <form class="modal-form" id="syncMapForm" enctype="multipart/form-data">
       <label>Upload KML or KMZ <input class="retro-input" name="kml_file" type="file" accept=".kml,.kmz,application/vnd.google-earth.kml+xml,application/vnd.google-earth.kmz" required></label>
       <div>Only brand new drains are added. Existing drains stay untouched.</div>
-      <button class="retro-button" type="submit">Import New Drains</button>
+      <div class="auth-links">
+        <button class="retro-button" type="submit">Import New Drains</button>
+        <button class="retro-button" id="undoSyncButton" type="button">Undo Last Sync</button>
+      </div>
     </form>
   </template>
 {% endblock %}

@@ -235,7 +235,7 @@ def sync_kml():
     if not file or not file.filename:
         return jsonify({"error": "Choose a KML or KMZ file first."}), 400
     try:
-        result = drain_service.sync_kml_payload(file.read())
+        result = drain_service.sync_kml_payload(current_username(), file.read())
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
     return jsonify(
@@ -244,6 +244,26 @@ def sync_kml():
             "stats": drain_service.stats_summary(current_username()),
         }
     )
+
+
+@app.post("/api/sync-kml/undo")
+@admin_required
+def undo_sync_kml():
+    result = drain_service.undo_last_sync(current_username())
+    return jsonify({**result, "stats": drain_service.stats_summary(current_username())})
+
+
+@app.post("/api/location")
+@login_required
+def save_location():
+    payload = request.get_json(silent=True) or request.form
+    try:
+        lat = float(payload.get("lat"))
+        lon = float(payload.get("lon"))
+    except (TypeError, ValueError, AttributeError):
+        return jsonify({"error": "Invalid location."}), 400
+    drain_service.save_user_origin(current_username(), lat, lon)
+    return jsonify({"ok": True})
 
 
 @app.get("/api/drains/<path:name>")
@@ -289,6 +309,15 @@ def update_drain(name: str):
         notes=str(payload.get("notes", "")),
         features=payload.get("features") if hasattr(payload, "get") else None,
     )
+    return jsonify({"ok": True, "stats": drain_service.stats_summary(current_username())})
+
+
+@app.post("/api/drains/<path:name>/delete")
+@login_required
+def delete_drain(name: str):
+    deleted = drain_service.delete_user_drain(current_username(), name)
+    if not deleted:
+        return jsonify({"error": "Only user-added drains can be deleted."}), 400
     return jsonify({"ok": True, "stats": drain_service.stats_summary(current_username())})
 
 

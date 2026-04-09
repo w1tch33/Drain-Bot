@@ -102,7 +102,7 @@ body {
   width: 100%;
   display: grid;
   place-items: center;
-  padding: 24px;
+  padding: 96px 24px 24px;
 }
 
 .auth-window {
