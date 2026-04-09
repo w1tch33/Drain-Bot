@@ -646,6 +646,7 @@ body {
   .result-item { min-height: 40px; }
   .modal-window { width: min(95vw, 700px); }
   .image-preview-window { width: min(95vw, 960px); }
+  .volume-wrap { display: none; }
   .game-control {
     min-width: 92px;
     min-height: 42px;

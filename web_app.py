@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from functools import wraps
+from datetime import timedelta
 
 from flask import Flask, abort, flash, jsonify, redirect, render_template, request, send_file, send_from_directory, session, url_for
 from werkzeug.utils import secure_filename
@@ -10,6 +11,7 @@ import drain_service
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY", "drain-tool-mobile")
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
 APPROVAL_PASSWORD = os.getenv("DRAINBOT_APPROVAL_PASSWORD") or app.config["SECRET_KEY"]
 
 drain_service.ensure_runtime_dirs()
@@ -82,6 +84,8 @@ def login():
             flash("Your account is still waiting for approval.")
             return redirect(url_for("login"))
 
+        session.clear()
+        session.permanent = True
         session["username"] = account["username"]
         return redirect(url_for("index"))
 
