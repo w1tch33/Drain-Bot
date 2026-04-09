@@ -81,7 +81,7 @@ After deployment, open the site in Safari and use `Share -> Add to Home Screen` 
 - Metadata editing for visited/favorite/notes
 - Custom drain creation
 - Persistent uploaded-photo storage when deployed with a mounted data disk
-- Manual `Sync Map` support for pulling a shared Google Earth / Drive KML or KMZ into the live drain list
+- Manual `Sync Map` support for uploading a KML or KMZ and adding only brand new drains into the live drain list
 
 ## Persistent storage behavior
 
@@ -94,5 +94,5 @@ After deployment, open the site in Safari and use `Share -> Add to Home Screen` 
 
 - Existing old photo references that point to absolute paths on your PC are still local-machine references. Those will not work from the cloud unless the actual images are copied into the mounted data folder or uploaded through the web UI.
 - Large music files are still served from the app bundle right now, which is fine for initial deployment but could be moved to object storage later if you want a cleaner production setup.
-- The `Sync Map` button is add-only: it scans the shared file for valid new drains and adds only missing entries into DrainTool. It does not modify or remove existing DrainTool drains.
-- The `Sync Map` button expects the shared Google Drive / Google Earth file to be publicly downloadable as KML or KMZ. A normal Google Earth project page link is not enough by itself unless it resolves to a real downloadable file.
+- The `Sync Map` button is add-only: it scans the uploaded KML/KMZ for valid new drains and adds only missing entries into DrainTool. It does not modify or remove existing DrainTool drains.
+- Duplicate matching uses both drain name and coordinates, and blocked words like `potential`, `potentially`, and `here` are still ignored during import.

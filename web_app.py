@@ -108,12 +108,11 @@ def search():
 
 @app.post("/api/sync-kml")
 def sync_kml():
-    payload = request.get_json(silent=True) or request.form
-    source_url = ""
-    if hasattr(payload, "get"):
-        source_url = str(payload.get("source_url", "")).strip()
+    file = request.files.get("kml_file")
+    if not file or not file.filename:
+        return jsonify({"error": "Choose a KML or KMZ file first."}), 400
     try:
-        result = drain_service.sync_kml_from_source(source_url or None)
+        result = drain_service.sync_kml_payload(file.read())
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
     return jsonify(

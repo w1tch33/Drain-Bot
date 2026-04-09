@@ -243,6 +243,47 @@ def _extract_kml_bytes(payload: bytes) -> bytes:
     raise ValueError("The synced file was not a KML or KMZ.")
 
 
+def _drain_identity_key(name: str, lat: float, lon: float) -> tuple[str, float, float]:
+    return (name.casefold(), round(float(lat), 7), round(float(lon), 7))
+
+
+def sync_kml_payload(payload: bytes) -> dict[str, Any]:
+    kml_bytes = _extract_kml_bytes(payload)
+    imported_drains = _parse_kml_bytes_to_drains(kml_bytes)
+    metadata = load_metadata()
+    existing_keys = {
+        _drain_identity_key(drain["name"], drain["lat"], drain["lon"])
+        for drain in get_all_drains()
+    }
+    added = 0
+
+    for drain in imported_drains:
+        key = _drain_identity_key(drain["name"], drain["lat"], drain["lon"])
+        if key in existing_keys:
+            continue
+
+        current = metadata.get(drain["name"], {})
+        if not isinstance(current, dict):
+            current = {}
+
+        current["synced"] = True
+        current["lat"] = drain["lat"]
+        current["lon"] = drain["lon"]
+        current["description"] = drain.get("description", "")
+        metadata[drain["name"]] = current
+        existing_keys.add(key)
+        added += 1
+
+    if added:
+        save_metadata(metadata)
+
+    return {
+        "ok": True,
+        "count": len(imported_drains),
+        "added": added,
+    }
+
+
 def sync_kml_from_source(source: str | None = None) -> dict[str, Any]:
     sync_source = (source or KML_SYNC_URL or "").strip()
     if not sync_source:
@@ -261,38 +302,9 @@ def sync_kml_from_source(source: str | None = None) -> dict[str, Any]:
     except urllib.error.URLError as error:
         raise ValueError(f"Could not download the KML source: {error}") from error
 
-    kml_bytes = _extract_kml_bytes(payload)
-    imported_drains = _parse_kml_bytes_to_drains(kml_bytes)
-    metadata = load_metadata()
-    existing_names = {drain["name"].casefold() for drain in get_all_drains()}
-    added = 0
-
-    for drain in imported_drains:
-        key = drain["name"].casefold()
-        if key in existing_names:
-            continue
-
-        current = metadata.get(drain["name"], {})
-        if not isinstance(current, dict):
-            current = {}
-
-        current["synced"] = True
-        current["lat"] = drain["lat"]
-        current["lon"] = drain["lon"]
-        current["description"] = drain.get("description", "")
-        metadata[drain["name"]] = current
-        existing_names.add(key)
-        added += 1
-
-    if added:
-        save_metadata(metadata)
-
-    return {
-        "ok": True,
-        "count": len(imported_drains),
-        "added": added,
-        "source_url": sync_source,
-    }
+    result = sync_kml_payload(payload)
+    result["source_url"] = sync_source
+    return result
 
 
 def _custom_drains(metadata: dict[str, Any]) -> list[dict[str, Any]]:

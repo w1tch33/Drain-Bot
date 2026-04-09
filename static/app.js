@@ -202,19 +202,27 @@
   }
 
   async function syncMap() {
-    setLoading(true);
-    try {
-      const result = await fetchJson("/api/sync-kml", { method: "POST" });
-      await refreshStats();
-      drawMessage(`Synced map successfully. Found ${result.count} entries and added ${result.added} new drains.`);
-      if (searchInput.value.trim()) {
-        await searchDrains();
+    openModal("Sync Map", qs("#syncMapTemplate").content.cloneNode(true));
+    qs("#syncMapForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      setLoading(true);
+      try {
+        const result = await fetchJson("/api/sync-kml", {
+          method: "POST",
+          body: new FormData(event.currentTarget),
+        });
+        closeModal();
+        await refreshStats();
+        drawMessage(`Import complete. Found ${result.count} entries and added ${result.added} new drains.`);
+        if (searchInput.value.trim()) {
+          await searchDrains();
+        }
+      } catch (error) {
+        drawMessage(error.message);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      drawMessage(error.message);
-    } finally {
-      setLoading(false);
-    }
+    });
   }
 
   async function refreshStats() {
