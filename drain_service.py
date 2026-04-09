@@ -12,7 +12,8 @@ from typing import Any
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_DATA_FILE = os.path.join(BASE_DIR, "drain_data.json")
 KML_FILE = os.path.join(BASE_DIR, "your_map.kml")
-DATA_DIR = os.getenv("DRAINTOOL_DATA_DIR", BASE_DIR)
+DEFAULT_DATA_DIR = os.getenv("RAILWAY_VOLUME_MOUNT_PATH", BASE_DIR)
+DATA_DIR = os.getenv("DRAINTOOL_DATA_DIR", DEFAULT_DATA_DIR)
 DATA_FILE = os.getenv("DRAINTOOL_DATA_FILE", os.path.join(DATA_DIR, "drain_data.json"))
 UPLOAD_DIR = os.getenv("DRAINTOOL_UPLOAD_DIR", os.path.join(DATA_DIR, "uploads"))
 PHOTO_DIR_CANDIDATES = [

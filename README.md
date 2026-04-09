@@ -47,6 +47,25 @@ Recommended environment variables:
 - `FLASK_SECRET_KEY`
   Set a private random value.
 
+### Railway
+
+Railway is a strong free-tier option for this app because it can attach a small persistent volume.
+
+Steps:
+
+1. Push this repo to GitHub.
+2. In Railway, create a new project from the GitHub repo.
+3. Add a volume in the Railway project.
+4. Railway exposes the mount path as `RAILWAY_VOLUME_MOUNT_PATH`.
+5. DrainTool will automatically use that mounted path for live data unless you override `DRAINTOOL_DATA_DIR`.
+
+Recommended Railway variables:
+
+- `FLASK_SECRET_KEY`
+  Set a private random value.
+- `PORT`
+  Railway usually provides this automatically.
+
 You can keep editing the app locally after deployment and redeploy updated versions whenever you want. Deployment does not stop this workspace from being the source of truth.
 
 ## iPhone use
