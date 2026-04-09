@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: draintool-web
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -b 0.0.0.0:$PORT web_app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.2
+      - key: DRAINTOOL_DATA_DIR
+        value: /var/data
+      - key: FLASK_SECRET_KEY
+        generateValue: true
+    disk:
+      name: draintool-data
+      mountPath: /var/data
+      sizeGB: 5

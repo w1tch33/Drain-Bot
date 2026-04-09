@@ -1,0 +1,554 @@
+{
+  "Virgin Web": {
+    "photos": [],
+    "description": "shit except for entrance",
+    "difficulty": "medium",
+    "favorite": 0,
+    "value": "trash",
+    "rating": 2,
+    "visited": 1
+  },
+  "Tricky's Tomb": {
+    "difficulty": "easy",
+    "value": "bad"
+  },
+  "Drongo\u2019s Den": {
+    "difficulty": "medium",
+    "description": "",
+    "photos": [],
+    "value": "not_bad"
+  },
+  "Blackburn": {
+    "favorite": 0,
+    "difficulty": "medium",
+    "photos": [],
+    "description": ""
+  },
+  "Rieschiecks": {
+    "description": "apparently is just a boring shrinker",
+    "value": "bad",
+    "difficulty": "easy"
+  },
+  "Fisted/Casle\u2019s Tomb": {
+    "photos": [
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7277.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7285.jpg",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011791.JPEG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011793.jpg"
+    ],
+    "difficulty": "easy",
+    "value": "mid",
+    "rating": 6,
+    "visited": 1,
+    "features": {
+      "Grille Room": 1,
+      "Split": 1,
+      "Junction": 1
+    },
+    "witch_notes": "Really hard to get into if you don\u2019t want to get wet however I made a rope ladder to climb down which made it better. It\u2019s a massive RCP with barely any graff in it except for super old Cave clan tags which was super interesting to see the history. Eventually goes up to a big grill room with a split to 2 small tunnels but nothing really worth doing after the grill. But still a really cool drain."
+  },
+  "Holy Foot": {
+    "description": "e"
+  },
+  "Drongo's Den": {
+    "difficulty": "medium",
+    "value": "mid",
+    "visited": 1,
+    "features": {
+      "Junction": 1,
+      "Split": 1,
+      "Grille Room": 1
+    },
+    "rating": 5,
+    "photos": [
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_6357.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011658.JPEG"
+    ],
+    "witch_notes": "Not too much water but it is kind of low, which is annoying but about 100m in there\u2019s a double split in a nice little room up the right pipe is a really cool grill room/overflow and the left pipe continues on to another grill room and double split. The right pipe does drop down extremely low halfway through it and you will need to crawl for about 100m until it opens back up again to a regular size. overall pretty cool."
+  },
+  "Tenth": {
+    "difficulty": "medium",
+    "favorite": 0,
+    "photos": [],
+    "value": "amazing"
+  },
+  "Mosh's Tomb": {
+    "difficulty": "medium"
+  },
+  "Dodgy's Tomb": {
+    "difficulty": "medium"
+  },
+  "B.U.R.P.": {
+    "difficulty": "easy",
+    "value": "good",
+    "description": "",
+    "visited": 1,
+    "rating": 6,
+    "witch_notes": "Wasn't really much to the drain itself, but it was still pretty cool given how large it is and the area around it was really beautiful too. Still interesting to see despite not having many crazy features."
+  },
+  "Bumboys": {
+    "difficulty": "hard",
+    "value": "good",
+    "description": "",
+    "photos": [],
+    "features": {
+      "Chamber": 1,
+      "Grille Room": 1,
+      "Waterfall": 1
+    }
+  },
+  "Witch\u2019s Tomb": {
+    "difficulty": "medium",
+    "value": "mid",
+    "description": "",
+    "visited": 1,
+    "rating": 5,
+    "features": {
+      "Split": 1,
+      "Grille Room": 1,
+      "Junction": 1
+    },
+    "witch_notes": "low as balls but i think it has good potential"
+  },
+  "The Wormhole": {
+    "difficulty": "easy",
+    "value": "good",
+    "photos": [],
+    "description": ""
+  },
+  "Eltham": {
+    "difficulty": "easy",
+    "value": "mid",
+    "photos": [
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011661.JPEG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011663.JPEG"
+    ],
+    "custom": true,
+    "lat": -37.721111,
+    "lon": 145.141111,
+    "visited": 1,
+    "features": {
+      "Grille Room": 1
+    },
+    "rating": 6,
+    "witch_notes": "Pretty wide and chill, definitely a nice walk but nothing to unique. There's a massive skylight/grille about halfway through that looks super cool. Only really worth it for a calm walk."
+  },
+  "The Mission": {
+    "value": "trash",
+    "difficulty": "easy",
+    "description": "The Mission\ud83d\udeab \ud83d\udc63 \ud83d\udc41GPS -37.710766, 145.147436MELWAYS REF: 21 J-4LOCATION: On grounds of Judge Book Memorial Village. East bank of Diamond CkCLAN ZONE: North eastENTRANCE: 2m \u2b55PROBLEMS: Finding &amp; getting down to the entranceTRANSPORT: Train to ElthamVALUE: \ud83d\uddd1HIGHLIGHT: \u2639CLEANLINESS: \ud83d\ude42NEARBY: Eltham, Bridgette\u2019s, Mitchelle\u2019s &amp; Tiffani\u2019s\u26d4: Once in the drain it\u2019s \ud83d\ude42NOTES: Not very good, but maybe it\u2019s better than we think? Prowler?"
+  },
+  "Flat": {
+    "value": "mid",
+    "difficulty": "easy",
+    "description": "FlatGPS -37.799186, 145.115965MELWAYS REF. 47 B-4LOCATION: North end of Box Hill Cres over Belmore RdENTRANCE: 2 \u00d7 1.8m \u2b55OTHER SHAPES: \u2639CLAN ZONE: EastVALUE: \u2639TRANSPORT: Ringwood train to Box Hill then busHIGHLIGHT: Joining roomCLEANLINESS: A bit of rubble at startPROBLEMS: Could be worse. \u2b55 5cm deepNEARBY: 10thNOTES: Goes up to 2.1m after the join. Drain just down from outlet is called Spectator.Song goes a flat tyre riding out to find Flat. Sloth &amp; Woody each got a flat on the first expo.",
+    "favorite": 0,
+    "rating": 5,
+    "photos": []
+  },
+  "Dougo's Tomb": {
+    "difficulty": "easy",
+    "value": "good",
+    "description": "Dougo\u2019s Tomb\ud83d\udeabGPS -37.853695, 145.061038MELWAYS REF. 60 B-6LOCATION: 11A Denman Av (approx). Follow Back Creek with the flow from Sloth\u2019s TombENTRANCE: 3.2 \u2b1cOTHER SHAPES: \u2312CLAN ZONE: EastVALUE: \ud83c\udfc6TRANSPORT: Alamein train to HartwellHIGHLIGHT: EntranceCLEANLINESS: Good except for the outlet\u26d4: Outlet kneePROBLEMS: ExitingNEARBY: Great Stairway, Echo Tunnel, Macka\u2019s, Hexadus, Chameleon, Big Bastard &amp; Sloth\u2019sNOTES: The 1.6 side pipe has some nice bits for hardcore explorers. Do Dougo\u2019s then Sloth\u2019s and Great Stairway.Dougo\u2019s Tomb is named after one of the founding Clan members who is also rumoured to be an iron-fisted wookie who has murdered some members.",
+    "photos": [
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011282.jpg",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011285.jpg",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011292.jpg",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011294.jpg"
+    ],
+    "rating": 7,
+    "visited": 1,
+    "features": {
+      "Slide": 0
+    },
+    "witch_notes": "Massive square tunnel and really easy on the feet, super fun walk and very chill. not many features to it except a little side pipe thats quite low that goes on for a while. but other than that, it\u2019s just a really nice walk and overall a pretty chill drain."
+  },
+  "Trinity's Tomb": {
+    "difficulty": "easy",
+    "value": "mid"
+  },
+  "Veg's Silver Chain": {
+    "difficulty": "easy"
+  },
+  "NGCD": {
+    "difficulty": "easy",
+    "value": "good",
+    "rating": 7,
+    "photos": [
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7177.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7180.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7456.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7457.JPG"
+    ],
+    "visited": 1,
+    "witch_notes": "Cool entrance with two square tunnels leading in that both join up at the pillars and continue on eventually getting smaller which was pretty interesting. The pillars are the main feature with a bunch of grilles and another split and there\u2019s cool stories about the drain given its significance to the cave clan but after the pillars there\u2019s not really much else to it, just big tunnels that go on for a while. still pretty big and not a bad explore.",
+    "features": {
+      "Split": 1,
+      "Junction": 1,
+      "Grille Room": 1,
+      "Chamber": 0
+    }
+  },
+  "City": {
+    "difficulty": "hard",
+    "value": "amazing"
+  },
+  "Mill Park": {
+    "photos": []
+  },
+  "130 Steps": {
+    "difficulty": "easy",
+    "value": "mid",
+    "description": "130 Steps\n\ud83d\udeab\nGPS: -37.772286, 144.851544\nMELWAYS REF: 27 C-9\nLOCATION: Walk down the track located at the bend in Burke St. Turn right at river & check bank.\nVALUE: \ud83d\ude42\nENTRANCE: 1.6m \u26aa\nOTHER SHAPES: \u2639\ufe0f\nCLAN ZONE: North west.\nHIGHLIGHT: The stairways.\nTRANSPORT: Bus from Albion stn to Burke St.\nCLEANLINESS: Can get a bit webby.\nWATER: shoes will get wet.\nPROBLEMS: Low long stairway.\nNEARBY: COAD, Funnel Web, BURP, FART & 3 Sisters.\nNOTES: This drain is a good build up to Roxy's.\n130 Steps takes its name from the fact that it has 130 steps in it... yes, it's true!"
+  },
+  "Satan's": {
+    "difficulty": "easy",
+    "value": "trash"
+  },
+  "Big Bastard": {
+    "value": "trash",
+    "difficulty": "easy"
+  },
+  "Como Falls": {
+    "value": "mid",
+    "difficulty": "easy"
+  },
+  "Holey Foot": {
+    "difficulty": "easy",
+    "value": "mid",
+    "visited": 1,
+    "features": {
+      "Grille Room": 1,
+      "Slide": 0,
+      "Junction": 1,
+      "Split": 1
+    },
+    "rating": 6,
+    "photos": [
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7368.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7344.jpg",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7345.jpg",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7352.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7364.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7366.JPG"
+    ],
+    "witch_notes": "Double barrel entrance with decently big pipes. not many features throughout the walk to the end just classic RCP, but the end has a big grill room which is the highlight. It was very cool and massive. overall nothing crazy but pretty cool."
+  },
+  "Fish & Chipp": {
+    "difficulty": "medium",
+    "value": "bad",
+    "visited": 1,
+    "rating": 5,
+    "features": {
+      "Split": 1,
+      "Slide": 0,
+      "Grille Room": 1,
+      "Junction": 0,
+      "Chamber": 1,
+      "Waterfall": 1
+    },
+    "photos": [
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7332.jpg",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7335.jpg",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7336.jpg",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7340.JPG"
+    ],
+    "witch_notes": "Has a really interesting entrance by a beautiful creek. The issue is that its very very low but despite that has some actually really interesting features. there\u2019s some cool junctions manhole exits grills and a waterfall definitely on the difficult side."
+  },
+  "Dweller's Tomb": {
+    "value": "amazing",
+    "difficulty": "medium",
+    "description": "Dweller\u2019s Tomb\n\ud83d\udeab \ud83c\udf0a\nGPS: -37.875146, 145.070992\nMELWAYS REF: 69 B-1\nLOCATION: Follow Gardiners Creek upstream from Solway St.\nCLAN ZONE: East.\nENTRANCE: 2.8m \u26aa\nOTHER SHAPES: \u2302, \u2b1c & \u2b1c\nPROBLEMS: Length.\nTRANSPORT: Glen Waverley train to East Malvern.\nHIGHLIGHT: Old sections. Waiting room.\nCLEANLINESS: A bit wet.\nWATER: Entrance is knee deep unless you can do the splits.\nVALUE: \ud83c\udfc6\nNEARBY: Chameleon, iD\u2019s Tomb, Dougo\u2019s Tomb, Echo Tunnel and Mini 10th.\nNOTES: The entrance can be a bit off-putting to newer explorers, but on a hot day, wow! Lots of changes included. You may do a bit of slipping & sliding. Don't ask about the fireman!\nDweller's Tomb is named after the group from the 80's, the Drain Dwellers. Map to the right >"
+  },
+  "Cobra's Tomb": {
+    "rating": 3
+  },
+  "The Maze": {
+    "photos": [
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_3958.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_6613.jpg",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_6638.jpg",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011105.JPEG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011300.JPEG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011301.JPEG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011308.jpg",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011361.JPEG"
+    ],
+    "description": "The Maze\n\ud83c\udf78\nGPS: -37.823213, 145.023108\nMELWAYS REF: 45 A-11\nLOCATION: Next to flats on west side of Evansdale Rd between railway place and Austin Street over wooden fence.\nENTRANCE: 3.2m \u26aa\nOTHER SHAPES: \u2302, balloon, \u2b1c, \u2302 & \u2b1c\nCLAN ZONE: East.\nTRANSPORT: Train to Hawthorn\nHIGHLIGHT: Length & changes. One of the top 3 drains in Australia.\nWATER: \ud83d\ude42\nCLEANLINESS: Avoidable wet feet.\nPROBLEMS: Doing it in one visit.\nVALUE: \ud83c\udfc6\nNEARBY: The Slide, Mega Slide, Ladders to Heaven, No Vest, Vampire's Cavern, CBRBD & Punctual.\nNOTES: Do this drain on a nice hot day. There are a few exits & many junctions & features. A 10/10er. Bike can be used in sections. Follow white arrows where possible.\nMaze is named due to the many splits and loops in the system.",
+    "difficulty": "easy",
+    "rating": 8,
+    "value": "amazing",
+    "features": {
+      "Split": 1,
+      "Chamber": 1,
+      "Waterfall": 1,
+      "Grille Room": 1
+    },
+    "visited": 1,
+    "witch_notes": "Huge drain system that spans on for ages has a triple split a little bit up with some really cool sections some red brick some bluestone and lots of different shape changes easily one of the best drain systems in Melbourne by far."
+  },
+  "Vegie": {
+    "photos": []
+  },
+  "Mega Stairway": {
+    "photos": []
+  },
+  "Banger's Tomb": {
+    "features": {
+      "Waterfall": 0,
+      "Chamber": 0
+    }
+  },
+  "Great Stairway - Creek Entrance": {
+    "visited": 1,
+    "features": {
+      "Junction": 1,
+      "Split": 1,
+      "Grille Room": 1,
+      "Waterfall": 1
+    },
+    "rating": 8,
+    "value": "good",
+    "difficulty": "easy",
+    "photos": [
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\photo-output(1).JPEG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011109.JPEG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_6694.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_6680.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_6664.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_6662.JPG"
+    ],
+    "witch_notes": "Another really popular drain with a nice big tunnel comes up to a split the tunnel on the right goes to a cool grill room. The tunnel on the left leads on for a while that goes to the staircase which is the main feature between the tunnels as a crawlspace where you can get between the two which is really good to do the whole thing the staircase is massive with a big red brick RCP at the top of it cool shape changes and fun to explore."
+  },
+  "Anzac": {
+    "visited": 1,
+    "rating": 9,
+    "witch_notes": "Coming in from the river outlet is a huge archway tunnel leading all the way down straight to the chamber. The chamber being the main feature is absolutely massive. The biggest strain in Melbourne I\u2019d say really cool history and lots to look at in the chamber with some crazy architecture around at the end of the chamber. It leads down into two smaller pipes that are quite low and leads onto some very old tunnels that are also pretty fun to explore. The entrance I used to take it now blocked off so you had to go through the river entrance which means wet feet or a manhole entrance which I've never done before lol",
+    "features": {
+      "Split": 1,
+      "Chamber": 1
+    },
+    "difficulty": "medium",
+    "value": "amazing",
+    "photos": [
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011231.JPEG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_4366.jpg",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_4368.jpg",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011222.JPEG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011220.JPEG"
+    ],
+    "description": "G.O.D. \u2b1c \ud83d\udeab \ud83e\uddd7GPS: 37.795754, 145.001252MELWAYS REF: 2D B-5CLAN ZONE: InnerLOCATION: On west bank of the Merri Ck. Between Eastern Fwy bridge &amp; the Yarra.ENTRANCE: 3m \u2b55OTHER SHAPES: Bowl (flat &amp; curved top), \u2b55 \u2b1c (flat &amp; angled floor)PROBLEMS: Some slippery sections.CLEANLINESS: You may get splashed climbing the waterfall.TRANSPORT: Clifton Hill train to Victoria ParkHIGHLIGHT: Variety in shape and texture.NEARBY: CBRD, Vampires Cavern, Mega Slide, Ladders To Heaven, Puncture, Short, Bangers Tomb, Northcote High, Flooded &amp; Nam.NOTES: This is a definite summer drain. The waterfall is awkward during wetter periods plus the bluestone &amp; angled floors can be hazardous. Big $ were spent on repairs in 1996/7 that gutted some sections.G.O.D. was named after the Grunt Owned Darkie."
+  },
+  "Blade's Tomb": {
+    "witch_notes": "Honestly was pretty boring and didn't have much to it. it\u2019s pretty low at the start and goes on for a while without much change but eventually it has some shape changes and a couple of interesting features like the split into 2 RCP\u2019s. The canal outside the drain is really cool and is a really good walk but not my type of drain.",
+    "visited": 1,
+    "features": {
+      "Split": 1,
+      "Junction": 1
+    },
+    "difficulty": "easy",
+    "value": "mid",
+    "rating": 5,
+    "description": "Blade\u2019s Tomb\ud83d\udeab \ud83d\udeb2 \ud83c\udf78GPS -37.900200, 145.008570MELWAYS REF: 67 H-7LOCATION: Follow canal against the flow Asling St through underpass. Check side tunnel in North Rd underpassENTRANCE: 2.8m \u2b1cOTHER SHAPES: \u2b55CLAN ZONE: SouthVALUE: \ud83c\udfc6TRANSPORT: Sandringham train to Gardenvale\u26d4\ud83d\ude42PROBLEMS: \ud83d\ude42HIGHLIGHT: OutletCLEANLINESS: \ud83d\ude42NEARBY: Tommy\u2019s Hole, Pauline, Underworld, Cobra\u2019s &amp; DungeonNOTES: When the tunnel splits into 2 RCPs take either as they eventually join up via a loop. See page 34 for map.Blade\u2019s Tomb was named after one of the founders of The Drain Dwellers."
+  },
+  "Clantomb": {
+    "visited": 1,
+    "witch_notes": "Clan tomb is a really good drain and a nice walk with very interesting features. There are steps, ramps, plenty of shape changes, and as you go further up, there is a very large rectangle corridor with lots of cool graph and a couple of grills eventually leading onto a split with two RCP\u2018s. My favorite thing about the drain is all of the shape changes and the layout is very interesting.",
+    "features": {
+      "Slide": 1,
+      "Split": 1,
+      "Grille Room": 1,
+      "Junction": 1
+    },
+    "difficulty": "medium",
+    "rating": 7,
+    "value": "mid",
+    "photos": [
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011271.jpg",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011273.jpg",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011276.jpg",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011278.jpg"
+    ]
+  },
+  "G.O.D.": {
+    "visited": 1,
+    "features": {
+      "Split": 1,
+      "Waterfall": 1,
+      "Chamber": 1
+    },
+    "rating": 7,
+    "value": "good",
+    "difficulty": "medium",
+    "photos": [
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_4594.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_4597.jpg",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_4601.jpg"
+    ],
+    "witch_notes": "Extremely fucking long and straight, very interesting and unique shape changes. this drain is so goddamn straight I had a panick attack cause I walked for like an hour and a half in a dead straight line by myself and soon realized no manhole opens and the only exit was an extremely long walk back. not fun. Don't do by yourself. Honestly though this is a really nice drain I'm just skitz in drains like that."
+  },
+  "Mini Tenth": {
+    "visited": 1,
+    "rating": 9,
+    "value": "amazing",
+    "difficulty": "easy",
+    "features": {
+      "Waterfall": 1,
+      "Chamber": 1,
+      "Grille Room": 1,
+      "Split": 1
+    },
+    "photos": [
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011364.jpg",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011367.jpg",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011381.JPEG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011380.JPEG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011373.JPEG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011370.JPEG"
+    ],
+    "witch_notes": "Super sick chamber as you walk in with cool decorations and a disco ball. The \"Dog Room\" was really interesting with photo frames of dogs on the wall and pictures plastered to the ceiling. further down it's a very wide drain with some small off-shoot tunnels but other than that slightly featureless.\n\nKnightstalker's (9/10)\nAmazing drain with super cool shape changes and waterfalls, awesome graffiti and really cool features. goes pretty far but keeps it interesting. We nearly drowned in here because it started raining which was really stupid of me but other than nearly dying it was incredible."
+  },
+  "Slide": {
+    "visited": 1,
+    "features": {
+      "Junction": 1,
+      "Slide": 1
+    },
+    "rating": 5,
+    "value": "mid",
+    "difficulty": "medium",
+    "photos": [
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_6648.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_6646.JPG"
+    ],
+    "witch_notes": "Had really nice red brick section at the start cool little chamber not too far in, but after that, they went over the red brick with concrete, which makes it look really ugly was hard to walk through and a little flooded at the time so we didn't make it up to the slide, but was still cool overall.  nothing too crazy."
+  },
+  "Punctual": {
+    "visited": 1,
+    "features": {
+      "Slide": 1,
+      "Junction": 1
+    },
+    "difficulty": "medium",
+    "value": "mid",
+    "rating": 5,
+    "witch_notes": "Really interesting entrance with a weird material black uphill tunnel, then a nice old red brick balloon shape that continues straight for a long time pretty boring after the first 60 meters but the start is super cool."
+  },
+  "Predator's": {
+    "visited": 1,
+    "value": "amazing",
+    "difficulty": "medium",
+    "rating": 10,
+    "features": {
+      "Chamber": 1,
+      "Grille Room": 1,
+      "Split": 1,
+      "Waterfall": 1,
+      "Junction": 1
+    },
+    "photos": [
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\photo-output.JPEG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_6855.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_6854.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_6849.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_6846.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_6840.JPG"
+    ],
+    "witch_notes": "Probably the best drain system I\u2019ve ever been in. Insanely unique shapes, entrances, outlets and rooms. Has super cool hole in the roof that the sun pours in from running all the way down. Walls everywhere with 3 tunnels and all sorts of grilles and rooms. Easily the most interesting and best drain I\u2019ve ever been to and seen in my life."
+  },
+  "Glass Creek": {
+    "visited": 1,
+    "rating": 7,
+    "difficulty": "easy",
+    "value": "good",
+    "features": {
+      "Waterfall": 1,
+      "Chamber": 1
+    },
+    "photos": [
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7319.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7324.jpg",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7325.JPG"
+    ],
+    "witch_notes": "Really nice walk easy on the feet and lots of space. The highlight is obviously the best feature with the room above the drain. Lots of cool history and old cave clan tags but after the highlight doesn\u2019t offer a hell of a lot still pretty good overall. would do again."
+  },
+  "Ringwood Bypass": {
+    "visited": 1,
+    "rating": 4,
+    "difficulty": "easy",
+    "value": "mid",
+    "features": {
+      "Split": 1,
+      "Grille Room": 1
+    },
+    "photos": [
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7381.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7382.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7386.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_7387.JPG"
+    ],
+    "witch_notes": "The bypass is decently big about 5m tall and a triple barrel. The middle tunnel is flooded, but the other others aren\u2019t. The left tunnel has a side pipe that goes to a grill room and also to an overflow in the middle of a lake, which is pretty cool but is a very low and decent crawl to get to it. to be honest not really the best"
+  },
+  "Little Verdant (Witch)": {
+    "visited": 1,
+    "features": {
+      "Grille Room": 1,
+      "Junction": 1,
+      "Waterfall": 1
+    },
+    "rating": 5,
+    "difficulty": "easy",
+    "value": "mid"
+  },
+  "L.A.M.P (Witch)": {
+    "visited": 1,
+    "description": ".",
+    "witch_notes": "Little & Average Montpellier Pipe",
+    "difficulty": "hard",
+    "value": "bad",
+    "rating": 3
+  },
+  "Envi's Underpass": {
+    "visited": 1
+  },
+  "Gobbledox": {
+    "custom": true,
+    "lat": -33.813056,
+    "lon": 151.199167,
+    "visited": 1,
+    "rating": 8,
+    "difficulty": "easy",
+    "value": "good",
+    "features": {
+      "Grille Room": 1,
+      "Side-Pipe": 1
+    },
+    "witch_notes": "This drain has such a beautiful entrance from the canal. Starts off pretty normal with the addition of a downward slope the whole way but gets massive about halfway through. Has a super tall ceiling and some interesting side pipes but not too many other features. It\u2019s located in a really beautiful forest which was nice.",
+    "photos": [
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\IMG_6924.JPG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011700.JPEG",
+      "C:\\Users\\hazao\\OneDrive\\Pictures\\Drain pics\\P1011698.JPEG"
+    ]
+  },
+  "Tommy's Hole": {
+    "visited": 1
+  },
+  "Bad": {
+    "value": "bad"
+  },
+  "_drain_man_high_score": 3430,
+  "_drain_climber_high_score": 6664,
+  "Spectator": {
+    "custom": true,
+    "lat": -37.798611,
+    "lon": 145.115556,
+    "visited": 1,
+    "features": {
+      "Grille Room": 1
+    },
+    "difficulty": "medium",
+    "rating": 3,
+    "value": "trash",
+    "witch_notes": "The whole tunnel is low and pretty shit with no features other than a tiny grille room. not a lot to offer. but we took Maggie and she seemed to have a lot of fun so maybe not too bad."
+  }
+}

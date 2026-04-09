@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}{{ drain.name }} - DrainTool{% endblock %}
+{% block content %}
+  <section class="panel">
+    <a class="text-link" href="{{ url_for('index') }}">Back to planner</a>
+    <article class="feature-card">
+      <p class="chip">{{ drain.distance_km }} km from base</p>
+      <h2>{{ drain.name }}</h2>
+      <p>{{ drain.description or "No description saved yet." }}</p>
+      <div class="meta-grid">
+        <div><span>Drive</span><strong>{{ format_minutes(drain.drive_minutes) }}</strong></div>
+        <div><span>Difficulty</span><strong>{{ drain.difficulty or "Unknown" }}</strong></div>
+        <div><span>Value</span><strong>{{ drain.value or "Unrated" }}</strong></div>
+        <div><span>Rating</span><strong>{% if drain.rating is not none %}{{ drain.rating }}/10{% else %}-{% endif %}</strong></div>
+      </div>
+      <a class="button button-primary" href="{{ maps_url }}" target="_blank" rel="noreferrer">Open in Apple Maps</a>
+    </article>
+  </section>
+
+  {% if drain.features %}
+    <section class="panel">
+      <h2>Features</h2>
+      <div class="tag-row">
+        {% for feature, enabled in drain.features.items() %}
+          {% if enabled %}
+            <span class="badge">{{ feature }}</span>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  <section class="panel">
+    <h2>Update details</h2>
+    <form class="stack" method="post" action="{{ url_for('update_drain', name=drain.name) }}">
+      <div class="field-row">
+        <label class="checkbox-row">
+          <input type="checkbox" name="visited" value="1" {% if drain.visited %}checked{% endif %}>
+          Mark visited
+        </label>
+        <label class="checkbox-row">
+          <input type="checkbox" name="favorite" value="1" {% if drain.favorite %}checked{% endif %}>
+          Mark favorite
+        </label>
+      </div>
+      <div class="field-row">
+        <label>
+          Difficulty
+          <input type="text" name="difficulty" value="{{ drain.difficulty }}">
+        </label>
+        <label>
+          Value
+          <input type="text" name="value" value="{{ drain.value }}">
+        </label>
+      </div>
+      <label>
+        Rating
+        <input type="number" min="0" max="10" name="rating" value="{% if drain.rating is not none %}{{ drain.rating }}{% endif %}">
+      </label>
+      <label>
+        Notes
+        <textarea name="notes" rows="8">{{ drain.notes }}</textarea>
+      </label>
+      <button class="button button-primary" type="submit">Save changes</button>
+    </form>
+  </section>
+
+  {% if drain.photos %}
+    <section class="panel">
+      <h2>Photos</h2>
+      <p>Existing photo paths are stored in your data file, but they are local desktop paths right now. To show them in the cloud app, they would need to be uploaded into web storage later.</p>
+    </section>
+  {% endif %}
+{% endblock %}
