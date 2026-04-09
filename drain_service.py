@@ -149,6 +149,10 @@ def _parse_kml_drains() -> list[dict[str, Any]]:
 
     tree = ET.parse(KML_FILE)
     root = tree.getroot()
+    return _parse_kml_root(root)
+
+
+def _parse_kml_root(root: ET.Element) -> list[dict[str, Any]]:
     ns = {"kml": "http://www.opengis.net/kml/2.2"}
     drains: list[dict[str, Any]] = []
     seen: set[str] = set()
@@ -188,6 +192,11 @@ def _parse_kml_drains() -> list[dict[str, Any]]:
         )
 
     return drains
+
+
+def _parse_kml_bytes_to_drains(payload: bytes) -> list[dict[str, Any]]:
+    root = ET.fromstring(payload)
+    return _parse_kml_root(root)
 
 
 def _extract_drive_file_id(value: str) -> str | None:
@@ -253,23 +262,43 @@ def sync_kml_from_source(source: str | None = None) -> dict[str, Any]:
         raise ValueError(f"Could not download the KML source: {error}") from error
 
     kml_bytes = _extract_kml_bytes(payload)
-    ensure_runtime_dirs()
-    with open(KML_FILE, "wb") as handle:
-        handle.write(kml_bytes)
+    imported_drains = _parse_kml_bytes_to_drains(kml_bytes)
+    metadata = load_metadata()
+    existing_names = {drain["name"].casefold() for drain in get_all_drains()}
+    added = 0
 
-    drains = _parse_kml_drains()
+    for drain in imported_drains:
+        key = drain["name"].casefold()
+        if key in existing_names:
+            continue
+
+        current = metadata.get(drain["name"], {})
+        if not isinstance(current, dict):
+            current = {}
+
+        current["synced"] = True
+        current["lat"] = drain["lat"]
+        current["lon"] = drain["lon"]
+        current["description"] = drain.get("description", "")
+        metadata[drain["name"]] = current
+        existing_names.add(key)
+        added += 1
+
+    if added:
+        save_metadata(metadata)
+
     return {
         "ok": True,
-        "count": len(drains),
+        "count": len(imported_drains),
+        "added": added,
         "source_url": sync_source,
-        "kml_file": KML_FILE,
     }
 
 
 def _custom_drains(metadata: dict[str, Any]) -> list[dict[str, Any]]:
     drains: list[dict[str, Any]] = []
     for name, item in metadata.items():
-        if not isinstance(item, dict) or not item.get("custom"):
+        if not isinstance(item, dict) or not (item.get("custom") or item.get("synced")):
             continue
         lat = item.get("lat")
         lon = item.get("lon")
@@ -284,8 +313,8 @@ def _custom_drains(metadata: dict[str, Any]) -> list[dict[str, Any]]:
                 "distance_km": round(dist, 2),
                 "drive_minutes": km_to_drive_minutes(dist),
                 "description": clean_description(item.get("description", "")),
-                "source": "custom",
-                "custom": True,
+                "source": "synced" if item.get("synced") else "custom",
+                "custom": bool(item.get("custom")),
             }
         )
     return drains

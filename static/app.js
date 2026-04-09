@@ -206,7 +206,7 @@
     try {
       const result = await fetchJson("/api/sync-kml", { method: "POST" });
       await refreshStats();
-      drawMessage(`Synced map successfully. ${result.count} drains available.`);
+      drawMessage(`Synced map successfully. Found ${result.count} entries and added ${result.added} new drains.`);
       if (searchInput.value.trim()) {
         await searchDrains();
       }
