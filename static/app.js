@@ -44,6 +44,10 @@
   }
 
   function fitDesktop() {
+    if (window.innerWidth <= 980) {
+      desktop.style.transform = "none";
+      return;
+    }
     const scale = Math.min(window.innerWidth / BASE_WIDTH, window.innerHeight / BASE_HEIGHT, 1);
     desktop.style.transform = `scale(${scale})`;
   }
