@@ -1,21 +1,29 @@
 import json
+import io
 import math
 import os
 import random
 import re
 import shutil
 import threading
+import urllib.error
+import urllib.parse
+import urllib.request
 import xml.etree.ElementTree as ET
+import zipfile
 from typing import Any
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_DATA_FILE = os.path.join(BASE_DIR, "drain_data.json")
-KML_FILE = os.path.join(BASE_DIR, "your_map.kml")
+DEFAULT_KML_FILE = os.path.join(BASE_DIR, "your_map.kml")
 DEFAULT_DATA_DIR = os.getenv("RAILWAY_VOLUME_MOUNT_PATH", BASE_DIR)
 DATA_DIR = os.getenv("DRAINTOOL_DATA_DIR", DEFAULT_DATA_DIR)
 DATA_FILE = os.getenv("DRAINTOOL_DATA_FILE", os.path.join(DATA_DIR, "drain_data.json"))
+KML_FILE = os.getenv("DRAINTOOL_KML_FILE", os.path.join(DATA_DIR, "your_map.kml"))
 UPLOAD_DIR = os.getenv("DRAINTOOL_UPLOAD_DIR", os.path.join(DATA_DIR, "uploads"))
+DEFAULT_KML_SYNC_URL = "https://earth.google.com/earth/d/1jhOxgKG18OSMNaiIXuqAdBXAaV3SMhfC?usp=drive_link"
+KML_SYNC_URL = os.getenv("DRAINTOOL_KML_SYNC_URL", DEFAULT_KML_SYNC_URL)
 PHOTO_DIR_CANDIDATES = [
     os.path.join(DATA_DIR, "Drain Pics"),
     os.path.join(DATA_DIR, "Drain pics"),
@@ -47,6 +55,14 @@ def bootstrap_metadata_file() -> None:
         return
     with open(DATA_FILE, "w", encoding="utf-8") as handle:
         json.dump({}, handle, indent=2)
+
+
+def bootstrap_kml_file() -> None:
+    ensure_runtime_dirs()
+    if os.path.exists(KML_FILE):
+        return
+    if os.path.exists(DEFAULT_KML_FILE):
+        shutil.copyfile(DEFAULT_KML_FILE, KML_FILE)
 
 
 def distance_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -127,6 +143,7 @@ def is_valid_name(name: str) -> bool:
 
 
 def _parse_kml_drains() -> list[dict[str, Any]]:
+    bootstrap_kml_file()
     if not os.path.exists(KML_FILE):
         return []
 
@@ -171,6 +188,82 @@ def _parse_kml_drains() -> list[dict[str, Any]]:
         )
 
     return drains
+
+
+def _extract_drive_file_id(value: str) -> str | None:
+    parsed = urllib.parse.urlparse(value)
+    if parsed.scheme and parsed.netloc:
+        if parsed.netloc.endswith("google.com"):
+            parts = [part for part in parsed.path.split("/") if part]
+            if "d" in parts:
+                index = parts.index("d")
+                if index + 1 < len(parts):
+                    return parts[index + 1]
+            query_id = urllib.parse.parse_qs(parsed.query).get("id")
+            if query_id:
+                return query_id[0]
+    if re.fullmatch(r"[-\w]{20,}", value.strip()):
+        return value.strip()
+    return None
+
+
+def _kml_download_url(source: str) -> str:
+    file_id = _extract_drive_file_id(source)
+    if file_id:
+        return f"https://drive.google.com/uc?export=download&id={file_id}"
+    return source
+
+
+def _extract_kml_bytes(payload: bytes) -> bytes:
+    if zipfile.is_zipfile(io.BytesIO(payload)):
+        with zipfile.ZipFile(io.BytesIO(payload)) as archive:
+            kml_names = [name for name in archive.namelist() if name.lower().endswith(".kml")]
+            if not kml_names:
+                raise ValueError("The synced file was a ZIP/KMZ archive without a KML inside.")
+            with archive.open(kml_names[0]) as handle:
+                return handle.read()
+
+    trimmed = payload.lstrip()
+    if trimmed.startswith(b"<?xml") or b"<kml" in trimmed[:4096].lower():
+        return payload
+
+    preview = trimmed[:200].decode("utf-8", errors="ignore").lower()
+    if "<html" in preview or "<!doctype" in preview:
+        raise ValueError("Google returned an HTML page instead of a KML/KMZ file. Check that the shared file is directly downloadable.")
+
+    raise ValueError("The synced file was not a KML or KMZ.")
+
+
+def sync_kml_from_source(source: str | None = None) -> dict[str, Any]:
+    sync_source = (source or KML_SYNC_URL or "").strip()
+    if not sync_source:
+        raise ValueError("No sync URL is configured.")
+
+    request = urllib.request.Request(
+        _kml_download_url(sync_source),
+        headers={
+            "User-Agent": "DrainBot/1.0 (+https://github.com/w1tch33/Drain-Bot)",
+        },
+    )
+
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            payload = response.read()
+    except urllib.error.URLError as error:
+        raise ValueError(f"Could not download the KML source: {error}") from error
+
+    kml_bytes = _extract_kml_bytes(payload)
+    ensure_runtime_dirs()
+    with open(KML_FILE, "wb") as handle:
+        handle.write(kml_bytes)
+
+    drains = _parse_kml_drains()
+    return {
+        "ok": True,
+        "count": len(drains),
+        "source_url": sync_source,
+        "kml_file": KML_FILE,
+    }
 
 
 def _custom_drains(metadata: dict[str, Any]) -> list[dict[str, Any]]:

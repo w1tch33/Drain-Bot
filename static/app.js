@@ -201,6 +201,22 @@
     }
   }
 
+  async function syncMap() {
+    setLoading(true);
+    try {
+      const result = await fetchJson("/api/sync-kml", { method: "POST" });
+      await refreshStats();
+      drawMessage(`Synced map successfully. ${result.count} drains available.`);
+      if (searchInput.value.trim()) {
+        await searchDrains();
+      }
+    } catch (error) {
+      drawMessage(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function refreshStats() {
     const stats = await fetchJson("/api/stats");
     visitedCount.textContent = `Visited: ${stats.visited}`;
@@ -1231,6 +1247,7 @@
   qs("#routeButton").addEventListener("click", buildRoute);
   qs("#linksButton").addEventListener("click", openLinks);
   qs("#addDrainButton").addEventListener("click", openAddDrain);
+  qs("#syncMapButton").addEventListener("click", syncMap);
   qs("#miniGamesButton").addEventListener("click", openGames);
   qs("#closeModal").addEventListener("click", closeModal);
 

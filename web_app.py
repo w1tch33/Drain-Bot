@@ -106,6 +106,24 @@ def search():
     return jsonify(drain_service.search_results(query, _bool_arg("only_unvisited")))
 
 
+@app.post("/api/sync-kml")
+def sync_kml():
+    payload = request.get_json(silent=True) or request.form
+    source_url = ""
+    if hasattr(payload, "get"):
+        source_url = str(payload.get("source_url", "")).strip()
+    try:
+        result = drain_service.sync_kml_from_source(source_url or None)
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
+    return jsonify(
+        {
+            **result,
+            "stats": drain_service.stats_summary(),
+        }
+    )
+
+
 @app.get("/api/drains/<path:name>")
 def drain_detail(name: str):
     drain = drain_service.get_drain(name)
