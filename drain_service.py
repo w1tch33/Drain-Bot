@@ -426,6 +426,7 @@ def _drain_identity_key(name: str, lat: float, lon: float) -> tuple[str, float, 
 def sync_kml_payload(username: str, payload: bytes) -> dict[str, Any]:
     kml_bytes = _extract_kml_bytes(payload)
     imported_drains = _parse_kml_bytes_to_drains(kml_bytes)
+    before_total = len(get_all_drains(username))
     metadata = load_user_metadata(username)
     existing_keys = {
         _drain_identity_key(drain["name"], drain["lat"], drain["lon"])
@@ -456,11 +457,13 @@ def sync_kml_payload(username: str, payload: bytes) -> dict[str, Any]:
     if added:
         mark_account_map_uploaded(username)
     save_user_metadata(username, metadata)
+    after_total = len(get_all_drains(username))
+    visible_added = max(0, after_total - before_total)
 
     return {
         "ok": True,
         "count": len(imported_drains),
-        "added": added,
+        "added": visible_added,
     }
 
 
