@@ -219,7 +219,7 @@
 
   async function refreshStats() {
     const stats = await fetchJson("/api/stats");
-    visitedCount.textContent = `Visited: ${stats.visited}`;
+    visitedCount.textContent = `Drains Completed: ${stats.visited}`;
   }
 
   async function searchDrains() {
