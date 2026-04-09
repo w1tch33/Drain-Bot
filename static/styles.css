@@ -273,7 +273,7 @@ body {
   transform: translateY(1px);
 }
 
-.flash-button { position: absolute; top: 30px; right: 40px; width: 102px; height: 32px; animation: invertFlash 2.4s step-end infinite; font-size: 14px; }
+.flash-button { position: absolute; top: 66px; right: 40px; width: 102px; height: 32px; animation: invertFlash 2.4s step-end infinite; font-size: 14px; }
 .retro-label { display: block; margin-top: 4px; margin-bottom: 5px; font-size: 14px; margin-left: 14px; }
 .slider-wrap {
   position: relative;
