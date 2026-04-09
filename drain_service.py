@@ -146,7 +146,9 @@ def create_account(username: str, password: str) -> dict[str, Any]:
         "map_uploaded": False,
     }
     save_accounts(accounts)
-    save_user_metadata(normalized, load_user_metadata(normalized))
+    metadata = load_user_metadata(normalized)
+    metadata["_map_uploaded"] = False
+    save_user_metadata(normalized, metadata)
     return {"username": normalized, "approved": False}
 
 
@@ -181,18 +183,24 @@ def approve_account(username: str) -> None:
 
 def mark_account_map_uploaded(username: str) -> None:
     normalized = normalize_username(username)
+    metadata = load_user_metadata(normalized)
+    metadata["_map_uploaded"] = True
+    save_user_metadata(normalized, metadata)
+
     accounts = load_accounts()
     account = accounts.get(normalized)
-    if not isinstance(account, dict):
-        raise ValueError("Account not found.")
-    account["map_uploaded"] = True
-    accounts[normalized] = account
-    save_accounts(accounts)
+    if isinstance(account, dict):
+        account["map_uploaded"] = True
+        accounts[normalized] = account
+        save_accounts(accounts)
 
 
 def account_uses_personal_map(username: str | None) -> bool:
     if not username:
         return False
+    metadata = load_user_metadata(username)
+    if isinstance(metadata, dict) and "_map_uploaded" in metadata:
+        return bool(metadata.get("_map_uploaded"))
     account = load_accounts().get(normalize_username(username))
     if not isinstance(account, dict):
         return False
@@ -204,6 +212,9 @@ def account_uses_personal_map(username: str | None) -> bool:
 def include_shared_map(username: str | None) -> bool:
     if not username:
         return True
+    metadata = load_user_metadata(username)
+    if isinstance(metadata, dict) and "_map_uploaded" in metadata:
+        return not bool(metadata.get("_map_uploaded"))
     account = load_accounts().get(normalize_username(username))
     if not isinstance(account, dict):
         return True
