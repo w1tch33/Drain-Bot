@@ -233,7 +233,7 @@ def search():
 
 
 @app.post("/api/sync-kml")
-@admin_required
+@login_required
 def sync_kml():
     file = request.files.get("kml_file")
     if not file or not file.filename:
@@ -251,7 +251,7 @@ def sync_kml():
 
 
 @app.post("/api/sync-kml/undo")
-@admin_required
+@login_required
 def undo_sync_kml():
     result = drain_service.undo_last_sync(current_username())
     return jsonify({**result, "stats": drain_service.stats_summary(current_username())})
