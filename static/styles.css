@@ -622,6 +622,25 @@ body {
     transform: none;
     background: transparent;
   }
+  .session-controls {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 2px;
+  }
+  .session-user {
+    font-size: 11px;
+    padding: 4px 6px 3px;
+  }
+  .session-button {
+    min-height: 34px;
+    padding: 4px 8px;
+    font-size: 11px;
+  }
   .desktop::before { display: none; }
   .title-shell, .visited-window, .control-window, .results-window, .search-window, .music-window, .smiley-zone, .credit, .flash-button {
     position: relative;
