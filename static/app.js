@@ -38,6 +38,7 @@
   const CLIMBER_HIGH_SCORE_KEY = "draintool-drainclimber-high-score";
   let musicMarqueeTimer = null;
   let audioUnlocked = false;
+  let pendingAutoplay = false;
 
   function setLoading(visible) {
     loadingOverlay.classList.toggle("hidden", !visible);
@@ -303,6 +304,10 @@
     audioUnlocked = true;
     audioPlayer.load();
     meowPlayer.load();
+    if (pendingAutoplay) {
+      pendingAutoplay = false;
+      startPlaybackAt(state.playlistIndex);
+    }
   }
 
   function readStoredNumber(key) {
@@ -515,33 +520,63 @@
     state.playlist = JSON.parse(qs("#desktop").dataset.playlist);
     if (!state.playlist.length) return;
 
-    audioPlayer.volume = Number(volumeControl.value);
+    audioPlayer.volume = 0;
     volumeValue.textContent = Number(volumeControl.value).toFixed(2);
     startSongMarquee(state.playlist[0].replace(".mp3", ""));
 
-    function playAt(index) {
-      unlockAudio();
+    function fadeInToTarget(targetVolume) {
+      const startVolume = Number(audioPlayer.volume || 0);
+      const steps = 18;
+      const duration = 1200;
+      let step = 0;
+
+      function tick() {
+        step += 1;
+        const nextVolume = startVolume + ((targetVolume - startVolume) * (step / steps));
+        audioPlayer.volume = Math.max(0, Math.min(1, nextVolume));
+        if (step < steps && !audioPlayer.paused) {
+          window.setTimeout(tick, duration / steps);
+        }
+      }
+
+      tick();
+    }
+
+    function startPlaybackAt(index, shouldFade = true) {
       state.playlistIndex = (index + state.playlist.length) % state.playlist.length;
       const filename = state.playlist[state.playlistIndex];
       audioPlayer.src = `/audio/${encodeURIComponent(filename)}`;
       startSongMarquee(filename.replace(".mp3", ""));
-      audioPlayer.play().catch(() => {});
+      const targetVolume = Number(volumeControl.value);
+      if (shouldFade) {
+        audioPlayer.volume = 0;
+      } else {
+        audioPlayer.volume = targetVolume;
+      }
+      audioPlayer.play()
+        .then(() => {
+          if (shouldFade) fadeInToTarget(targetVolume);
+        })
+        .catch(() => {
+          pendingAutoplay = true;
+        });
     }
 
-    qs("#prevSong").addEventListener("click", () => playAt(state.playlistIndex - 1));
-    qs("#nextSong").addEventListener("click", () => playAt(state.playlistIndex + 1));
+    qs("#prevSong").addEventListener("click", () => startPlaybackAt(state.playlistIndex - 1));
+    qs("#nextSong").addEventListener("click", () => startPlaybackAt(state.playlistIndex + 1));
     qs("#toggleSong").addEventListener("click", () => {
-      if (!audioPlayer.src) playAt(state.playlistIndex);
+      if (!audioPlayer.src) startPlaybackAt(state.playlistIndex);
       else if (audioPlayer.paused) audioPlayer.play().catch(() => {});
       else audioPlayer.pause();
     });
 
-    audioPlayer.addEventListener("ended", () => playAt(state.playlistIndex + 1));
+    audioPlayer.addEventListener("ended", () => startPlaybackAt(state.playlistIndex + 1));
     volumeControl.addEventListener("input", () => {
       audioPlayer.volume = Number(volumeControl.value);
       volumeValue.textContent = Number(volumeControl.value).toFixed(2);
     });
 
+    startPlaybackAt(0);
   }
 
   function openLinks() {
