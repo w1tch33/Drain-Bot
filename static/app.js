@@ -300,7 +300,13 @@
   }
 
   function unlockAudio() {
-    if (audioUnlocked) return;
+    if (audioUnlocked) {
+      if (audioPlayer.muted && !audioPlayer.paused) {
+        audioPlayer.muted = false;
+        audioPlayer.volume = Number(volumeControl.value);
+      }
+      return;
+    }
     audioUnlocked = true;
     audioPlayer.load();
     meowPlayer.load();
@@ -542,12 +548,13 @@
       tick();
     }
 
-    function startPlaybackAt(index, shouldFade = true) {
+    function startPlaybackAt(index, shouldFade = true, preferMutedAutoplay = false) {
       state.playlistIndex = (index + state.playlist.length) % state.playlist.length;
       const filename = state.playlist[state.playlistIndex];
       audioPlayer.src = `/audio/${encodeURIComponent(filename)}`;
       startSongMarquee(filename.replace(".mp3", ""));
       const targetVolume = Number(volumeControl.value);
+      audioPlayer.muted = !!preferMutedAutoplay;
       if (shouldFade) {
         audioPlayer.volume = 0;
       } else {
@@ -555,7 +562,15 @@
       }
       audioPlayer.play()
         .then(() => {
-          if (shouldFade) fadeInToTarget(targetVolume);
+          if (preferMutedAutoplay) {
+            window.setTimeout(() => {
+              audioPlayer.muted = false;
+              if (shouldFade) fadeInToTarget(targetVolume);
+              else audioPlayer.volume = targetVolume;
+            }, 180);
+          } else if (shouldFade) {
+            fadeInToTarget(targetVolume);
+          }
         })
         .catch(() => {
           pendingAutoplay = true;
@@ -576,7 +591,7 @@
       volumeValue.textContent = Number(volumeControl.value).toFixed(2);
     });
 
-    startPlaybackAt(0);
+    startPlaybackAt(0, true, true);
   }
 
   function openLinks() {
