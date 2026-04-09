@@ -63,6 +63,8 @@ Recommended Railway variables:
 
 - `FLASK_SECRET_KEY`
   Set a private random value.
+- `DRAINBOT_APPROVAL_PASSWORD`
+  Set the private password you will use to open the account approval panel at `/admin/login`.
 - `PORT`
   Railway usually provides this automatically.
 
@@ -96,3 +98,4 @@ After deployment, open the site in Safari and use `Share -> Add to Home Screen` 
 - Large music files are still served from the app bundle right now, which is fine for initial deployment but could be moved to object storage later if you want a cleaner production setup.
 - The `Sync Map` button is add-only: it scans the uploaded KML/KMZ for valid new drains and adds only missing entries into DrainTool. It does not modify or remove existing DrainTool drains.
 - Duplicate matching uses both drain name and coordinates, and blocked words like `potential`, `potentially`, and `here` are still ignored during import.
+- Accounts are per-user and pending by default. You approve them from the admin approval panel, and user drain changes are stored per account so they follow that login across devices.

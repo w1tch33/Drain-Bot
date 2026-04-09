@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Admin Approval - DrainTool{% endblock %}
+{% block content %}
+  <div class="auth-page">
+    <div class="retro-window auth-window">
+      <div class="window-title"><span>Admin Approval</span></div>
+      <div class="window-body auth-body">
+        <form class="modal-form" method="post">
+          <label>Approval Password <input class="retro-input" name="password" type="password" required></label>
+          <button class="retro-button" type="submit">Open Approval Panel</button>
+        </form>
+        <div class="auth-links">
+          <a class="retro-button" href="{{ url_for('login') }}">Back to Login</a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

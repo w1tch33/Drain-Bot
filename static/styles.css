@@ -41,6 +41,24 @@ body {
   align-items: flex-start;
 }
 
+.flash-stack {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: grid;
+  gap: 6px;
+}
+
+.flash-message {
+  border: 2px solid #000;
+  background: #fff;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .desktop {
   position: relative;
   width: 1433px;
@@ -49,6 +67,80 @@ body {
   background: transparent;
   animation: bootIn 420ms ease-out;
   transform-origin: top center;
+}
+
+.session-controls {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 5;
+}
+
+.session-user {
+  border: 2px solid #000;
+  background: #fff;
+  padding: 4px 8px 3px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.session-form {
+  margin: 0;
+}
+
+.session-button {
+  min-height: 28px;
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.auth-page {
+  min-height: 100vh;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.auth-window {
+  width: min(92vw, 420px);
+}
+
+.auth-window-wide {
+  width: min(92vw, 560px);
+}
+
+.auth-body {
+  padding-top: 34px;
+}
+
+.auth-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.auth-copy {
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.approval-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border: 2px solid #000;
+  background: #fff;
+  padding: 8px 10px;
+}
+
+.approval-name {
+  font-weight: 700;
 }
 
 .desktop::before {

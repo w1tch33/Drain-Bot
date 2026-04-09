@@ -12,6 +12,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 import zipfile
 from typing import Any
+from werkzeug.security import check_password_hash, generate_password_hash
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -22,6 +23,8 @@ DATA_DIR = os.getenv("DRAINTOOL_DATA_DIR", DEFAULT_DATA_DIR)
 DATA_FILE = os.getenv("DRAINTOOL_DATA_FILE", os.path.join(DATA_DIR, "drain_data.json"))
 KML_FILE = os.getenv("DRAINTOOL_KML_FILE", os.path.join(DATA_DIR, "your_map.kml"))
 UPLOAD_DIR = os.getenv("DRAINTOOL_UPLOAD_DIR", os.path.join(DATA_DIR, "uploads"))
+ACCOUNTS_FILE = os.getenv("DRAINTOOL_ACCOUNTS_FILE", os.path.join(DATA_DIR, "accounts.json"))
+USERS_DIR = os.getenv("DRAINTOOL_USERS_DIR", os.path.join(DATA_DIR, "users"))
 DEFAULT_KML_SYNC_URL = "https://earth.google.com/earth/d/1jhOxgKG18OSMNaiIXuqAdBXAaV3SMhfC?usp=drive_link"
 KML_SYNC_URL = os.getenv("DRAINTOOL_KML_SYNC_URL", DEFAULT_KML_SYNC_URL)
 PHOTO_DIR_CANDIDATES = [
@@ -44,6 +47,7 @@ _LOCK = threading.Lock()
 def ensure_runtime_dirs() -> None:
     os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
     os.makedirs(UPLOAD_DIR, exist_ok=True)
+    os.makedirs(USERS_DIR, exist_ok=True)
 
 
 def bootstrap_metadata_file() -> None:
@@ -63,6 +67,115 @@ def bootstrap_kml_file() -> None:
         return
     if os.path.exists(DEFAULT_KML_FILE):
         shutil.copyfile(DEFAULT_KML_FILE, KML_FILE)
+
+
+def bootstrap_accounts_file() -> None:
+    ensure_runtime_dirs()
+    if os.path.exists(ACCOUNTS_FILE):
+        return
+    with open(ACCOUNTS_FILE, "w", encoding="utf-8") as handle:
+        json.dump({}, handle, indent=2)
+
+
+def normalize_username(username: str) -> str:
+    return re.sub(r"[^a-zA-Z0-9_-]", "", (username or "").strip()).lower()
+
+
+def valid_username(username: str) -> bool:
+    return bool(re.fullmatch(r"[a-zA-Z0-9_-]{3,32}", username or ""))
+
+
+def user_metadata_path(username: str) -> str:
+    return os.path.join(USERS_DIR, normalize_username(username), "metadata.json")
+
+
+def user_upload_dir(username: str) -> str:
+    return os.path.join(UPLOAD_DIR, normalize_username(username))
+
+
+def ensure_user_dirs(username: str) -> None:
+    os.makedirs(os.path.dirname(user_metadata_path(username)), exist_ok=True)
+    os.makedirs(user_upload_dir(username), exist_ok=True)
+
+
+def load_accounts() -> dict[str, Any]:
+    bootstrap_accounts_file()
+    with open(ACCOUNTS_FILE, "r", encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def save_accounts(accounts: dict[str, Any]) -> None:
+    with _LOCK:
+        ensure_runtime_dirs()
+        with open(ACCOUNTS_FILE, "w", encoding="utf-8") as handle:
+            json.dump(accounts, handle, indent=2, ensure_ascii=False)
+
+
+def load_user_metadata(username: str | None) -> dict[str, Any]:
+    if not username:
+        return {}
+    path = user_metadata_path(username)
+    if not os.path.exists(path):
+        return {}
+    with open(path, "r", encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def save_user_metadata(username: str, data: dict[str, Any]) -> None:
+    ensure_user_dirs(username)
+    with _LOCK:
+        with open(user_metadata_path(username), "w", encoding="utf-8") as handle:
+            json.dump(data, handle, indent=2, ensure_ascii=False)
+
+
+def create_account(username: str, password: str) -> dict[str, Any]:
+    normalized = normalize_username(username)
+    if not valid_username(normalized):
+        raise ValueError("Usernames must be 3-32 characters and use only letters, numbers, dashes, or underscores.")
+    if len(password or "") < 6:
+        raise ValueError("Passwords must be at least 6 characters long.")
+
+    accounts = load_accounts()
+    if normalized in accounts:
+        raise ValueError("That username is already taken.")
+
+    accounts[normalized] = {
+        "username": normalized,
+        "password_hash": generate_password_hash(password),
+        "approved": False,
+    }
+    save_accounts(accounts)
+    save_user_metadata(normalized, load_user_metadata(normalized))
+    return {"username": normalized, "approved": False}
+
+
+def authenticate_account(username: str, password: str) -> dict[str, Any]:
+    normalized = normalize_username(username)
+    accounts = load_accounts()
+    account = accounts.get(normalized)
+    if not isinstance(account, dict) or not check_password_hash(account.get("password_hash", ""), password or ""):
+        raise ValueError("Invalid username or password.")
+    return account
+
+
+def list_pending_accounts() -> list[dict[str, Any]]:
+    pending = []
+    for account in load_accounts().values():
+        if isinstance(account, dict) and not account.get("approved"):
+            pending.append({"username": account.get("username", "")})
+    pending.sort(key=lambda item: item["username"])
+    return pending
+
+
+def approve_account(username: str) -> None:
+    normalized = normalize_username(username)
+    accounts = load_accounts()
+    account = accounts.get(normalized)
+    if not isinstance(account, dict):
+        raise ValueError("Account not found.")
+    account["approved"] = True
+    accounts[normalized] = account
+    save_accounts(accounts)
 
 
 def distance_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -348,8 +461,9 @@ def _merge_metadata(base: dict[str, Any], item: dict[str, Any] | None) -> dict[s
     return merged
 
 
-def get_all_drains() -> list[dict[str, Any]]:
+def get_all_drains(username: str | None = None) -> list[dict[str, Any]]:
     metadata = load_metadata()
+    user_metadata = load_user_metadata(username)
     combined: dict[str, dict[str, Any]] = {}
 
     for drain in _parse_kml_drains():
@@ -358,30 +472,39 @@ def get_all_drains() -> list[dict[str, Any]]:
     for drain in _custom_drains(metadata):
         combined[drain["name"]] = drain
 
-    merged = [_merge_metadata(drain, metadata.get(drain["name"])) for drain in combined.values()]
+    for drain in _custom_drains(user_metadata):
+        combined[drain["name"]] = drain
+
+    merged = []
+    for drain in combined.values():
+        merged_item = _merge_metadata(drain, metadata.get(drain["name"]))
+        merged_item = _merge_metadata(merged_item, user_metadata.get(drain["name"]))
+        merged.append(merged_item)
     merged.sort(key=lambda item: item["distance_km"])
     return merged
 
 
-def get_drain(name: str) -> dict[str, Any] | None:
-    for drain in get_all_drains():
+def get_drain(name: str, username: str | None = None) -> dict[str, Any] | None:
+    for drain in get_all_drains(username):
         if drain["name"] == name:
             return drain
     return None
 
 
 def random_drain(
+    username: str | None = None,
     min_distance: float = 0,
     max_distance: float = 100,
     only_unvisited: bool = False,
 ) -> dict[str, Any] | None:
-    candidates = filter_drains(min_distance, max_distance, only_unvisited)
+    candidates = filter_drains(username, min_distance, max_distance, only_unvisited)
     if not candidates:
         return None
     return random.choice(candidates)
 
 
 def filter_drains(
+    username: str | None = None,
     min_distance: float = 0,
     max_distance: float = 60,
     only_unvisited: bool = False,
@@ -390,7 +513,7 @@ def filter_drains(
     drains = []
     term = search.strip().casefold()
 
-    for drain in get_all_drains():
+    for drain in get_all_drains(username):
         if drain["distance_km"] < min_distance or drain["distance_km"] > max_distance:
             continue
         if only_unvisited and drain["visited"]:
@@ -411,12 +534,13 @@ def filter_drains(
 
 
 def recommend_session(
+    username: str | None = None,
     session_type: str = "long",
     min_distance: float = 0,
     max_distance: float = 60,
     only_unvisited: bool = False,
 ) -> dict[str, Any]:
-    candidates = filter_drains(min_distance, max_distance, only_unvisited)
+    candidates = filter_drains(username, min_distance, max_distance, only_unvisited)
     if not candidates:
         return {"primary": None, "route": [], "options": []}
 
@@ -433,6 +557,7 @@ def recommend_session(
 
 
 def build_route_plan(
+    username: str | None = None,
     min_distance: float = 0,
     max_distance: float = 60,
     only_unvisited: bool = False,
@@ -440,7 +565,7 @@ def build_route_plan(
     max_leg_km: float = 5,
     max_total_minutes: float = 120,
 ) -> dict[str, Any]:
-    pool = filter_drains(min_distance, max_distance, only_unvisited)
+    pool = filter_drains(username, min_distance, max_distance, only_unvisited)
     if len(pool) < 2:
         return {"route": [], "total_minutes": 0, "total_distance_km": 0}
 
@@ -483,13 +608,13 @@ def build_route_plan(
     }
 
 
-def nearby_drains(name: str, limit: int = 3, radius_km: float = 5) -> list[dict[str, Any]]:
-    current = get_drain(name)
+def nearby_drains(name: str, username: str | None = None, limit: int = 3, radius_km: float = 5) -> list[dict[str, Any]]:
+    current = get_drain(name, username)
     if not current:
         return []
 
     nearby: list[dict[str, Any]] = []
-    for drain in get_all_drains():
+    for drain in get_all_drains(username):
         if drain["name"] == name:
             continue
         dist = distance_km(current["lat"], current["lon"], drain["lat"], drain["lon"])
@@ -502,12 +627,12 @@ def nearby_drains(name: str, limit: int = 3, radius_km: float = 5) -> list[dict[
     return nearby[:limit]
 
 
-def route_from_drain(name: str, radius_km: float = 5, stop_limit: int = 4) -> dict[str, Any]:
-    start = get_drain(name)
+def route_from_drain(name: str, username: str | None = None, radius_km: float = 5, stop_limit: int = 4) -> dict[str, Any]:
+    start = get_drain(name, username)
     if not start:
         return {"route": [], "total_minutes": 0, "total_distance_km": 0}
 
-    nearby = nearby_drains(name, limit=max(0, stop_limit - 1), radius_km=radius_km)
+    nearby = nearby_drains(name, username, limit=max(0, stop_limit - 1), radius_km=radius_km)
     route = [start] + nearby
     if len(route) < 2:
         return {"route": [], "total_minutes": 0, "total_distance_km": 0}
@@ -528,8 +653,8 @@ def route_from_drain(name: str, radius_km: float = 5, stop_limit: int = 4) -> di
     }
 
 
-def stats_summary() -> dict[str, int]:
-    drains = get_all_drains()
+def stats_summary(username: str | None = None) -> dict[str, int]:
+    drains = get_all_drains(username)
     return {
         "total": len(drains),
         "visited": sum(1 for item in drains if item["visited"]),
@@ -540,6 +665,7 @@ def stats_summary() -> dict[str, int]:
 
 def update_drain(
     name: str,
+    username: str | None = None,
     *,
     visited: bool | None = None,
     favorite: bool | None = None,
@@ -550,7 +676,9 @@ def update_drain(
     notes: str | None = None,
     features: dict[str, Any] | None = None,
 ) -> bool:
-    metadata = load_metadata()
+    if not username:
+        raise ValueError("A user account is required.")
+    metadata = load_user_metadata(username)
     current = metadata.get(name, {})
     if not isinstance(current, dict):
         current = {}
@@ -573,12 +701,12 @@ def update_drain(
         current["features"] = {key: 1 if value else 0 for key, value in features.items()}
 
     metadata[name] = current
-    save_metadata(metadata)
+    save_user_metadata(username, metadata)
     return True
 
 
-def add_custom_drain(name: str, lat: float, lon: float, description: str = "") -> None:
-    metadata = load_metadata()
+def add_custom_drain(username: str, name: str, lat: float, lon: float, description: str = "") -> None:
+    metadata = load_user_metadata(username)
     current = metadata.get(name, {})
     if not isinstance(current, dict):
         current = {}
@@ -590,7 +718,7 @@ def add_custom_drain(name: str, lat: float, lon: float, description: str = "") -
         current["description"] = description.strip()
 
     metadata[name] = current
-    save_metadata(metadata)
+    save_user_metadata(username, metadata)
 
 
 def ensure_upload_dir() -> None:
@@ -610,7 +738,8 @@ def resolve_photo_asset(path: str) -> dict[str, Any]:
     normalized = normalize_photo_path(path)
 
     if normalized.startswith("uploads/"):
-        absolute = os.path.join(BASE_DIR, normalized.replace("/", os.sep))
+        relative_upload = normalized.removeprefix("uploads/").replace("/", os.sep)
+        absolute = os.path.join(UPLOAD_DIR, relative_upload)
         return {
             "path": normalized,
             "url": f"/{normalized}",
@@ -651,8 +780,8 @@ def resolve_photo_asset(path: str) -> dict[str, Any]:
     }
 
 
-def list_photos(name: str) -> list[dict[str, Any]]:
-    drain = get_drain(name)
+def list_photos(name: str, username: str | None = None) -> list[dict[str, Any]]:
+    drain = get_drain(name, username)
     if not drain:
         return []
 
@@ -672,19 +801,19 @@ def find_photo_file(filename: str) -> str | None:
     return None
 
 
-def add_uploaded_photo(name: str, relative_path: str) -> None:
-    metadata = load_metadata()
+def add_uploaded_photo(name: str, username: str, relative_path: str) -> None:
+    metadata = load_user_metadata(username)
     current = metadata.get(name, {})
     if not isinstance(current, dict):
         current = {}
     current.setdefault("photos", [])
     current["photos"].append(normalize_photo_path(relative_path))
     metadata[name] = current
-    save_metadata(metadata)
+    save_user_metadata(username, metadata)
 
 
-def remove_photo(name: str, path: str) -> None:
-    metadata = load_metadata()
+def remove_photo(name: str, username: str, path: str) -> None:
+    metadata = load_user_metadata(username)
     current = metadata.get(name, {})
     if not isinstance(current, dict):
         return
@@ -692,10 +821,10 @@ def remove_photo(name: str, path: str) -> None:
     target = normalize_photo_path(path)
     current["photos"] = [photo for photo in photos if photo != target]
     metadata[name] = current
-    save_metadata(metadata)
+    save_user_metadata(username, metadata)
 
     if target.startswith("uploads/"):
-        absolute = os.path.join(BASE_DIR, target.replace("/", os.sep))
+        absolute = os.path.join(UPLOAD_DIR, target.removeprefix("uploads/").replace("/", os.sep))
         if os.path.exists(absolute):
             os.remove(absolute)
 
@@ -720,12 +849,13 @@ def result_rows(
 
 
 def session_results(
+    username: str | None = None,
     session_type: str = "long",
     min_distance: float = 0,
     max_distance: float = 60,
     only_unvisited: bool = False,
 ) -> list[dict[str, Any]]:
-    recommendation = recommend_session(session_type, min_distance, max_distance, only_unvisited)
+    recommendation = recommend_session(username, session_type, min_distance, max_distance, only_unvisited)
     ordered: list[dict[str, Any]] = []
     seen: set[str] = set()
     for bucket in ("primary", "route", "options"):
@@ -742,8 +872,8 @@ def session_results(
     return result_rows(ordered)
 
 
-def search_results(query: str, only_unvisited: bool = False) -> list[dict[str, Any]]:
-    drains = filter_drains(0, 9999, only_unvisited, query)
+def search_results(username: str | None, query: str, only_unvisited: bool = False) -> list[dict[str, Any]]:
+    drains = filter_drains(username, 0, 9999, only_unvisited, query)
     return result_rows(drains)
 
 

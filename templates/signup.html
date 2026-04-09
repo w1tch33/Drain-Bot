@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Sign Up - DrainTool{% endblock %}
+{% block content %}
+  <div class="auth-page">
+    <div class="retro-window auth-window">
+      <div class="window-title"><span>Create Account</span></div>
+      <div class="window-body auth-body">
+        <form class="modal-form" method="post">
+          <label>Username <input class="retro-input" name="username" required></label>
+          <label>Password <input class="retro-input" name="password" type="password" required></label>
+          <button class="retro-button" type="submit">Sign Up</button>
+        </form>
+        <div class="auth-copy">After signup, your account stays pending until you approve it.</div>
+        <div class="auth-links">
+          <a class="retro-button" href="{{ url_for('login') }}">Back to Login</a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

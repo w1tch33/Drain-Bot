@@ -2,6 +2,18 @@
 {% block title %}DrainTool Desktop Web{% endblock %}
 {% block content %}
   <div class="desktop" id="desktop" data-playlist='{{ playlist|tojson }}'>
+    <div class="session-controls">
+      {% if admin_verified %}
+        <a class="retro-button session-button" href="{{ url_for('admin_accounts') }}">Approve Users</a>
+      {% else %}
+        <a class="retro-button session-button" href="{{ url_for('admin_login') }}">Admin</a>
+      {% endif %}
+      <span class="session-user">{{ current_username }}</span>
+      <form class="session-form" method="post" action="{{ url_for('logout') }}">
+        <button class="retro-button session-button" type="submit">Log Out</button>
+      </form>
+    </div>
+
     <div class="retro-window visited-window">
       <div class="window-body visited-body">
         <span id="visitedCount">Drains Completed: {{ stats.visited }}</span>
@@ -37,7 +49,9 @@
         <button class="retro-button action-button" id="randomButton" type="button">Random Drain</button>
         <button class="retro-button action-button" id="routeButton" type="button">Build Route</button>
         <button class="retro-button action-button" id="addDrainButton" type="button">Add Drain</button>
-        <button class="retro-button action-button" id="syncMapButton" type="button">Sync Map</button>
+        {% if admin_verified %}
+          <button class="retro-button action-button" id="syncMapButton" type="button">Sync Map</button>
+        {% endif %}
 
         <label class="check-row">
           <input id="onlyUnvisited" type="checkbox">

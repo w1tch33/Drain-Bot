@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Approve Users - DrainTool{% endblock %}
+{% block content %}
+  <div class="auth-page">
+    <div class="retro-window auth-window auth-window-wide">
+      <div class="window-title"><span>Approve Users</span></div>
+      <div class="window-body auth-body">
+        {% if pending_accounts %}
+          <div class="stack-list">
+            {% for account in pending_accounts %}
+              <form class="approval-row" method="post" action="{{ url_for('approve_account', username=account.username) }}">
+                <span class="approval-name">{{ account.username }}</span>
+                <button class="retro-button" type="submit">Approve</button>
+              </form>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="auth-copy">No pending accounts right now.</div>
+        {% endif %}
+        <div class="auth-links">
+          <a class="retro-button" href="{{ url_for('index') if current_username else url_for('login') }}">Back</a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
