@@ -745,16 +745,22 @@ body {
   .result-item { min-height: 40px; }
   .modal-window { width: min(95vw, 700px); }
   .game-modal-window { width: min(96vw, 720px); max-height: min(90vh, 720px); }
-  .game-modal-body { max-height: calc(min(90vh, 720px) - 32px); }
+  .game-modal-body {
+    max-height: calc(min(90vh, 720px) - 32px);
+    padding-top: 28px;
+    gap: 6px;
+  }
+  .game-help { font-size: 12px; min-height: 16px; margin-top: 6px; }
   .image-preview-window { width: min(95vw, 960px); }
   .volume-wrap { display: none; }
   .game-controls { display: grid; }
-  .game-canvas { max-height: calc(100vh - 360px); }
-  .game-canvas.climber-canvas { max-height: calc(100vh - 360px); }
-  .game-canvas.runner-canvas { max-height: calc(100vh - 380px); }
+  .game-canvas { max-height: calc(100vh - 390px); margin-top: 6px; }
+  .game-canvas.climber-canvas { max-height: calc(100vh - 400px); }
+  .game-canvas.runner-canvas { max-height: calc(100vh - 390px); }
   .game-control {
-    min-width: 92px;
-    min-height: 42px;
-    font-size: 14px;
+    min-width: 80px;
+    min-height: 38px;
+    font-size: 13px;
   }
+  .game-controls-row { gap: 6px; }
 }

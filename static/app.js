@@ -333,12 +333,27 @@
   }
 
   async function syncStoredHighScores() {
-    const localScores = [
-      { game: "ladderclimb", score: readStoredNumber(CLIMBER_HIGH_SCORE_KEY) },
-      { game: "drainrunner", score: readStoredNumber(RUNNER_HIGH_SCORE_KEY) },
-    ].filter((entry) => entry.score > 0);
+    try {
+      const profile = await fetchJson("/api/profile");
+      const localScores = {
+        ladderclimb: readStoredNumber(CLIMBER_HIGH_SCORE_KEY),
+        drainrunner: readStoredNumber(RUNNER_HIGH_SCORE_KEY),
+      };
+      const remoteScores = {
+        ladderclimb: Number(profile.high_scores?.ladderclimb?.score || 0),
+        drainrunner: Number(profile.high_scores?.drainrunner?.score || 0),
+      };
 
-    await Promise.all(localScores.map((entry) => syncHighScore(entry.game, entry.score)));
+      writeStoredNumber(CLIMBER_HIGH_SCORE_KEY, Math.max(localScores.ladderclimb, remoteScores.ladderclimb));
+      writeStoredNumber(RUNNER_HIGH_SCORE_KEY, Math.max(localScores.drainrunner, remoteScores.drainrunner));
+
+      const uploads = [];
+      if (localScores.ladderclimb > remoteScores.ladderclimb) uploads.push(syncHighScore("ladderclimb", localScores.ladderclimb));
+      if (localScores.drainrunner > remoteScores.drainrunner) uploads.push(syncHighScore("drainrunner", localScores.drainrunner));
+      await Promise.all(uploads);
+    } catch (_error) {
+      // Keep local score fallback if account score sync fails.
+    }
   }
 
   function profileHtml(profile) {
@@ -589,6 +604,25 @@
     }
   }
 
+  function bindPress(element, handler) {
+    if (!element) return;
+    let lastTouchAt = 0;
+    const onTouchEnd = (event) => {
+      lastTouchAt = Date.now();
+      event.preventDefault();
+      handler(event);
+    };
+    const onClick = (event) => {
+      if (Date.now() - lastTouchAt < 500) {
+        event.preventDefault();
+        return;
+      }
+      handler(event);
+    };
+    element.addEventListener("touchend", onTouchEnd, { passive: false });
+    element.addEventListener("click", onClick);
+  }
+
   function detailHtml(drain) {
     const photos = (drain.photos || [])
       .map((photo) => {
@@ -677,19 +711,19 @@
       .join("");
 
     const nearbyArea = modalBody.querySelector("#nearbyArea");
-    modalBody.querySelector("#nearbyButton").addEventListener("click", () => {
+    bindPress(modalBody.querySelector("#nearbyButton"), () => {
       nearbyArea.innerHTML = nearbyMarkup || "<span>No nearby drains found.</span>";
       nearbyArea.querySelectorAll(".nearby-open").forEach((button) => {
-        button.addEventListener("click", () => openDrain(button.dataset.name));
+        bindPress(button, () => openDrain(button.dataset.name));
       });
     });
-    modalBody.querySelector("#routeFromHereButton").addEventListener("click", async () => {
+    bindPress(modalBody.querySelector("#routeFromHereButton"), async () => {
       renderRoute(await fetchJson(`/api/drains/${encodeURIComponent(name)}/route`));
       closeModal();
     });
     const deleteDrainButton = modalBody.querySelector("#deleteDrainButton");
     if (deleteDrainButton) {
-      deleteDrainButton.addEventListener("click", async () => {
+      bindPress(deleteDrainButton, async () => {
         await fetchJson(`/api/drains/${encodeURIComponent(name)}/delete`, { method: "POST" });
         await refreshStats();
         closeModal();
@@ -698,28 +732,28 @@
     }
 
     modalBody.querySelectorAll(".difficulty-button").forEach((button) => {
-      button.addEventListener("click", () => {
+      bindPress(button, () => {
         difficulty = button.dataset.value;
         modalBody.querySelectorAll(".difficulty-button").forEach((item) => item.classList.toggle("active", item === button));
       });
     });
 
     modalBody.querySelectorAll(".value-button").forEach((button) => {
-      button.addEventListener("click", () => {
+      bindPress(button, () => {
         value = button.dataset.value;
         modalBody.querySelectorAll(".value-button").forEach((item) => item.classList.toggle("active", item === button));
       });
     });
 
     modalBody.querySelectorAll(".rating-button").forEach((button) => {
-      button.addEventListener("click", () => {
+      bindPress(button, () => {
         rating = Number(button.dataset.value);
         modalBody.querySelectorAll(".rating-button").forEach((item) => item.classList.toggle("active", item === button));
       });
     });
 
     modalBody.querySelectorAll(".delete-photo").forEach((button) => {
-      button.addEventListener("click", async () => {
+      bindPress(button, async () => {
         const formData = new FormData();
         formData.append("path", button.dataset.path);
         await fetchJson(`/api/drains/${encodeURIComponent(name)}/photos/delete`, { method: "POST", body: formData });
@@ -728,7 +762,7 @@
     });
 
     modalBody.querySelectorAll(".preview-photo").forEach((img) => {
-      img.addEventListener("click", () => openImagePreview(img.dataset.title, img.dataset.url));
+      bindPress(img, () => openImagePreview(img.dataset.title, img.dataset.url));
     });
 
     modalBody.querySelector("#photoUploadForm").addEventListener("submit", async (event) => {
@@ -740,7 +774,7 @@
       await openDrain(name);
     });
 
-    modalBody.querySelector("#saveDrainButton").addEventListener("click", async () => {
+    bindPress(modalBody.querySelector("#saveDrainButton"), async () => {
       const saveButton = modalBody.querySelector("#saveDrainButton");
       saveButton.disabled = true;
       try {
@@ -989,6 +1023,7 @@
     const canvas = qs("#gameCanvas");
     const help = qs("#gameHelp");
     const controls = qs("#gameControls");
+    const menu = modalBody.querySelector(".stack-list");
     canvas.tabIndex = 0;
     const cleanupControls = bindGameControls(controls);
     canvas.classList.add("hidden");
@@ -1001,6 +1036,7 @@
         canvas.classList.remove("hidden");
         help.classList.remove("hidden");
         controls.classList.remove("hidden");
+        if (window.innerWidth <= 980 && menu) menu.classList.add("hidden");
         canvas.focus();
         if (state.gameCleanup) {
           state.gameCleanup();
@@ -1031,11 +1067,12 @@
 
   function runLadderClimb(canvas, help) {
     const ctx = canvas.getContext("2d");
+    const isMobile = window.innerWidth <= 980;
     const WIDTH = 12;
     const HEIGHT = 320;
-    const TILE = 14;
+    const TILE = isMobile ? 10 : 14;
     canvas.width = WIDTH * TILE;
-    canvas.height = 430;
+    canvas.height = isMobile ? 280 : 430;
     canvas.classList.remove("runner-canvas");
     canvas.classList.add("climber-canvas");
     let player = { x: WIDTH / 2, y: HEIGHT - 5, w: 0.9, h: 0.95 };
@@ -1142,7 +1179,7 @@
 
     function draw() {
       const theme = levelThemes[(level - 1) % levelThemes.length];
-      const offsetY = cameraY * TILE - canvas.height * 0.68;
+      const offsetY = cameraY * TILE - canvas.height * (isMobile ? 0.84 : 0.68);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (let i = 0; i < canvas.height / 20; i += 1) {
         ctx.fillStyle = i % 2 === 0 ? theme.skyA : theme.skyB;
@@ -1376,8 +1413,9 @@
 
   function runDrainRunner(canvas, help) {
     const ctx = canvas.getContext("2d");
-    canvas.width = 620;
-    canvas.height = 280;
+    const isMobile = window.innerWidth <= 980;
+    canvas.width = isMobile ? 540 : 620;
+    canvas.height = isMobile ? 240 : 280;
     canvas.classList.remove("climber-canvas");
     canvas.classList.add("runner-canvas");
     let player = { x: 88, y: 182, w: 28, h: 42, vy: 0, ducking: false };
@@ -2241,6 +2279,7 @@
   setupLoadingDots();
   setupSmiley();
   setupMusic();
+  syncStoredHighScores();
   requestLocation();
   window.addEventListener("resize", () => {
     fitDesktop();
