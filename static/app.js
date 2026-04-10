@@ -1753,11 +1753,11 @@
       lastFrameMs = now;
       const frameScale = deltaMs / 16.67;
 
-      if (keys.left) velocityX -= 0.019 * frameScale;
-      if (keys.right) velocityX += 0.019 * frameScale;
+      if (keys.left) velocityX -= 0.0135 * frameScale;
+      if (keys.right) velocityX += 0.0135 * frameScale;
       velocityX *= Math.pow(0.88, frameScale);
-      velocityX = Math.max(-0.12, Math.min(0.12, velocityX));
-      ballX += velocityX * frameScale;
+      velocityX = Math.max(-0.095, Math.min(0.095, velocityX));
+      const intendedX = ballX + velocityX * frameScale;
 
       speed += 0.00075 * frameScale;
       speed = Math.min(1.45, speed);
@@ -1765,13 +1765,21 @@
       curvePhase += (0.010 + speed * 0.005) * frameScale;
 
       const nearHalf = roadHalfWidth(1);
-      if (Math.abs(ballX) > nearHalf - 0.08) {
+      const softEdge = Math.max(0.14, nearHalf - 0.035);
+      const hardEdge = nearHalf + 0.15;
+      if (Math.abs(intendedX) > hardEdge) {
         gameRunning = false;
         gameOver = true;
         gameOverTitle = "FELL OFF THE EDGE";
         updateHighScore();
         drawRunner();
         return;
+      }
+      ballX = intendedX;
+      if (Math.abs(ballX) > softEdge) {
+        const edgeDir = Math.sign(ballX || 1);
+        ballX = edgeDir * softEdge;
+        velocityX *= -0.24;
       }
 
       spawnTimer -= frameScale;
