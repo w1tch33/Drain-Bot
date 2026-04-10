@@ -968,6 +968,7 @@
     const canvas = qs("#gameCanvas");
     const help = qs("#gameHelp");
     const controls = qs("#gameControls");
+    canvas.tabIndex = 0;
     const cleanupControls = bindGameControls(controls);
     canvas.classList.add("hidden");
     help.classList.add("hidden");
@@ -975,9 +976,11 @@
     help.textContent = "Pick a game.";
     modalBody.querySelectorAll(".game-button").forEach((button) => {
       button.addEventListener("click", () => {
+        button.blur();
         canvas.classList.remove("hidden");
         help.classList.remove("hidden");
         controls.classList.remove("hidden");
+        canvas.focus();
         if (state.gameCleanup) {
           state.gameCleanup();
           state.gameCleanup = null;
@@ -1058,19 +1061,37 @@
       }
     }
 
-    function updateHelp() {
-      if (!gameRunning) {
-        help.textContent = countdown > 0
-          ? `LADDER CLIMB | ${countdown} | High: ${highScore}`
-          : `LADDER CLIMB | High: ${highScore}`;
-        return;
+      function updateHelp() {
+        if (!gameRunning) {
+          help.textContent = countdown > 0
+            ? `DRAIN CLIMBER | ${countdown} | High: ${highScore}`
+            : `DRAIN CLIMBER | High: ${highScore}`;
+          return;
+        }
+        help.textContent = `Score: ${score} | Floor: ${floorReached} | Combo: x${Math.max(combo, 1)} | High: ${highScore}`;
       }
-      help.textContent = `Score: ${score} | Floor: ${floorReached} | Combo: x${Math.max(combo, 1)} | High: ${highScore}`;
-    }
 
-    function draw() {
-      const offsetY = cameraY * TILE - canvas.height * 0.68;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      function drawGameOver() {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.72)";
+        ctx.fillRect(18, 150, canvas.width - 36, 176);
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(18, 150, canvas.width - 36, 176);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 28px Chicago, Monaco, monospace";
+        ctx.textAlign = "center";
+        ctx.fillText("GAME OVER", canvas.width / 2, 195);
+        ctx.font = "20px Chicago, Monaco, monospace";
+        ctx.fillText(`Score: ${score}`, canvas.width / 2, 232);
+        ctx.fillText(`High: ${highScore}`, canvas.width / 2, 262);
+        ctx.font = "16px Chicago, Monaco, monospace";
+        ctx.fillText("Click Drain Climber to play again", canvas.width / 2, 302);
+        ctx.textAlign = "start";
+      }
+
+      function draw() {
+        const offsetY = cameraY * TILE - canvas.height * 0.68;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (let i = 0; i < canvas.height / 20; i += 1) {
         ctx.fillStyle = i % 2 === 0 ? "#161616" : "#1f1f1f";
         ctx.fillRect(0, i * 20, canvas.width, 20);
@@ -1096,14 +1117,18 @@
       ctx.strokeStyle = "#000";
       ctx.strokeRect(player.x * TILE, player.y * TILE - offsetY, player.w * TILE, player.h * TILE);
 
-      const waterY = waterLevel * TILE - offsetY;
-      ctx.fillStyle = "#2979ff";
-      ctx.fillRect(0, waterY, canvas.width, canvas.height - waterY);
-      ctx.fillStyle = "rgba(255,255,255,0.25)";
-      ctx.fillRect(0, waterY, canvas.width, 6);
+        const waterY = waterLevel * TILE - offsetY;
+        ctx.fillStyle = "#2979ff";
+        ctx.fillRect(0, waterY, canvas.width, canvas.height - waterY);
+        ctx.fillStyle = "rgba(255,255,255,0.25)";
+        ctx.fillRect(0, waterY, canvas.width, 6);
 
-      updateHelp();
-    }
+        if (!gameRunning && countdown <= 0) {
+          drawGameOver();
+        }
+
+        updateHelp();
+      }
 
     function updateHighScore() {
       if (score > highScore) {
@@ -1203,13 +1228,13 @@
         combo = 0;
       }
 
-      if (player.y > waterLevel) {
-        gameRunning = false;
-        updateHighScore();
-        help.textContent = `GAME OVER | Score: ${score} | High: ${highScore} | Click Ladder Climb to retry`;
-        draw();
-        return;
-      }
+        if (player.y > waterLevel) {
+          gameRunning = false;
+          updateHighScore();
+          draw();
+          help.textContent = `GAME OVER | Score: ${score} | High: ${highScore}`;
+          return;
+        }
 
       draw();
       rafId = requestAnimationFrame(step);
@@ -1244,18 +1269,36 @@
     const pickups = [];
     const cops = [{ x: 12, y: 182 }, { x: 40, y: 182 }];
 
-    function updateHelp(message = "") {
-      if (message) {
-        help.textContent = message;
-        return;
-      }
+      function updateHelp(message = "") {
+        if (message) {
+          help.textContent = message;
+          return;
+        }
       help.textContent = gameRunning
         ? `Score: ${score} | Distance: ${Math.floor(distance)}m | High: ${highScore}`
-        : `DRAIN RUNNER | ${countdown > 0 ? countdown : "GO"} | High: ${highScore}`;
-    }
+          : `DRAIN RUNNER | ${countdown > 0 ? countdown : "GO"} | High: ${highScore}`;
+      }
 
-    function drawRunner() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      function drawGameOver(title) {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.72)";
+        ctx.fillRect(28, 50, canvas.width - 56, 150);
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(28, 50, canvas.width - 56, 150);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 24px Chicago, Monaco, monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(title, canvas.width / 2, 88);
+        ctx.font = "18px Chicago, Monaco, monospace";
+        ctx.fillText(`Score: ${score}`, canvas.width / 2, 118);
+        ctx.fillText(`High: ${highScore}`, canvas.width / 2, 144);
+        ctx.font = "14px Chicago, Monaco, monospace";
+        ctx.fillText("Click Drain Runner to play again", canvas.width / 2, 176);
+        ctx.textAlign = "start";
+      }
+
+      function drawRunner() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "#0f0f0f";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "#2b2b2b";
@@ -1286,12 +1329,16 @@
       ctx.fillStyle = "#dcdcdc";
       const playerHeight = player.ducking ? 24 : player.h;
       const playerY = player.ducking ? player.y + 18 : player.y;
-      ctx.fillRect(player.x, playerY, player.w, playerHeight);
-      ctx.strokeStyle = "#000";
-      ctx.strokeRect(player.x, playerY, player.w, playerHeight);
+        ctx.fillRect(player.x, playerY, player.w, playerHeight);
+        ctx.strokeStyle = "#000";
+        ctx.strokeRect(player.x, playerY, player.w, playerHeight);
 
-      updateHelp();
-    }
+        if (!gameRunning && countdown <= 0) {
+          drawGameOver("GAME OVER");
+        }
+
+        updateHelp();
+      }
 
     function updateHighScore() {
       if (score > highScore) {
@@ -1380,21 +1427,23 @@
 
         if (obstacle.type === "gap") {
           const overGap = player.x + player.w > obstacle.x && player.x < obstacle.x + obstacle.w;
-          if (overGap && player.y >= 182) {
+            if (overGap && player.y >= 182) {
+              gameRunning = false;
+              updateHighScore();
+              drawRunner();
+              drawGameOver("YOU FELL IN");
+              help.textContent = `YOU FELL IN | Score: ${score} | High: ${highScore}`;
+              return;
+            }
+          } else if (overlap) {
             gameRunning = false;
             updateHighScore();
             drawRunner();
-            help.textContent = `YOU FELL IN | Score: ${score} | High: ${highScore} | Click Drain Runner to retry`;
+            drawGameOver("BUSTED BY THE COPS");
+            help.textContent = `BUSTED BY THE COPS | Score: ${score} | High: ${highScore}`;
             return;
           }
-        } else if (overlap) {
-          gameRunning = false;
-          updateHighScore();
-          drawRunner();
-          help.textContent = `BUSTED BY THE COPS | Score: ${score} | High: ${highScore} | Click Drain Runner to retry`;
-          return;
         }
-      }
 
       for (let index = pickups.length - 1; index >= 0; index -= 1) {
         const pickup = pickups[index];

@@ -244,7 +244,7 @@ def save_user_metadata(username: str, data: dict[str, Any]) -> None:
 
 
 GAME_SCORE_LABELS = {
-    "ladderclimb": "Ladder Climb",
+    "ladderclimb": "Drain Climber",
     "drainrunner": "Drain Runner",
 }
 
