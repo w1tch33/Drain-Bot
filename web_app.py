@@ -157,6 +157,11 @@ def admin_accounts():
 def approve_account(username: str):
     try:
         drain_service.approve_account(username)
+        drain_service.add_notification(
+            drain_service.normalize_username(username),
+            "Your account has been approved. You can now use Drain-Bot.",
+            "account",
+        )
         flash(f"Approved {drain_service.normalize_username(username)}.")
     except ValueError as error:
         flash(str(error))
@@ -218,18 +223,50 @@ def profile():
     return jsonify(drain_service.profile_summary(current_username(), current_username()))
 
 
+@app.get("/api/notifications")
+@login_required
+def notifications():
+    unread_only = _bool_arg("unread_only")
+    return jsonify(drain_service.get_notifications(current_username(), unread_only))
+
+
+@app.post("/api/notifications/read")
+@login_required
+def notifications_read():
+    payload = request.get_json(silent=True) or request.form
+    ids = payload.get("ids") if hasattr(payload, "get") else None
+    if not isinstance(ids, list):
+        ids = []
+    return jsonify(drain_service.mark_notifications_read(current_username(), ids))
+
+
 @app.post("/api/high-scores")
 @login_required
 def save_high_score():
     payload = request.get_json(silent=True) or request.form
+    game = str(payload.get("game", ""))
+    try:
+        score = int(payload.get("score", 0))
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid score."}), 400
+    previous_scores = drain_service.get_user_high_scores(current_username())
+    previous_score = int(previous_scores.get(game, {}).get("score", 0))
     try:
         scores = drain_service.save_high_score(
             current_username(),
-            str(payload.get("game", "")),
-            int(payload.get("score", 0)),
+            game,
+            score,
         )
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
+    new_score = int(scores.get(game, {}).get("score", 0))
+    if new_score > previous_score:
+        label = scores.get(game, {}).get("label", game)
+        drain_service.add_notification(
+            current_username(),
+            f"New high score in {label}: {new_score}",
+            "game",
+        )
     return jsonify({"ok": True, "high_scores": scores})
 
 
@@ -332,6 +369,11 @@ def sync_kml():
         result = drain_service.sync_kml_payload(current_username(), file.read())
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
+    drain_service.add_notification(
+        current_username(),
+        f"Sync complete: {result.get('added', 0)} new drains added.",
+        "sync",
+    )
     return jsonify(
         {
             **result,

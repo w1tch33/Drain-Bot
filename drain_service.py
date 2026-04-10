@@ -6,9 +6,11 @@ import random
 import re
 import shutil
 import threading
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import uuid
 import xml.etree.ElementTree as ET
 import zipfile
 from typing import Any
@@ -243,6 +245,89 @@ def save_user_metadata(username: str, data: dict[str, Any]) -> None:
             json.dump(data, handle, indent=2, ensure_ascii=False)
 
 
+NOTIFICATION_MAX = 120
+
+
+def _normalize_notifications(value: Any) -> list[dict[str, Any]]:
+    if not isinstance(value, list):
+        return []
+    normalized: list[dict[str, Any]] = []
+    for item in value:
+        if not isinstance(item, dict):
+            continue
+        message = str(item.get("message", "")).strip()
+        if not message:
+            continue
+        notification_id = str(item.get("id", "")).strip() or str(uuid.uuid4())
+        kind = str(item.get("kind", "")).strip() or "info"
+        read = bool(item.get("read"))
+        try:
+            timestamp = float(item.get("ts", time.time()))
+        except (TypeError, ValueError):
+            timestamp = time.time()
+        normalized.append(
+            {
+                "id": notification_id,
+                "message": message,
+                "kind": kind,
+                "read": read,
+                "ts": timestamp,
+            }
+        )
+    normalized.sort(key=lambda item: item["ts"], reverse=True)
+    return normalized[:NOTIFICATION_MAX]
+
+
+def add_notification(username: str, message: str, kind: str = "info") -> dict[str, Any]:
+    normalized = normalize_username(username)
+    if not normalized:
+        raise ValueError("Account not found.")
+    clean_message = str(message or "").strip()
+    if not clean_message:
+        raise ValueError("Notification message is required.")
+    metadata = load_user_metadata(normalized)
+    notifications = _normalize_notifications(metadata.get("_notifications"))
+    entry = {
+        "id": str(uuid.uuid4()),
+        "message": clean_message,
+        "kind": str(kind or "info").strip() or "info",
+        "read": False,
+        "ts": time.time(),
+    }
+    notifications.insert(0, entry)
+    metadata["_notifications"] = notifications[:NOTIFICATION_MAX]
+    save_user_metadata(normalized, metadata)
+    return entry
+
+
+def get_notifications(username: str, unread_only: bool = False) -> dict[str, Any]:
+    metadata = load_user_metadata(username)
+    notifications = _normalize_notifications(metadata.get("_notifications"))
+    unread_count = sum(1 for item in notifications if not item.get("read"))
+    if unread_only:
+        notifications = [item for item in notifications if not item.get("read")]
+    return {
+        "items": notifications,
+        "unread": unread_count,
+    }
+
+
+def mark_notifications_read(username: str, ids: list[str] | None = None) -> dict[str, Any]:
+    metadata = load_user_metadata(username)
+    notifications = _normalize_notifications(metadata.get("_notifications"))
+    if not notifications:
+        return {"items": [], "unread": 0}
+
+    id_set = {str(item).strip() for item in (ids or []) if str(item).strip()}
+    for item in notifications:
+        if not id_set or item["id"] in id_set:
+            item["read"] = True
+
+    metadata["_notifications"] = notifications
+    save_user_metadata(username, metadata)
+    return get_notifications(username)
+
+
 GAME_SCORE_LABELS = {
     "ladderclimb": "Drain Climber",
     "drainrunner": "Drain Runner",
@@ -412,6 +497,7 @@ def send_friend_request(from_username: str, to_username: str) -> None:
     accounts[sender] = sender_account
     accounts[recipient] = recipient_account
     save_accounts(accounts)
+    add_notification(recipient, f"New friend request from {sender}.", "friend")
 
 
 def accept_friend_request(username: str, from_username: str) -> None:

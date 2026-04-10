@@ -10,6 +10,10 @@
           <a class="retro-button session-button" href="{{ url_for('admin_login') }}">Admin</a>
         {% endif %}
       {% endif %}
+      <button class="retro-button session-button notify-button" id="notificationsButton" type="button">
+        Notifications
+        <span class="notify-badge hidden" id="notificationsBadge">0</span>
+      </button>
       <button class="session-user session-user-button" id="profileButton" type="button">{{ current_username }}</button>
       <form class="session-form" method="post" action="{{ url_for('logout') }}">
         <button class="retro-button session-button" type="submit">Log Out</button>
@@ -182,6 +186,7 @@
         <div><strong>Welcome to Drain-Bot</strong></div>
         <div>1. Create an account and wait for approval from <strong>witch</strong>.</div>
         <div>2. Log in and click <strong>Sync Map</strong> to upload your KML/KMZ and add your drains.</div>
+        <div>Mobile tip: on iPhone open Safari share menu and tap <strong>Add to Home Screen</strong> to install it like an app.</div>
         <div>3. Set your <strong>Min km</strong> and <strong>Max km</strong> sliders in the Control Panel.</div>
         <div>4. Use <strong>Run</strong> to get drains, <strong>Random Drain</strong> for a surprise, and <strong>Build Route</strong> for a route plan.</div>
         <div>5. Click any drain result to open the drain menu and save your own <strong>Description</strong>, <strong>Notes</strong>, <strong>Visited</strong>, rating, and photos.</div>

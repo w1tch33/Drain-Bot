@@ -102,6 +102,28 @@ body {
   font-size: 12px;
 }
 
+.notify-button {
+  position: relative;
+  padding-right: 28px;
+}
+
+.notify-badge {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  min-width: 18px;
+  height: 18px;
+  border: 2px solid #000;
+  border-radius: 9px;
+  background: #000;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 14px;
+  text-align: center;
+  padding: 0 3px;
+}
+
 .auth-page {
   min-height: 100vh;
   width: 100%;
@@ -551,6 +573,24 @@ body {
 }
 .stack-list, .modal-form { display: flex; flex-direction: column; gap: 8px; }
 .tutorial-stack { gap: 10px; line-height: 1.2; }
+.notifications-list { display: grid; gap: 8px; }
+.notification-item {
+  border: 2px solid #000;
+  background: #fff;
+  padding: 8px 10px;
+  display: grid;
+  gap: 4px;
+}
+.notification-item.unread {
+  background: #f2f2f2;
+}
+.notification-text {
+  font-size: 13px;
+}
+.notification-meta {
+  font-size: 11px;
+  color: #222;
+}
 .list-button { text-align: center; min-width: 160px; }
 .profile-section { display: grid; gap: 8px; margin-bottom: 14px; }
 .profile-heading, .profile-name { font-weight: 700; font-size: 15px; }

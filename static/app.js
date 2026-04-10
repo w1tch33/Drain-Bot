@@ -35,6 +35,7 @@
   const minDistanceValue = qs("#minDistanceValue");
   const maxDistanceValue = qs("#maxDistanceValue");
   const volumeValue = qs("#volumeValue");
+  const notificationsBadge = qs("#notificationsBadge");
   const desktop = qs("#desktop");
   const BASE_WIDTH = 1433;
   const BASE_HEIGHT = 768;
@@ -305,6 +306,75 @@
     const closeButton = item.querySelector(".client-flash-close");
     closeButton.addEventListener("click", () => item.remove());
     stack.appendChild(item);
+  }
+
+  function setNotificationsBadge(count) {
+    if (!notificationsBadge) return;
+    const unread = Math.max(0, Number(count || 0));
+    notificationsBadge.textContent = unread > 99 ? "99+" : String(unread);
+    notificationsBadge.classList.toggle("hidden", unread <= 0);
+  }
+
+  function notificationTimeLabel(ts) {
+    const seconds = Math.max(0, Math.round(Date.now() / 1000 - Number(ts || 0)));
+    if (seconds < 60) return "just now";
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    return `${Math.floor(seconds / 86400)}d ago`;
+  }
+
+  function notificationsHtml(payload) {
+    const rows = (payload.items || [])
+      .map(
+        (item) => `
+          <div class="notification-item ${item.read ? "" : "unread"}" data-id="${escapeHtml(item.id)}">
+            <div class="notification-text">${escapeHtml(item.message)}</div>
+            <div class="notification-meta">${escapeHtml(notificationTimeLabel(item.ts))}</div>
+          </div>
+        `
+      )
+      .join("");
+    return `
+      <div class="auth-links">
+        <button class="retro-button" id="markAllNotificationsRead" type="button">Mark All Read</button>
+      </div>
+      <div class="notifications-list">${rows || '<div class="notification-item"><div class="notification-text">No notifications yet.</div></div>'}</div>
+    `;
+  }
+
+  async function refreshNotifications() {
+    try {
+      const payload = await fetchJson("/api/notifications");
+      setNotificationsBadge(payload.unread || 0);
+      return payload;
+    } catch (_error) {
+      return null;
+    }
+  }
+
+  async function openNotifications() {
+    setLoading(true);
+    try {
+      const payload = await fetchJson("/api/notifications");
+      setNotificationsBadge(payload.unread || 0);
+      openModal("Notifications", notificationsHtml(payload));
+      const markReadButton = qs("#markAllNotificationsRead");
+      if (markReadButton) {
+        markReadButton.addEventListener("click", async () => {
+          const updated = await fetchJson("/api/notifications/read", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ids: [] }),
+          });
+          setNotificationsBadge(updated.unread || 0);
+          openModal("Notifications", notificationsHtml(updated));
+        });
+      }
+    } catch (error) {
+      drawMessage(error.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   function highScoreEntries(highScores) {
@@ -2288,6 +2358,7 @@
   qs("#routeButton").addEventListener("click", buildRoute);
   qs("#linksButton").addEventListener("click", openLinks);
   qs("#tutorialButton").addEventListener("click", openTutorial);
+  qs("#notificationsButton").addEventListener("click", openNotifications);
   qs("#addDrainButton").addEventListener("click", openAddDrain);
   qs("#profileButton").addEventListener("click", openProfile);
   if (qs("#syncMapButton")) qs("#syncMapButton").addEventListener("click", syncMap);
@@ -2324,6 +2395,8 @@
   setupSmiley();
   setupMusic();
   syncStoredHighScores();
+  refreshNotifications();
+  setInterval(refreshNotifications, 30000);
   requestLocation();
   window.addEventListener("resize", () => {
     fitDesktop();
