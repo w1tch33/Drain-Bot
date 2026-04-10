@@ -937,39 +937,45 @@
     state.gameCleanup = () => {
       window.removeEventListener("keydown", handler);
       window.removeEventListener("keyup", handler);
+      window.removeEventListener("game-control", handler);
       if (extraCleanup) extraCleanup();
     };
     window.addEventListener("keydown", handler);
     window.addEventListener("keyup", handler);
+    window.addEventListener("game-control", handler);
   }
 
-  function dispatchGameKey(type, key, code = "") {
+  function dispatchGameKey(type, key, code = "", slot = "") {
     const event = new KeyboardEvent(type, {
       key,
       code: code || key,
       bubbles: true,
     });
     window.dispatchEvent(event);
+    window.dispatchEvent(
+      new CustomEvent("game-control", {
+        detail: {
+          phase: type === "keydown" ? "down" : "up",
+          key,
+          code: code || key,
+          slot,
+        },
+      })
+    );
   }
 
   function bindGameControls(container) {
     const cleanups = [];
     container.querySelectorAll(".game-control").forEach((button) => {
+      const slot = button.dataset.controlSlot || "";
       const press = (event) => {
         if (event) event.preventDefault();
         button.blur();
-        dispatchGameKey("keydown", button.dataset.key || "", button.dataset.code || button.dataset.key || "");
+        dispatchGameKey("keydown", button.dataset.key || "", button.dataset.code || button.dataset.key || "", slot);
       };
       const release = (event) => {
         if (event) event.preventDefault();
-        dispatchGameKey("keyup", button.dataset.key || "", button.dataset.code || button.dataset.key || "");
-      };
-      const tap = (event) => {
-        if (event) event.preventDefault();
-        const key = button.dataset.key || "";
-        const code = button.dataset.code || key;
-        dispatchGameKey("keydown", key, code);
-        window.setTimeout(() => dispatchGameKey("keyup", key, code), 40);
+        dispatchGameKey("keyup", button.dataset.key || "", button.dataset.code || button.dataset.key || "", slot);
       };
 
       button.addEventListener("pointerdown", press);
@@ -979,7 +985,6 @@
       button.addEventListener("touchstart", press, { passive: false });
       button.addEventListener("touchend", release, { passive: false });
       button.addEventListener("touchcancel", release, { passive: false });
-      button.addEventListener("click", tap);
       cleanups.push(() => {
         button.removeEventListener("pointerdown", press);
         button.removeEventListener("pointerup", release);
@@ -988,7 +993,6 @@
         button.removeEventListener("touchstart", press);
         button.removeEventListener("touchend", release);
         button.removeEventListener("touchcancel", release);
-        button.removeEventListener("click", tap);
       });
     });
     return () => cleanups.forEach((cleanup) => cleanup());
@@ -1291,6 +1295,14 @@
     }
 
     function onKey(event) {
+      if (event.type === "game-control") {
+        const detail = event.detail || {};
+        const isDown = detail.phase === "down";
+        if (detail.slot === "left") keys.left = isDown;
+        if (detail.slot === "right") keys.right = isDown;
+        if (detail.slot === "action" && isDown) jumpQueued = true;
+        return;
+      }
       if (event.type === "keydown" && (event.key === " " || event.code === "Space" || event.key.startsWith("Arrow"))) {
         event.preventDefault();
       }
@@ -1551,6 +1563,13 @@
     }
 
     function onKey(event) {
+      if (event.type === "game-control") {
+        const detail = event.detail || {};
+        const isDown = detail.phase === "down";
+        if (detail.slot === "action") keys.jump = isDown;
+        if (detail.slot === "down") keys.duck = isDown;
+        return;
+      }
       const isDown = event.type === "keydown";
       if (isDown && (event.key === " " || event.code === "Space" || event.key.startsWith("Arrow"))) {
         event.preventDefault();
