@@ -37,18 +37,18 @@ html[data-theme="crt-green"] {
 }
 
 html[data-theme="industrial-gray"] {
-  --desktop-bg: #b9bbbf;
-  --window-fill: #d2d3d6;
-  --line: #1d1f23;
-  --button-face: #d8d9dd;
-  --button-shadow: #787b82;
-  --button-highlight: #f4f4f4;
-  --text: #0e1117;
-  --dot-color: rgba(0, 0, 0, 0.76);
-  --title-stripe-light: #ececef;
-  --title-stripe-dark: #9da0a8;
-  --title-fill: #f7f7f8;
-  --field-bg: #f8f8f9;
+  --desktop-bg: #26272b;
+  --window-fill: #3a3d43;
+  --line: #ff9d2a;
+  --button-face: #4b4f57;
+  --button-shadow: #23262b;
+  --button-highlight: #696d77;
+  --text: #ffe2be;
+  --dot-color: rgba(255, 170, 64, 0.42);
+  --title-stripe-light: #6c707a;
+  --title-stripe-dark: #2b2e34;
+  --title-fill: #4a4e56;
+  --field-bg: #2d3036;
 }
 
 html[data-theme="amber-terminal"] {
@@ -67,18 +67,18 @@ html[data-theme="amber-terminal"] {
 }
 
 html[data-theme="ice-blueprint"] {
-  --desktop-bg: #bcc7d4;
-  --window-fill: #d7e1ee;
-  --line: #173b63;
-  --button-face: #deebf8;
-  --button-shadow: #5b7694;
-  --button-highlight: #f8fbff;
-  --text: #0f2b49;
-  --dot-color: rgba(16, 62, 110, 0.58);
-  --title-stripe-light: #f5fbff;
-  --title-stripe-dark: #95b1cc;
-  --title-fill: #f5faff;
-  --field-bg: #f8fcff;
+  --desktop-bg: #0b2d52;
+  --window-fill: #144372;
+  --line: #9be9ff;
+  --button-face: #1c568e;
+  --button-shadow: #0c2f50;
+  --button-highlight: #2b72b5;
+  --text: #e3f8ff;
+  --dot-color: rgba(165, 235, 255, 0.34);
+  --title-stripe-light: #2f78b8;
+  --title-stripe-dark: #103d67;
+  --title-fill: #1b5e98;
+  --field-bg: #0f3960;
 }
 
 * { box-sizing: border-box; }
@@ -104,6 +104,23 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
+}
+
+html[data-theme="industrial-gray"] body {
+  background:
+    radial-gradient(circle, var(--dot-color) 0 1.2px, transparent 1.2px 100%),
+    repeating-linear-gradient(135deg, rgba(255, 157, 42, 0.06) 0 8px, rgba(0, 0, 0, 0.06) 8px 16px),
+    var(--desktop-bg);
+  background-size: 6px 6px, 24px 24px, auto;
+}
+
+html[data-theme="ice-blueprint"] body {
+  background:
+    radial-gradient(circle, var(--dot-color) 0 1px, transparent 1px 100%),
+    linear-gradient(to right, rgba(155, 233, 255, 0.16) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(155, 233, 255, 0.16) 1px, transparent 1px),
+    var(--desktop-bg);
+  background-size: 6px 6px, 36px 36px, 36px 36px, auto;
 }
 
 .flash-stack {
