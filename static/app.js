@@ -339,12 +339,17 @@
         friendRequestForm.addEventListener("submit", async (event) => {
           event.preventDefault();
           const formData = new FormData(event.currentTarget);
-          await fetchJson("/api/friends/request", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username: formData.get("username") }),
-          });
-          await openProfile();
+          try {
+            await fetchJson("/api/friends/request", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ username: formData.get("username") }),
+            });
+            drawMessage(`Friend request sent to ${formData.get("username")}.`);
+            await openProfile();
+          } catch (error) {
+            drawMessage(error.message);
+          }
         });
       }
 
