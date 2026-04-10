@@ -1047,7 +1047,7 @@
     let jumpQueued = false;
     let highScore = readStoredNumber(CLIMBER_HIGH_SCORE_KEY);
     let level = 1;
-    let nextMilestone = 100;
+    let nextMilestone = 250;
     let milestoneText = "";
     let milestoneTimer = 0;
     const keys = { left: false, right: false };
@@ -1118,6 +1118,19 @@
       ctx.textAlign = "start";
     }
 
+    function drawCountdownOverlay() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.58)";
+      ctx.fillRect(52, 120, canvas.width - 104, 120);
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(52, 120, canvas.width - 104, 120);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 54px Chicago, Monaco, monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(String(countdown), canvas.width / 2, 196);
+      ctx.textAlign = "start";
+    }
+
     function draw() {
       const theme = levelThemes[(level - 1) % levelThemes.length];
       const offsetY = cameraY * TILE - canvas.height * 0.68;
@@ -1130,7 +1143,7 @@
       ctx.fillStyle = "rgba(255,255,255,0.18)";
       ctx.font = "12px Chicago, Monaco, monospace";
       ctx.textAlign = "right";
-      for (let meter = 100; meter <= Math.max(nextMilestone, score + 100); meter += 100) {
+      for (let meter = 250; meter <= Math.max(nextMilestone, score + 250); meter += 250) {
         const y = (HEIGHT - meter / 10) * TILE - offsetY;
         if (y < -18 || y > canvas.height + 18) continue;
         ctx.fillRect(8, y, canvas.width - 16, 1);
@@ -1176,6 +1189,10 @@
         ctx.textAlign = "start";
       }
 
+      if (!gameRunning && !gameOver && countdown > 0) {
+        drawCountdownOverlay();
+      }
+
       if (gameOver) {
         drawGameOver();
       }
@@ -1201,7 +1218,7 @@
       comboTimer = 0;
       countdown = 3;
       level = 1;
-      nextMilestone = 100;
+      nextMilestone = 250;
       milestoneText = "";
       milestoneTimer = 0;
       gameRunning = false;
@@ -1307,7 +1324,7 @@
         if (score >= nextMilestone) {
           milestoneText = `${nextMilestone}m`;
           milestoneTimer = 110;
-          nextMilestone += 100;
+          nextMilestone += 250;
         }
         updateHighScore();
       } else if (comboTimer > 0) {
@@ -1384,7 +1401,7 @@
           : `DRAIN RUNNER | ${countdown > 0 ? countdown : "GO"} | High: ${highScore}`;
       }
 
-      function drawGameOver(title) {
+    function drawGameOver(title) {
         ctx.fillStyle = "rgba(0, 0, 0, 0.72)";
         ctx.fillRect(28, 50, canvas.width - 56, 150);
         ctx.strokeStyle = "#ffffff";
@@ -1399,8 +1416,21 @@
         ctx.fillText(`High: ${highScore}`, canvas.width / 2, 144);
         ctx.font = "14px Chicago, Monaco, monospace";
         ctx.fillText("Click Drain Runner to play again", canvas.width / 2, 176);
-        ctx.textAlign = "start";
-      }
+      ctx.textAlign = "start";
+    }
+
+    function drawCountdownOverlay() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.58)";
+      ctx.fillRect(86, 54, canvas.width - 172, 108);
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(86, 54, canvas.width - 172, 108);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 50px Chicago, Monaco, monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(String(countdown), canvas.width / 2, 126);
+      ctx.textAlign = "start";
+    }
 
       function drawRunner() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1437,6 +1467,10 @@
         ctx.fillRect(player.x, playerY, player.w, playerHeight);
         ctx.strokeStyle = "#000";
         ctx.strokeRect(player.x, playerY, player.w, playerHeight);
+
+        if (!gameRunning && !gameOver && countdown > 0) {
+          drawCountdownOverlay();
+        }
 
         if (gameOver) {
           drawGameOver(gameOverTitle);
