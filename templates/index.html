@@ -3,10 +3,12 @@
 {% block content %}
   <div class="desktop" id="desktop" data-playlist='{{ playlist|tojson }}'>
     <div class="session-controls">
-      {% if admin_verified %}
-        <a class="retro-button session-button" href="{{ url_for('admin_accounts') }}">Approve Users</a>
-      {% else %}
-        <a class="retro-button session-button" href="{{ url_for('admin_login') }}">Admin</a>
+      {% if is_witch_account %}
+        {% if admin_verified %}
+          <a class="retro-button session-button" href="{{ url_for('admin_accounts') }}">Admin</a>
+        {% else %}
+          <a class="retro-button session-button" href="{{ url_for('admin_login') }}">Admin</a>
+        {% endif %}
       {% endif %}
       <span class="session-user">{{ current_username }}</span>
       <form class="session-form" method="post" action="{{ url_for('logout') }}">

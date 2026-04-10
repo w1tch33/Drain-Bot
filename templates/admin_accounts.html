@@ -3,8 +3,34 @@
 {% block content %}
   <div class="auth-page">
     <div class="retro-window auth-window auth-window-wide">
-      <div class="window-title"><span>Approve Users</span></div>
+      <div class="window-title"><span>Manage Accounts</span></div>
       <div class="window-body auth-body">
+        <div class="auth-copy">All accounts</div>
+        {% if all_accounts %}
+          <div class="stack-list">
+            {% for account in all_accounts %}
+              <div class="approval-row">
+                <span class="approval-name">{{ account.username }}{% if not account.approved %} (pending){% endif %}</span>
+                <div class="auth-links">
+                  {% if not account.approved %}
+                    <form method="post" action="{{ url_for('approve_account', username=account.username) }}">
+                      <button class="retro-button" type="submit">Approve</button>
+                    </form>
+                  {% endif %}
+                  {% if account.username != 'witch' %}
+                    <form method="post" action="{{ url_for('delete_account', username=account.username) }}" onsubmit="return confirm('Delete {{ account.username }}?');">
+                      <button class="retro-button" type="submit">Remove</button>
+                    </form>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="auth-copy">No accounts found.</div>
+        {% endif %}
+
+        <div class="auth-copy">Pending approvals</div>
         {% if pending_accounts %}
           <div class="stack-list">
             {% for account in pending_accounts %}

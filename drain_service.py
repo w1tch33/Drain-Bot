@@ -170,6 +170,25 @@ def list_pending_accounts() -> list[dict[str, Any]]:
     return pending
 
 
+def list_accounts() -> list[dict[str, Any]]:
+    accounts_list = []
+    for account in load_accounts().values():
+        if not isinstance(account, dict):
+            continue
+        username = str(account.get("username", "")).strip()
+        if not username:
+            continue
+        accounts_list.append(
+            {
+                "username": username,
+                "approved": bool(account.get("approved")),
+                "map_uploaded": bool(account.get("map_uploaded")),
+            }
+        )
+    accounts_list.sort(key=lambda item: item["username"])
+    return accounts_list
+
+
 def approve_account(username: str) -> None:
     normalized = normalize_username(username)
     accounts = load_accounts()
@@ -179,6 +198,35 @@ def approve_account(username: str) -> None:
     account["approved"] = True
     accounts[normalized] = account
     save_accounts(accounts)
+
+
+def delete_account(username: str) -> None:
+    normalized = normalize_username(username)
+    if not normalized:
+        raise ValueError("Account not found.")
+    if normalized == "witch":
+        raise ValueError("The witch account cannot be deleted.")
+
+    accounts = load_accounts()
+    if normalized not in accounts:
+        raise ValueError("Account not found.")
+
+    accounts.pop(normalized, None)
+    save_accounts(accounts)
+
+    metadata_path = user_metadata_path(normalized)
+    upload_path = user_upload_dir(normalized)
+    user_dir = os.path.dirname(metadata_path)
+
+    if os.path.isdir(upload_path):
+        shutil.rmtree(upload_path, ignore_errors=True)
+    if os.path.isfile(metadata_path):
+        try:
+            os.remove(metadata_path)
+        except OSError:
+            pass
+    if os.path.isdir(user_dir):
+        shutil.rmtree(user_dir, ignore_errors=True)
 
 
 def mark_account_map_uploaded(username: str) -> None:

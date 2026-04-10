@@ -35,6 +35,10 @@ def current_username() -> str | None:
     return username
 
 
+def is_witch_account() -> bool:
+    return current_username() == "witch"
+
+
 def login_required(view):
     @wraps(view)
     def wrapped(*args, **kwargs):
@@ -50,6 +54,8 @@ def login_required(view):
 def admin_required(view):
     @wraps(view)
     def wrapped(*args, **kwargs):
+        if not is_witch_account():
+            abort(403)
         if not session.get("admin_verified"):
             return redirect(url_for("admin_login"))
         return view(*args, **kwargs)
@@ -63,6 +69,7 @@ def inject_globals():
         "format_minutes": drain_service.format_minutes,
         "current_username": current_username(),
         "admin_verified": bool(session.get("admin_verified")),
+        "is_witch_account": is_witch_account(),
     }
 
 
@@ -120,6 +127,8 @@ def logout():
 
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
+    if not is_witch_account():
+        abort(403)
     if request.method == "POST":
         password = request.form.get("password", "")
         if password == APPROVAL_PASSWORD:
@@ -132,7 +141,11 @@ def admin_login():
 @app.get("/admin/accounts")
 @admin_required
 def admin_accounts():
-    return render_template("admin_accounts.html", pending_accounts=drain_service.list_pending_accounts())
+    return render_template(
+        "admin_accounts.html",
+        pending_accounts=drain_service.list_pending_accounts(),
+        all_accounts=drain_service.list_accounts(),
+    )
 
 
 @app.post("/admin/accounts/<username>/approve")
@@ -141,6 +154,17 @@ def approve_account(username: str):
     try:
         drain_service.approve_account(username)
         flash(f"Approved {drain_service.normalize_username(username)}.")
+    except ValueError as error:
+        flash(str(error))
+    return redirect(url_for("admin_accounts"))
+
+
+@app.post("/admin/accounts/<username>/delete")
+@admin_required
+def delete_account(username: str):
+    try:
+        drain_service.delete_account(username)
+        flash(f"Deleted {drain_service.normalize_username(username)}.")
     except ValueError as error:
         flash(str(error))
     return redirect(url_for("admin_accounts"))
