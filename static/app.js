@@ -272,7 +272,27 @@
     visitedCount.textContent = `Drains Completed: ${stats.visited}`;
   }
 
-  function profileHtml(profile, statusMessage = "", statusIsError = false) {
+  function showPopupMessage(message, isError = false) {
+    let stack = qs("#clientFlashStack");
+    if (!stack) {
+      stack = document.createElement("div");
+      stack.id = "clientFlashStack";
+      stack.className = "flash-stack";
+      document.body.appendChild(stack);
+    }
+
+    const item = document.createElement("div");
+    item.className = `flash-message client-flash ${isError ? "client-flash-error" : ""}`;
+    item.innerHTML = `
+      <span>${escapeHtml(message)}</span>
+      <button class="retro-button client-flash-close" type="button">X</button>
+    `;
+    const closeButton = item.querySelector(".client-flash-close");
+    closeButton.addEventListener("click", () => item.remove());
+    stack.appendChild(item);
+  }
+
+  function profileHtml(profile) {
     const incoming = (profile.incoming_requests || [])
       .map(
         (request) => `
@@ -301,7 +321,6 @@
       .join("");
 
     return `
-      <div class="profile-status ${statusMessage ? "" : "hidden"} ${statusIsError ? "profile-status-error" : ""}" id="profileStatus">${escapeHtml(statusMessage)}</div>
       <div class="profile-section">
         <div class="profile-name">${escapeHtml(profile.username)}</div>
         <div class="profile-copy">Drains: ${profile.stats.total}</div>
@@ -330,11 +349,11 @@
     `;
   }
 
-  async function openProfile(statusMessage = "", statusIsError = false) {
+  async function openProfile() {
     setLoading(true);
     try {
       const profile = await fetchJson("/api/profile");
-      openModal(`${profile.username} Profile`, profileHtml(profile, statusMessage, statusIsError));
+      openModal(`${profile.username} Profile`, profileHtml(profile));
       const friendRequestForm = modalBody.querySelector("#friendRequestForm");
       if (friendRequestForm) {
         friendRequestForm.addEventListener("submit", async (event) => {
@@ -346,9 +365,10 @@
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ username: formData.get("username") }),
             });
-            await openProfile(`Friend request sent to ${formData.get("username")}.`, false);
+            showPopupMessage(`Friend request sent to ${formData.get("username")}.`);
+            await openProfile();
           } catch (error) {
-            await openProfile(error.message, true);
+            showPopupMessage(error.message, true);
           }
         });
       }
@@ -358,7 +378,8 @@
           await fetchJson(`/api/friends/accept/${encodeURIComponent(button.dataset.username)}`, {
             method: "POST",
           });
-          await openProfile(`You are now friends with ${button.dataset.username}.`, false);
+          showPopupMessage(`You are now friends with ${button.dataset.username}.`);
+          await openProfile();
         });
       });
     } catch (error) {

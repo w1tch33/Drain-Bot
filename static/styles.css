@@ -539,16 +539,6 @@ body {
 .profile-section { display: grid; gap: 8px; margin-bottom: 14px; }
 .profile-heading, .profile-name { font-weight: 700; font-size: 15px; }
 .profile-list { display: grid; gap: 8px; }
-.profile-status {
-  margin-bottom: 12px;
-  border: 2px solid #000;
-  background: #fff;
-  padding: 8px 10px;
-  font-size: 13px;
-}
-.profile-status-error {
-  background: #f3d7d7;
-}
 .profile-row, .profile-card {
   display: flex;
   justify-content: space-between;
@@ -563,6 +553,19 @@ body {
   justify-content: start;
 }
 .profile-copy { font-size: 13px; }
+.client-flash {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.client-flash-error {
+  background: #f3d7d7;
+}
+.client-flash-close {
+  min-width: 34px;
+  min-height: 28px;
+  padding: 4px 8px;
+}
 .detail-actions, .rating-row, .feature-grid, .value-row, .difficulty-row, .photo-grid, .nearby-list {
   display: flex;
   flex-wrap: wrap;
