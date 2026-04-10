@@ -343,6 +343,8 @@ body {
   border-radius: 0;
 }
 .action-button { display: block; margin-top: 7px; margin-left: 14px; width: fit-content; min-width: 0; height: 31px; font-size: 14px; }
+.toggle-row { display: flex; align-items: center; gap: 10px; margin-left: 12px; margin-top: 8px; flex-wrap: wrap; }
+.toggle-row .check-row { margin-top: 0; margin-left: 0; }
 .check-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; margin-left: 12px; font-size: 14px; }
 .check-row input { width: 16px; height: 16px; }
 
