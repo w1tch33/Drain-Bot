@@ -39,6 +39,7 @@
   let musicMarqueeTimer = null;
   let audioUnlocked = false;
   let pendingAutoplay = false;
+  let fadeToken = 0;
 
   function requestLocation() {
     if (!navigator.geolocation) return;
@@ -362,14 +363,21 @@
     if (audioUnlocked) {
       if (audioPlayer.muted && !audioPlayer.paused) {
         audioPlayer.muted = false;
-        audioPlayer.volume = Number(volumeControl.value);
+        fadeInToTarget(Number(volumeControl.value), 420);
+      } else if (audioPlayer.paused && state.playlist.length) {
+        startPlaybackAt(state.playlistIndex, true, false, false);
       }
       return;
     }
     audioUnlocked = true;
-    if (pendingAutoplay) {
+    if (audioPlayer.muted && !audioPlayer.paused) {
+      audioPlayer.muted = false;
+      fadeInToTarget(Number(volumeControl.value), 420);
+      return;
+    }
+    if (pendingAutoplay || audioPlayer.paused) {
       pendingAutoplay = false;
-      startPlaybackAt(state.playlistIndex);
+      startPlaybackAt(state.playlistIndex, true, false, false);
     }
   }
 
@@ -598,13 +606,15 @@
     volumeValue.textContent = Number(volumeControl.value).toFixed(2);
     startSongMarquee(state.playlist[0].replace(".mp3", ""));
 
-    function fadeInToTarget(targetVolume) {
+    fadeInToTarget = function (targetVolume, duration = 650) {
+      fadeToken += 1;
+      const currentFade = fadeToken;
       const startVolume = Number(audioPlayer.volume || 0);
-      const steps = 18;
-      const duration = 1200;
+      const steps = 12;
       let step = 0;
 
       function tick() {
+        if (currentFade !== fadeToken) return;
         step += 1;
         const nextVolume = startVolume + ((targetVolume - startVolume) * (step / steps));
         audioPlayer.volume = Math.max(0, Math.min(1, nextVolume));
@@ -614,12 +624,15 @@
       }
 
       tick();
-    }
+    };
 
-    function startPlaybackAt(index, shouldFade = true, preferMutedAutoplay = false) {
+    startPlaybackAt = function (index, shouldFade = true, preferMutedAutoplay = false, reloadTrack = true) {
       state.playlistIndex = (index + state.playlist.length) % state.playlist.length;
       const filename = state.playlist[state.playlistIndex];
-      audioPlayer.src = `/audio/${encodeURIComponent(filename)}`;
+      const nextSrc = `/audio/${encodeURIComponent(filename)}`;
+      if (reloadTrack || audioPlayer.src !== new URL(nextSrc, window.location.href).href) {
+        audioPlayer.src = nextSrc;
+      }
       startSongMarquee(filename.replace(".mp3", ""));
       const targetVolume = Number(volumeControl.value);
       audioPlayer.muted = !!preferMutedAutoplay;
@@ -631,19 +644,19 @@
       audioPlayer.play()
         .then(() => {
           if (preferMutedAutoplay) {
-            window.setTimeout(() => {
+            if (audioUnlocked) {
               audioPlayer.muted = false;
-              if (shouldFade) fadeInToTarget(targetVolume);
+              if (shouldFade) fadeInToTarget(targetVolume, 420);
               else audioPlayer.volume = targetVolume;
-            }, 180);
+            }
           } else if (shouldFade) {
-            fadeInToTarget(targetVolume);
+            fadeInToTarget(targetVolume, 420);
           }
         })
         .catch(() => {
           pendingAutoplay = true;
         });
-    }
+    };
 
     qs("#prevSong").addEventListener("click", () => startPlaybackAt(state.playlistIndex - 1));
     qs("#nextSong").addEventListener("click", () => startPlaybackAt(state.playlistIndex + 1));
@@ -660,7 +673,15 @@
     });
 
     startPlaybackAt(0, true, true);
+    window.setTimeout(() => {
+      if (!audioUnlocked && audioPlayer.paused) {
+        startPlaybackAt(state.playlistIndex, true, true, false);
+      }
+    }, 500);
   }
+
+  let fadeInToTarget = () => {};
+  let startPlaybackAt = () => {};
 
   function openLinks() {
     openModal("Helpful Links", qs("#linksTemplate").content.cloneNode(true));
@@ -1307,6 +1328,9 @@
     if (event.target === modalLayer) closeModal();
   });
   window.addEventListener("pointerdown", unlockAudio, { once: true });
+  window.addEventListener("click", unlockAudio, { once: true });
+  window.addEventListener("touchstart", unlockAudio, { once: true, passive: true });
+  window.addEventListener("keydown", unlockAudio, { once: true });
   qs("#closeImagePreview").addEventListener("click", closeImagePreview);
   imagePreviewLayer.addEventListener("click", (event) => {
     if (event.target === imagePreviewLayer) closeImagePreview();
