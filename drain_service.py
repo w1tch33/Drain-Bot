@@ -243,6 +243,56 @@ def save_user_metadata(username: str, data: dict[str, Any]) -> None:
             json.dump(data, handle, indent=2, ensure_ascii=False)
 
 
+GAME_SCORE_LABELS = {
+    "ladderclimb": "Ladder Climb",
+    "drainrunner": "Drain Runner",
+}
+
+
+def _normalize_high_scores(value: Any) -> dict[str, int]:
+    if not isinstance(value, dict):
+        return {}
+    normalized: dict[str, int] = {}
+    for key, raw_score in value.items():
+        game_key = str(key or "").strip().lower()
+        if game_key not in GAME_SCORE_LABELS:
+            continue
+        try:
+            score = int(raw_score)
+        except (TypeError, ValueError):
+            continue
+        normalized[game_key] = max(0, score)
+    return normalized
+
+
+def get_user_high_scores(username: str | None) -> dict[str, dict[str, Any]]:
+    metadata = load_user_metadata(username)
+    scores = _normalize_high_scores(metadata.get("_high_scores"))
+    return {
+        game_key: {"key": game_key, "label": GAME_SCORE_LABELS[game_key], "score": scores.get(game_key, 0)}
+        for game_key in GAME_SCORE_LABELS
+    }
+
+
+def save_high_score(username: str, game: str, score: int) -> dict[str, dict[str, Any]]:
+    normalized = normalize_username(username)
+    game_key = str(game or "").strip().lower()
+    if game_key not in GAME_SCORE_LABELS:
+        raise ValueError("Unknown game.")
+    try:
+        safe_score = max(0, int(score))
+    except (TypeError, ValueError) as exc:
+        raise ValueError("Invalid score.") from exc
+
+    metadata = load_user_metadata(normalized)
+    scores = _normalize_high_scores(metadata.get("_high_scores"))
+    if safe_score > scores.get(game_key, 0):
+        scores[game_key] = safe_score
+        metadata["_high_scores"] = scores
+        save_user_metadata(normalized, metadata)
+    return get_user_high_scores(normalized)
+
+
 def create_account(username: str, password: str) -> dict[str, Any]:
     normalized = normalize_username(username)
     if not valid_username(normalized):
@@ -444,6 +494,7 @@ def profile_summary(username: str, viewer_username: str | None = None) -> dict[s
             {
                 "username": friend_name,
                 "stats": stats_summary(friend_name),
+                "high_scores": get_user_high_scores(friend_name),
             }
         )
 
@@ -451,7 +502,7 @@ def profile_summary(username: str, viewer_username: str | None = None) -> dict[s
         "username": normalized,
         "stats": stats,
         "friends": friends,
-        "high_scores": {},
+        "high_scores": get_user_high_scores(normalized),
     }
 
     if viewer_username and normalize_username(viewer_username) == normalized:

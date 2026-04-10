@@ -540,6 +540,7 @@ body {
 .list-button { text-align: center; min-width: 160px; }
 .profile-section { display: grid; gap: 8px; margin-bottom: 14px; }
 .profile-heading, .profile-name { font-weight: 700; font-size: 15px; }
+.profile-mini-heading { font-weight: 700; font-size: 13px; margin-top: 4px; }
 .profile-list { display: grid; gap: 8px; }
 .profile-row, .profile-card {
   display: flex;
@@ -559,6 +560,8 @@ body {
   gap: 4px;
 }
 .profile-copy { font-size: 13px; }
+.profile-score-list { gap: 4px; }
+.profile-score-row { font-size: 13px; }
 .client-flash {
   display: flex;
   align-items: center;

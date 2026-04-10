@@ -305,6 +305,41 @@
     stack.appendChild(item);
   }
 
+  function highScoreEntries(highScores) {
+    return Object.values(highScores || {})
+      .sort((left, right) => left.label.localeCompare(right.label))
+      .map(
+        (entry) => `
+          <div class="profile-row profile-score-row">
+            <span>${escapeHtml(entry.label)}</span>
+            <span>${Number(entry.score || 0)}</span>
+          </div>
+        `
+      )
+      .join("");
+  }
+
+  async function syncHighScore(game, score) {
+    try {
+      await fetchJson("/api/high-scores", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ game, score }),
+      });
+    } catch (_error) {
+      // Keep local scores even if account sync fails.
+    }
+  }
+
+  async function syncStoredHighScores() {
+    const localScores = [
+      { game: "ladderclimb", score: readStoredNumber(CLIMBER_HIGH_SCORE_KEY) },
+      { game: "drainrunner", score: readStoredNumber(RUNNER_HIGH_SCORE_KEY) },
+    ].filter((entry) => entry.score > 0);
+
+    await Promise.all(localScores.map((entry) => syncHighScore(entry.game, entry.score)));
+  }
+
   function profileHtml(profile) {
     const incoming = (profile.incoming_requests || [])
       .map(
@@ -329,6 +364,8 @@
               <div class="profile-name">${escapeHtml(friend.username)}</div>
               <div class="profile-copy">Drains: ${friend.stats.total}</div>
               <div class="profile-copy">Visited: ${friend.stats.visited}</div>
+              <div class="profile-mini-heading">High Scores</div>
+              <div class="profile-list profile-score-list">${highScoreEntries(friend.high_scores) || "<div class=\"profile-copy\">No scores yet.</div>"}</div>
             </div>
             <button class="retro-button remove-friend-button" type="button" data-username="${escapeHtml(friend.username)}">Remove Friend</button>
           </div>
@@ -360,7 +397,7 @@
       </div>
       <div class="profile-section">
         <div class="profile-heading">High Scores</div>
-        <div class="profile-copy">Coming soon.</div>
+        <div class="profile-list profile-score-list">${highScoreEntries(profile.high_scores) || "<div class=\"profile-copy\">No scores yet.</div>"}</div>
       </div>
     `;
   }
@@ -368,6 +405,7 @@
   async function openProfile() {
     setLoading(true);
     try {
+      await syncStoredHighScores();
       const profile = await fetchJson("/api/profile");
       openModal(`${profile.username} Profile`, profileHtml(profile));
       const friendRequestForm = modalBody.querySelector("#friendRequestForm");
@@ -1071,6 +1109,7 @@
       if (score > highScore) {
         highScore = score;
         writeStoredNumber(CLIMBER_HIGH_SCORE_KEY, highScore);
+        syncHighScore("ladderclimb", highScore);
       }
     }
 
@@ -1258,6 +1297,7 @@
       if (score > highScore) {
         highScore = score;
         writeStoredNumber(RUNNER_HIGH_SCORE_KEY, highScore);
+        syncHighScore("drainrunner", highScore);
       }
     }
 

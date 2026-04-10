@@ -218,6 +218,21 @@ def profile():
     return jsonify(drain_service.profile_summary(current_username(), current_username()))
 
 
+@app.post("/api/high-scores")
+@login_required
+def save_high_score():
+    payload = request.get_json(silent=True) or request.form
+    try:
+        scores = drain_service.save_high_score(
+            current_username(),
+            str(payload.get("game", "")),
+            int(payload.get("score", 0)),
+        )
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
+    return jsonify({"ok": True, "high_scores": scores})
+
+
 @app.post("/api/friends/request")
 @login_required
 def friend_request():
