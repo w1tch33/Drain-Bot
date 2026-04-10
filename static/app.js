@@ -15,6 +15,7 @@
   const loadingDots = qs("#loadingDots");
   const visitedCount = qs("#visitedCount");
   const modalLayer = qs("#modalLayer");
+  const modalWindow = modalLayer.querySelector(".modal-window");
   const modalTitle = qs("#modalTitle");
   const modalBody = qs("#modalBody");
   const imagePreviewLayer = qs("#imagePreviewLayer");
@@ -473,6 +474,8 @@
   function openModal(title, content) {
     modalTitle.innerHTML = `<span>${escapeHtml(title)}</span>`;
     modalBody.innerHTML = "";
+    modalWindow.classList.remove("game-modal-window");
+    modalBody.classList.remove("game-modal-body");
     if (typeof content === "string") modalBody.innerHTML = content;
     else modalBody.appendChild(content);
     modalLayer.classList.remove("hidden");
@@ -481,6 +484,8 @@
   function closeModal() {
     modalLayer.classList.add("hidden");
     modalBody.innerHTML = "";
+    modalWindow.classList.remove("game-modal-window");
+    modalBody.classList.remove("game-modal-body");
     if (state.gameCleanup) {
       state.gameCleanup();
       state.gameCleanup = null;
@@ -979,6 +984,8 @@
 
   function openGames() {
     openModal("Mini Games", qs("#miniGamesTemplate").content.cloneNode(true));
+    modalWindow.classList.add("game-modal-window");
+    modalBody.classList.add("game-modal-body");
     const canvas = qs("#gameCanvas");
     const help = qs("#gameHelp");
     const controls = qs("#gameControls");
@@ -1026,9 +1033,11 @@
     const ctx = canvas.getContext("2d");
     const WIDTH = 12;
     const HEIGHT = 320;
-    const TILE = 16;
+    const TILE = 14;
     canvas.width = WIDTH * TILE;
-    canvas.height = 520;
+    canvas.height = 430;
+    canvas.classList.remove("runner-canvas");
+    canvas.classList.add("climber-canvas");
     let player = { x: WIDTH / 2, y: HEIGHT - 5, w: 0.9, h: 0.95 };
     let velocityY = 0;
     let velocityX = 0;
@@ -1367,8 +1376,10 @@
 
   function runDrainRunner(canvas, help) {
     const ctx = canvas.getContext("2d");
-    canvas.width = 520;
-    canvas.height = 260;
+    canvas.width = 620;
+    canvas.height = 280;
+    canvas.classList.remove("climber-canvas");
+    canvas.classList.add("runner-canvas");
     let player = { x: 88, y: 182, w: 28, h: 42, vy: 0, ducking: false };
     let score = 0;
     let distance = 0;
