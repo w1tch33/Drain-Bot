@@ -114,8 +114,12 @@ body {
   width: min(92vw, 560px);
 }
 
+.auth-window .window-title {
+  top: 8px;
+}
+
 .auth-body {
-  padding-top: 34px;
+  padding-top: 54px;
 }
 
 .auth-links {
