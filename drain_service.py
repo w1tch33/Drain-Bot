@@ -370,7 +370,20 @@ def accept_friend_request(username: str, from_username: str) -> None:
 
 def profile_summary(username: str, viewer_username: str | None = None) -> dict[str, Any]:
     normalized = normalize_username(username)
-    account = _account_record(normalized)
+    try:
+        account = _account_record(normalized)
+    except ValueError:
+        if viewer_username and normalize_username(viewer_username) == normalized:
+            account = {
+                "username": normalized,
+                "approved": True,
+                "map_uploaded": account_uses_personal_map(normalized),
+                "friends": [],
+                "incoming_requests": [],
+                "outgoing_requests": [],
+            }
+        else:
+            raise
     stats = stats_summary(normalized)
     friends = []
     for friend_name in account.get("friends", []):

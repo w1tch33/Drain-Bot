@@ -123,7 +123,13 @@
 
   async function fetchJson(url, options) {
     const response = await fetch(url, options);
-    const data = await response.json();
+    const text = await response.text();
+    let data;
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch (_error) {
+      throw new Error("The server returned a non-JSON response. Try refreshing the page.");
+    }
     if (!response.ok) throw new Error(data.error || "Request failed");
     return data;
   }
