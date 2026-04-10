@@ -326,13 +326,13 @@ def account_uses_personal_map(username: str | None) -> bool:
         return False
     metadata = load_user_metadata(username)
     if isinstance(metadata, dict) and "_map_uploaded" in metadata:
-        return bool(metadata.get("_map_uploaded"))
+        return True
     account = load_accounts().get(normalize_username(username))
     if not isinstance(account, dict):
         return True
     if "map_uploaded" not in account:
         return False
-    return bool(account.get("map_uploaded"))
+    return True
 
 
 def include_shared_map(username: str | None) -> bool:
@@ -340,13 +340,13 @@ def include_shared_map(username: str | None) -> bool:
         return True
     metadata = load_user_metadata(username)
     if isinstance(metadata, dict) and "_map_uploaded" in metadata:
-        return not bool(metadata.get("_map_uploaded"))
+        return False
     account = load_accounts().get(normalize_username(username))
     if not isinstance(account, dict):
         return False
     if "map_uploaded" not in account:
         return True
-    return not bool(account.get("map_uploaded"))
+    return False
 
 
 def get_user_origin(username: str | None) -> tuple[float, float]:
