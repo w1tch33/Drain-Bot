@@ -916,26 +916,40 @@
   function bindGameControls(container) {
     const cleanups = [];
     container.querySelectorAll(".game-control").forEach((button) => {
-      const press = () => dispatchGameKey("keydown", button.dataset.key || "", button.dataset.code || button.dataset.key || "");
-      const release = () => dispatchGameKey("keyup", button.dataset.key || "", button.dataset.code || button.dataset.key || "");
+      const press = (event) => {
+        if (event) event.preventDefault();
+        button.blur();
+        dispatchGameKey("keydown", button.dataset.key || "", button.dataset.code || button.dataset.key || "");
+      };
+      const release = (event) => {
+        if (event) event.preventDefault();
+        dispatchGameKey("keyup", button.dataset.key || "", button.dataset.code || button.dataset.key || "");
+      };
+      const tap = (event) => {
+        if (event) event.preventDefault();
+        const key = button.dataset.key || "";
+        const code = button.dataset.code || key;
+        dispatchGameKey("keydown", key, code);
+        window.setTimeout(() => dispatchGameKey("keyup", key, code), 40);
+      };
 
       button.addEventListener("pointerdown", press);
       button.addEventListener("pointerup", release);
       button.addEventListener("pointercancel", release);
       button.addEventListener("pointerleave", release);
-      button.addEventListener("click", () => {
-        const key = button.dataset.key || "";
-        const code = button.dataset.code || key;
-        if (key !== "Space") {
-          dispatchGameKey("keydown", key, code);
-          dispatchGameKey("keyup", key, code);
-        }
-      });
+      button.addEventListener("touchstart", press, { passive: false });
+      button.addEventListener("touchend", release, { passive: false });
+      button.addEventListener("touchcancel", release, { passive: false });
+      button.addEventListener("click", tap);
       cleanups.push(() => {
         button.removeEventListener("pointerdown", press);
         button.removeEventListener("pointerup", release);
         button.removeEventListener("pointercancel", release);
         button.removeEventListener("pointerleave", release);
+        button.removeEventListener("touchstart", press);
+        button.removeEventListener("touchend", release);
+        button.removeEventListener("touchcancel", release);
+        button.removeEventListener("click", tap);
       });
     });
     return () => cleanups.forEach((cleanup) => cleanup());
@@ -1011,7 +1025,7 @@
   function runLadderClimb(canvas, help) {
     const ctx = canvas.getContext("2d");
     const WIDTH = 12;
-    const HEIGHT = 260;
+    const HEIGHT = 320;
     const TILE = 16;
     canvas.width = WIDTH * TILE;
     canvas.height = 520;
@@ -1023,6 +1037,7 @@
     let combo = 0;
     let comboTimer = 0;
     let gameRunning = false;
+    let gameOver = false;
     let countdown = 3;
     let cameraY = player.y;
     let waterLevel = HEIGHT + 16;
@@ -1031,9 +1046,19 @@
     let countdownTimer = null;
     let jumpQueued = false;
     let highScore = readStoredNumber(CLIMBER_HIGH_SCORE_KEY);
+    let level = 1;
+    let nextMilestone = 100;
+    let milestoneText = "";
+    let milestoneTimer = 0;
     const keys = { left: false, right: false };
     const platforms = [];
     const ghosts = [];
+    const levelThemes = [
+      { skyA: "#161616", skyB: "#1f1f1f", platform: "#efefef", accent: "#8bc34a" },
+      { skyA: "#101820", skyB: "#1b2730", platform: "#d7e2ea", accent: "#4fc3f7" },
+      { skyA: "#1d1021", skyB: "#29152d", platform: "#f2dede", accent: "#ff8a65" },
+      { skyA: "#18150b", skyB: "#252010", platform: "#ece1ba", accent: "#ffd54f" },
+    ];
 
     function spawnInitialPlatforms() {
       platforms.length = 0;
@@ -1052,55 +1077,71 @@
     function fillAhead() {
       let highest = Math.min(...platforms.map((platform) => platform.y));
       while (highest > player.y - 70) {
-        highest -= 4 + Math.floor(Math.random() * 2);
-        const width = 2 + Math.floor(Math.random() * 3);
+        highest -= Math.max(3, 5 - Math.min(2, Math.floor(level / 3))) + Math.floor(Math.random() * 2);
+        const width = Math.max(2, 3 + Math.floor(Math.random() * 2) - Math.min(1, Math.floor(level / 4)));
         const x = Math.floor(Math.random() * Math.max(1, WIDTH - width));
         const typeRoll = Math.random();
-        const type = typeRoll > 0.86 ? "bounce" : "normal";
+        const type = typeRoll > Math.max(0.74, 0.88 - level * 0.02) ? "bounce" : "normal";
         platforms.push({ x, y: highest, width, type });
       }
     }
 
-      function updateHelp() {
-        if (!gameRunning) {
-          help.textContent = countdown > 0
-            ? `DRAIN CLIMBER | ${countdown} | High: ${highScore}`
-            : `DRAIN CLIMBER | High: ${highScore}`;
-          return;
-        }
-        help.textContent = `Score: ${score} | Floor: ${floorReached} | Combo: x${Math.max(combo, 1)} | High: ${highScore}`;
+    function updateHelp() {
+      if (gameOver) {
+        help.textContent = `GAME OVER | ${score}m | High: ${highScore} | Tap to retry`;
+        return;
       }
-
-      function drawGameOver() {
-        ctx.fillStyle = "rgba(0, 0, 0, 0.72)";
-        ctx.fillRect(18, 150, canvas.width - 36, 176);
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(18, 150, canvas.width - 36, 176);
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 28px Chicago, Monaco, monospace";
-        ctx.textAlign = "center";
-        ctx.fillText("GAME OVER", canvas.width / 2, 195);
-        ctx.font = "20px Chicago, Monaco, monospace";
-        ctx.fillText(`Score: ${score}`, canvas.width / 2, 232);
-        ctx.fillText(`High: ${highScore}`, canvas.width / 2, 262);
-        ctx.font = "16px Chicago, Monaco, monospace";
-        ctx.fillText("Click Drain Climber to play again", canvas.width / 2, 302);
-        ctx.textAlign = "start";
+      if (!gameRunning) {
+        help.textContent = countdown > 0
+          ? `DRAIN CLIMBER | ${countdown} | High: ${highScore}`
+          : `DRAIN CLIMBER | High: ${highScore}`;
+        return;
       }
+      help.textContent = `Height: ${score}m | Level: ${level} | Combo: x${Math.max(combo, 1)} | High: ${highScore}`;
+    }
 
-      function draw() {
-        const offsetY = cameraY * TILE - canvas.height * 0.68;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    function drawGameOver() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.72)";
+      ctx.fillRect(18, 150, canvas.width - 36, 176);
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(18, 150, canvas.width - 36, 176);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 28px Chicago, Monaco, monospace";
+      ctx.textAlign = "center";
+      ctx.fillText("GAME OVER", canvas.width / 2, 195);
+      ctx.font = "20px Chicago, Monaco, monospace";
+      ctx.fillText(`Height: ${score}m`, canvas.width / 2, 232);
+      ctx.fillText(`High: ${highScore}m`, canvas.width / 2, 262);
+      ctx.font = "16px Chicago, Monaco, monospace";
+      ctx.fillText("Tap or click to retry", canvas.width / 2, 302);
+      ctx.textAlign = "start";
+    }
+
+    function draw() {
+      const theme = levelThemes[(level - 1) % levelThemes.length];
+      const offsetY = cameraY * TILE - canvas.height * 0.68;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (let i = 0; i < canvas.height / 20; i += 1) {
-        ctx.fillStyle = i % 2 === 0 ? "#161616" : "#1f1f1f";
+        ctx.fillStyle = i % 2 === 0 ? theme.skyA : theme.skyB;
         ctx.fillRect(0, i * 20, canvas.width, 20);
       }
+
+      ctx.fillStyle = "rgba(255,255,255,0.18)";
+      ctx.font = "12px Chicago, Monaco, monospace";
+      ctx.textAlign = "right";
+      for (let meter = 100; meter <= Math.max(nextMilestone, score + 100); meter += 100) {
+        const y = (HEIGHT - meter / 10) * TILE - offsetY;
+        if (y < -18 || y > canvas.height + 18) continue;
+        ctx.fillRect(8, y, canvas.width - 16, 1);
+        ctx.fillText(`${meter}m`, canvas.width - 10, y - 4);
+      }
+      ctx.textAlign = "start";
 
       platforms.forEach((platform) => {
         const px = platform.x * TILE;
         const py = platform.y * TILE - offsetY;
-        ctx.fillStyle = platform.type === "bounce" ? "#8bc34a" : "#efefef";
+        ctx.fillStyle = platform.type === "bounce" ? theme.accent : theme.platform;
         ctx.fillRect(px, py, platform.width * TILE, 10);
         ctx.strokeStyle = "#000";
         ctx.strokeRect(px, py, platform.width * TILE, 10);
@@ -1117,18 +1158,30 @@
       ctx.strokeStyle = "#000";
       ctx.strokeRect(player.x * TILE, player.y * TILE - offsetY, player.w * TILE, player.h * TILE);
 
-        const waterY = waterLevel * TILE - offsetY;
-        ctx.fillStyle = "#2979ff";
-        ctx.fillRect(0, waterY, canvas.width, canvas.height - waterY);
-        ctx.fillStyle = "rgba(255,255,255,0.25)";
-        ctx.fillRect(0, waterY, canvas.width, 6);
+      const waterY = waterLevel * TILE - offsetY;
+      ctx.fillStyle = "#2979ff";
+      ctx.fillRect(0, waterY, canvas.width, canvas.height - waterY);
+      ctx.fillStyle = "rgba(255,255,255,0.25)";
+      ctx.fillRect(0, waterY, canvas.width, 6);
 
-        if (!gameRunning && countdown <= 0) {
-          drawGameOver();
-        }
-
-        updateHelp();
+      if (milestoneTimer > 0) {
+        ctx.fillStyle = "rgba(0,0,0,0.6)";
+        ctx.fillRect(38, 60, canvas.width - 76, 54);
+        ctx.strokeStyle = "#fff";
+        ctx.strokeRect(38, 60, canvas.width - 76, 54);
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 22px Chicago, Monaco, monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(milestoneText, canvas.width / 2, 93);
+        ctx.textAlign = "start";
       }
+
+      if (gameOver) {
+        drawGameOver();
+      }
+
+      updateHelp();
+    }
 
     function updateHighScore() {
       if (score > highScore) {
@@ -1139,8 +1192,26 @@
     }
 
     function startRound() {
+      player = { x: WIDTH / 2, y: HEIGHT - 5, w: 0.9, h: 0.95 };
+      velocityY = 0;
+      velocityX = 0;
+      score = 0;
+      floorReached = 0;
+      combo = 0;
+      comboTimer = 0;
       countdown = 3;
+      level = 1;
+      nextMilestone = 100;
+      milestoneText = "";
+      milestoneTimer = 0;
       gameRunning = false;
+      gameOver = false;
+      cameraY = player.y;
+      waterLevel = HEIGHT + 16;
+      onGround = false;
+      jumpQueued = false;
+      ghosts.length = 0;
+      spawnInitialPlatforms();
       updateHelp();
       draw();
       countdownTimer = setInterval(() => {
@@ -1157,6 +1228,13 @@
     }
 
     function onKey(event) {
+      if (event.type === "keydown" && (event.key === " " || event.code === "Space" || event.key.startsWith("Arrow"))) {
+        event.preventDefault();
+      }
+      if (gameOver && event.type === "keydown" && (event.key === " " || event.code === "Space" || event.key === "Enter")) {
+        startRound();
+        return;
+      }
       if (event.type === "keydown") {
         if (event.key === "ArrowLeft" || event.key === "a") keys.left = true;
         if (event.key === "ArrowRight" || event.key === "d") keys.right = true;
@@ -1170,28 +1248,28 @@
     function step() {
       if (!gameRunning) return;
       const previousY = player.y;
-      if (keys.left) velocityX -= 0.05;
-      if (keys.right) velocityX += 0.05;
-      velocityX *= 0.82;
-      velocityX = Math.max(-0.16, Math.min(0.16, velocityX));
+      if (keys.left) velocityX -= onGround ? 0.038 : 0.028;
+      if (keys.right) velocityX += onGround ? 0.038 : 0.028;
+      velocityX *= onGround ? 0.85 : 0.985;
+      velocityX = Math.max(-0.24, Math.min(0.24, velocityX));
       player.x += velocityX;
       if (player.x < 0) {
         player.x = 0;
-        velocityX = 0;
+        velocityX = Math.max(0.08, Math.abs(velocityX) * 0.88);
       }
       if (player.x + player.w > WIDTH) {
         player.x = WIDTH - player.w;
-        velocityX = 0;
+        velocityX = -Math.max(0.08, Math.abs(velocityX) * 0.88);
       }
 
       if (jumpQueued && onGround) {
-        velocityY = Math.abs(velocityX) > 0.1 ? -0.78 : -0.68;
+        velocityY = Math.abs(velocityX) > 0.11 ? -0.86 : -0.74;
         onGround = false;
         jumpQueued = false;
       }
       jumpQueued = false;
 
-      velocityY += 0.032;
+      velocityY += 0.03;
       player.y += velocityY;
       onGround = false;
 
@@ -1208,19 +1286,29 @@
       }
 
       ghosts.unshift({ x: player.x, y: player.y });
-      if (ghosts.length > 8) ghosts.pop();
+      if (ghosts.length > 12) ghosts.pop();
 
       cameraY += (player.y - cameraY) * 0.08;
-      waterLevel -= 0.03;
+      waterLevel -= 0.028 + level * 0.003;
+      const desiredWater = player.y + 26;
+      if (waterLevel - desiredWater > 20) {
+        waterLevel = Math.max(desiredWater, waterLevel - Math.min(0.38, (waterLevel - desiredWater) * 0.05));
+      }
       fillAhead();
 
       const climbed = Math.max(0, Math.floor((HEIGHT - player.y) * 10));
       if (climbed > score) {
-        const gained = climbed - score;
         score = climbed + combo * 10;
         combo = comboTimer > 0 ? combo + 1 : 1;
-        comboTimer = 36;
+        comboTimer = 44;
         floorReached = Math.max(floorReached, Math.floor((HEIGHT - player.y) / 4));
+        const nextLevel = Math.max(1, Math.floor(score / 250) + 1);
+        if (nextLevel !== level) level = nextLevel;
+        if (score >= nextMilestone) {
+          milestoneText = `${nextMilestone}m`;
+          milestoneTimer = 110;
+          nextMilestone += 100;
+        }
         updateHighScore();
       } else if (comboTimer > 0) {
         comboTimer -= 1;
@@ -1228,23 +1316,34 @@
         combo = 0;
       }
 
-        if (player.y > waterLevel) {
-          gameRunning = false;
-          updateHighScore();
-          draw();
-          help.textContent = `GAME OVER | Score: ${score} | High: ${highScore}`;
-          return;
-        }
+      if (milestoneTimer > 0) milestoneTimer -= 1;
+
+      if (player.y > waterLevel) {
+        gameRunning = false;
+        gameOver = true;
+        updateHighScore();
+        draw();
+        help.textContent = `GAME OVER | ${score}m | High: ${highScore}m | Tap to retry`;
+        return;
+      }
 
       draw();
       rafId = requestAnimationFrame(step);
     }
 
-    spawnInitialPlatforms();
+    const restartRound = () => {
+      if (!gameOver) return;
+      startRound();
+    };
+
     bindGameCleanup(onKey, () => {
       if (rafId) cancelAnimationFrame(rafId);
       if (countdownTimer) clearInterval(countdownTimer);
+      canvas.removeEventListener("click", restartRound);
+      canvas.removeEventListener("touchstart", restartRound);
     });
+    canvas.addEventListener("click", restartRound);
+    canvas.addEventListener("touchstart", restartRound, { passive: true });
     draw();
     startRound();
   }
@@ -1258,6 +1357,8 @@
     let distance = 0;
     let gameRunning = false;
     let countdown = 3;
+    let gameOver = false;
+    let gameOverTitle = "GAME OVER";
     let rafId = null;
     let countdownTimer = null;
     let spawnTimer = 0;
@@ -1269,11 +1370,15 @@
     const pickups = [];
     const cops = [{ x: 12, y: 182 }, { x: 40, y: 182 }];
 
-      function updateHelp(message = "") {
-        if (message) {
-          help.textContent = message;
-          return;
-        }
+    function updateHelp(message = "") {
+      if (message) {
+        help.textContent = message;
+        return;
+      }
+      if (gameOver) {
+        help.textContent = `${gameOverTitle} | Score: ${score} | High: ${highScore} | Tap to retry`;
+        return;
+      }
       help.textContent = gameRunning
         ? `Score: ${score} | Distance: ${Math.floor(distance)}m | High: ${highScore}`
           : `DRAIN RUNNER | ${countdown > 0 ? countdown : "GO"} | High: ${highScore}`;
@@ -1333,8 +1438,8 @@
         ctx.strokeStyle = "#000";
         ctx.strokeRect(player.x, playerY, player.w, playerHeight);
 
-        if (!gameRunning && countdown <= 0) {
-          drawGameOver("GAME OVER");
+        if (gameOver) {
+          drawGameOver(gameOverTitle);
         }
 
         updateHelp();
@@ -1364,12 +1469,31 @@
 
     function onKey(event) {
       const isDown = event.type === "keydown";
+      if (isDown && (event.key === " " || event.code === "Space" || event.key.startsWith("Arrow"))) {
+        event.preventDefault();
+      }
+      if (gameOver && isDown && (event.key === " " || event.code === "Space" || event.key === "Enter")) {
+        startRound();
+        return;
+      }
       if (event.key === " " || event.code === "Space" || event.key === "ArrowUp" || event.key === "w") keys.jump = isDown;
       if (event.key === "ArrowDown" || event.key === "s") keys.duck = isDown;
     }
 
     function startRound() {
+      player = { x: 88, y: 182, w: 28, h: 42, vy: 0, ducking: false };
+      score = 0;
+      distance = 0;
       countdown = 3;
+      gameOver = false;
+      gameOverTitle = "GAME OVER";
+      spawnTimer = 18;
+      copPulse = 0;
+      speed = 4.2;
+      keys.jump = false;
+      keys.duck = false;
+      obstacles.length = 0;
+      pickups.length = 0;
       gameRunning = false;
       drawRunner();
       countdownTimer = setInterval(() => {
@@ -1429,17 +1553,19 @@
           const overGap = player.x + player.w > obstacle.x && player.x < obstacle.x + obstacle.w;
             if (overGap && player.y >= 182) {
               gameRunning = false;
+              gameOver = true;
+              gameOverTitle = "YOU FELL IN";
               updateHighScore();
               drawRunner();
-              drawGameOver("YOU FELL IN");
               help.textContent = `YOU FELL IN | Score: ${score} | High: ${highScore}`;
               return;
             }
           } else if (overlap) {
             gameRunning = false;
+            gameOver = true;
+            gameOverTitle = "BUSTED BY THE COPS";
             updateHighScore();
             drawRunner();
-            drawGameOver("BUSTED BY THE COPS");
             help.textContent = `BUSTED BY THE COPS | Score: ${score} | High: ${highScore}`;
             return;
           }
@@ -1470,10 +1596,19 @@
       rafId = requestAnimationFrame(step);
     }
 
+    const restartRound = () => {
+      if (!gameOver) return;
+      startRound();
+    };
+
     bindGameCleanup(onKey, () => {
       if (rafId) cancelAnimationFrame(rafId);
       if (countdownTimer) clearInterval(countdownTimer);
+      canvas.removeEventListener("click", restartRound);
+      canvas.removeEventListener("touchstart", restartRound);
     });
+    canvas.addEventListener("click", restartRound);
+    canvas.addEventListener("touchstart", restartRound, { passive: true });
     drawRunner();
     startRound();
   }

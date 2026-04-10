@@ -607,6 +607,9 @@ body {
   min-width: 84px;
   min-height: 36px;
   font-size: 13px;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 .game-control-action {
   min-width: 94px;
