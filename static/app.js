@@ -970,7 +970,7 @@
     const ctx = canvas.getContext("2d");
     const WIDTH = 12;
     const HEIGHT = 260;
-    const TILE = 18;
+    const TILE = 16;
     canvas.width = WIDTH * TILE;
     canvas.height = 520;
     let player = { x: WIDTH / 2, y: HEIGHT - 5, w: 0.9, h: 0.95 };
@@ -1033,7 +1033,7 @@
     }
 
     function draw() {
-      const offsetY = cameraY * TILE - canvas.height * 0.58;
+      const offsetY = cameraY * TILE - canvas.height * 0.68;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (let i = 0; i < canvas.height / 20; i += 1) {
         ctx.fillStyle = i % 2 === 0 ? "#161616" : "#1f1f1f";
@@ -1108,16 +1108,16 @@
     function step() {
       if (!gameRunning) return;
       const previousY = player.y;
-      if (keys.left) velocityX -= 0.11;
-      if (keys.right) velocityX += 0.11;
-      velocityX *= 0.94;
-      velocityX = Math.max(-0.38, Math.min(0.38, velocityX));
+      if (keys.left) velocityX -= 0.075;
+      if (keys.right) velocityX += 0.075;
+      velocityX *= 0.9;
+      velocityX = Math.max(-0.24, Math.min(0.24, velocityX));
       player.x += velocityX;
       if (player.x < 0) player.x = WIDTH - player.w;
       if (player.x + player.w > WIDTH) player.x = 0;
 
       if (jumpQueued && onGround) {
-        velocityY = Math.abs(velocityX) > 0.18 ? -0.9 : -0.76;
+        velocityY = Math.abs(velocityX) > 0.14 ? -0.82 : -0.7;
         onGround = false;
         jumpQueued = false;
       }

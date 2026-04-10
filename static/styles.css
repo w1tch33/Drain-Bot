@@ -586,7 +586,7 @@ body {
 .game-help { margin-top: 8px; min-height: 20px; font-size: 14px; font-weight: 700; }
 .game-controls {
   margin-top: 12px;
-  display: grid;
+  display: none;
   justify-items: center;
   gap: 8px;
   touch-action: manipulation;
@@ -716,6 +716,7 @@ body {
   .modal-window { width: min(95vw, 700px); }
   .image-preview-window { width: min(95vw, 960px); }
   .volume-wrap { display: none; }
+  .game-controls { display: grid; }
   .game-control {
     min-width: 92px;
     min-height: 42px;
