@@ -101,8 +101,9 @@ body {
   min-height: 100vh;
   width: 100%;
   display: grid;
-  place-items: center;
-  padding: 96px 24px 24px;
+  justify-items: center;
+  align-content: start;
+  padding: 128px 24px 24px;
 }
 
 .auth-window {

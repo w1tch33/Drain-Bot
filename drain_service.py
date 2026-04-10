@@ -18,7 +18,18 @@ from werkzeug.security import check_password_hash, generate_password_hash
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_DATA_FILE = os.path.join(BASE_DIR, "drain_data.json")
 DEFAULT_KML_FILE = os.path.join(BASE_DIR, "your_map.kml")
-DEFAULT_DATA_DIR = os.getenv("RAILWAY_VOLUME_MOUNT_PATH", BASE_DIR)
+
+
+def _default_data_dir() -> str:
+    railway_mount = os.getenv("RAILWAY_VOLUME_MOUNT_PATH", "").strip()
+    if railway_mount:
+        return railway_mount
+    if os.path.isdir("/data"):
+        return "/data"
+    return BASE_DIR
+
+
+DEFAULT_DATA_DIR = _default_data_dir()
 DATA_DIR = os.getenv("DRAINTOOL_DATA_DIR", DEFAULT_DATA_DIR)
 DATA_FILE = os.getenv("DRAINTOOL_DATA_FILE", os.path.join(DATA_DIR, "drain_data.json"))
 KML_FILE = os.getenv("DRAINTOOL_KML_FILE", os.path.join(DATA_DIR, "your_map.kml"))
@@ -740,22 +751,24 @@ def filter_drains(
 ) -> list[dict[str, Any]]:
     drains = []
     term = search.strip().casefold()
+    words = [part for part in re.split(r"\s+", term) if part]
 
     for drain in get_all_drains(username):
         if drain["distance_km"] < min_distance or drain["distance_km"] > max_distance:
             continue
         if only_unvisited and drain["visited"]:
             continue
-        haystack = " ".join(
-            [
-                drain["name"],
-                drain.get("description", ""),
-                drain.get("difficulty", ""),
-                drain.get("value", ""),
-            ]
-        ).casefold()
-        if term and term not in haystack:
-            continue
+        if term:
+            name_text = drain["name"].casefold()
+            description_text = str(drain.get("description", "")).casefold()
+            notes_text = str(drain.get("notes", "")).casefold()
+            exact_name = term == name_text
+            phrase_in_name = term in name_text
+            all_words_in_name = bool(words) and all(word in name_text for word in words)
+            phrase_in_description = len(term) >= 4 and term in description_text
+            phrase_in_notes = len(term) >= 4 and term in notes_text
+            if not (exact_name or phrase_in_name or all_words_in_name or phrase_in_description or phrase_in_notes):
+                continue
         drains.append(drain)
 
     return drains
