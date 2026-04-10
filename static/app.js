@@ -312,9 +312,12 @@
       .map(
         (friend) => `
           <div class="profile-card">
-            <div class="profile-name">${escapeHtml(friend.username)}</div>
-            <div class="profile-copy">Drains: ${friend.stats.total}</div>
-            <div class="profile-copy">Visited: ${friend.stats.visited}</div>
+            <div class="profile-card-info">
+              <div class="profile-name">${escapeHtml(friend.username)}</div>
+              <div class="profile-copy">Drains: ${friend.stats.total}</div>
+              <div class="profile-copy">Visited: ${friend.stats.visited}</div>
+            </div>
+            <button class="retro-button remove-friend-button" type="button" data-username="${escapeHtml(friend.username)}">Remove Friend</button>
           </div>
         `
       )
@@ -379,6 +382,16 @@
             method: "POST",
           });
           showPopupMessage(`You are now friends with ${button.dataset.username}.`);
+          await openProfile();
+        });
+      });
+
+      modalBody.querySelectorAll(".remove-friend-button").forEach((button) => {
+        button.addEventListener("click", async () => {
+          await fetchJson(`/api/friends/remove/${encodeURIComponent(button.dataset.username)}`, {
+            method: "POST",
+          });
+          showPopupMessage(`Removed ${button.dataset.username} from your friends.`);
           await openProfile();
         });
       });

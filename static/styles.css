@@ -552,6 +552,10 @@ body {
   display: grid;
   justify-content: start;
 }
+.profile-card-info {
+  display: grid;
+  gap: 4px;
+}
 .profile-copy { font-size: 13px; }
 .client-flash {
   display: flex;

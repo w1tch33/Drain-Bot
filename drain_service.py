@@ -392,6 +392,33 @@ def accept_friend_request(username: str, from_username: str) -> None:
     save_accounts(accounts)
 
 
+def remove_friend(username: str, friend_username: str) -> None:
+    current = normalize_username(username)
+    friend = normalize_username(friend_username)
+    accounts = load_accounts()
+    current_account = accounts.get(current)
+    friend_account = accounts.get(friend)
+    if not isinstance(current_account, dict) or not isinstance(friend_account, dict):
+        raise ValueError("Account not found.")
+
+    current_account = _normalize_account_record(current, current_account)
+    friend_account = _normalize_account_record(friend, friend_account)
+
+    if friend not in current_account["friends"]:
+        raise ValueError("That user is not in your friends list.")
+
+    current_account["friends"] = [name for name in current_account["friends"] if name != friend]
+    friend_account["friends"] = [name for name in friend_account["friends"] if name != current]
+    current_account["incoming_requests"] = [name for name in current_account["incoming_requests"] if name != friend]
+    current_account["outgoing_requests"] = [name for name in current_account["outgoing_requests"] if name != friend]
+    friend_account["incoming_requests"] = [name for name in friend_account["incoming_requests"] if name != current]
+    friend_account["outgoing_requests"] = [name for name in friend_account["outgoing_requests"] if name != current]
+
+    accounts[current] = current_account
+    accounts[friend] = friend_account
+    save_accounts(accounts)
+
+
 def profile_summary(username: str, viewer_username: str | None = None) -> dict[str, Any]:
     normalized = normalize_username(username)
     try:

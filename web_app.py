@@ -239,6 +239,16 @@ def accept_friend(username: str):
     return jsonify({"ok": True, "profile": drain_service.profile_summary(current_username(), current_username())})
 
 
+@app.post("/api/friends/remove/<username>")
+@login_required
+def remove_friend(username: str):
+    try:
+        drain_service.remove_friend(current_username(), username)
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
+    return jsonify({"ok": True, "profile": drain_service.profile_summary(current_username(), current_username())})
+
+
 @app.get("/api/run")
 @login_required
 def run_picker():
