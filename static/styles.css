@@ -28,7 +28,7 @@ html[data-theme="crt-green"] {
   --button-face: #132318;
   --button-shadow: #0a130d;
   --button-highlight: #1e3424;
-  --text: #90ffba;
+  --text: #fff;
   --dot-color: rgba(132, 255, 182, 0.26);
   --title-stripe-light: #174f2a;
   --title-stripe-dark: #0c2a16;
@@ -43,7 +43,7 @@ html[data-theme="industrial-gray"] {
   --button-face: #4b4f57;
   --button-shadow: #23262b;
   --button-highlight: #696d77;
-  --text: #ffe2be;
+  --text: #fff;
   --dot-color: rgba(255, 170, 64, 0.42);
   --title-stripe-light: #6c707a;
   --title-stripe-dark: #2b2e34;
@@ -58,7 +58,7 @@ html[data-theme="amber-terminal"] {
   --button-face: #3a2a11;
   --button-shadow: #1f1609;
   --button-highlight: #5a4119;
-  --text: #ffd480;
+  --text: #fff;
   --dot-color: rgba(255, 187, 64, 0.24);
   --title-stripe-light: #704e1a;
   --title-stripe-dark: #3f2b0e;
@@ -73,7 +73,7 @@ html[data-theme="ice-blueprint"] {
   --button-face: #1c568e;
   --button-shadow: #0c2f50;
   --button-highlight: #2b72b5;
-  --text: #e3f8ff;
+  --text: #fff;
   --dot-color: rgba(165, 235, 255, 0.34);
   --title-stripe-light: #2f78b8;
   --title-stripe-dark: #103d67;
@@ -134,8 +134,9 @@ html[data-theme="ice-blueprint"] body {
 }
 
 .flash-message {
-  border: 2px solid #000;
-  background: #fff;
+  border: 2px solid var(--line);
+  background: var(--field-bg);
+  color: var(--text);
   padding: 6px 12px;
   font-size: 13px;
   font-weight: 700;
@@ -162,8 +163,9 @@ html[data-theme="ice-blueprint"] body {
 }
 
 .session-user {
-  border: 2px solid #000;
-  background: #fff;
+  border: 2px solid var(--line);
+  background: var(--field-bg);
+  color: var(--text);
   padding: 4px 8px 3px;
   font-size: 12px;
   font-weight: 700;
@@ -248,8 +250,8 @@ html[data-theme="ice-blueprint"] body {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  border: 2px solid #000;
-  background: #fff;
+  border: 2px solid var(--line);
+  background: var(--field-bg);
   padding: 8px 10px;
 }
 
@@ -375,7 +377,7 @@ html[data-theme="ice-blueprint"] body {
   border-right-color: var(--button-shadow);
   border-bottom-color: var(--button-shadow);
   background: var(--button-face);
-  color: #000;
+  color: var(--text);
   padding: 5px 10px;
   cursor: pointer;
   text-decoration: none;
@@ -660,8 +662,8 @@ html[data-theme="ice-blueprint"] body {
 .tutorial-stack { gap: 10px; line-height: 1.2; }
 .notifications-list { display: grid; gap: 8px; }
 .notification-item {
-  border: 2px solid #000;
-  background: #fff;
+  border: 2px solid var(--line);
+  background: var(--field-bg);
   padding: 8px 10px;
   display: grid;
   gap: 4px;
@@ -674,7 +676,8 @@ html[data-theme="ice-blueprint"] body {
 }
 .notification-meta {
   font-size: 11px;
-  color: #222;
+  color: var(--text);
+  opacity: 0.82;
 }
 .list-button { text-align: center; min-width: 160px; }
 .profile-section { display: grid; gap: 8px; margin-bottom: 14px; }
@@ -686,8 +689,8 @@ html[data-theme="ice-blueprint"] body {
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  border: 2px solid #000;
-  background: #fff;
+  border: 2px solid var(--line);
+  background: var(--field-bg);
   padding: 8px 10px;
 }
 .profile-card {
@@ -722,9 +725,9 @@ html[data-theme="ice-blueprint"] body {
 
 .detail-section { margin-bottom: 14px; }
 .detail-section label { display: block; margin-bottom: 4px; }
-.photo-card { border: 2px solid var(--line); background: #fff; padding: 6px; width: 110px; }
+.photo-card { border: 2px solid var(--line); background: var(--field-bg); padding: 6px; width: 110px; }
 .photo-card img { width: 100%; height: 80px; object-fit: cover; display: block; margin-bottom: 4px; }
-.badge { display: inline-block; border: 1px solid #000; background: #fff; padding: 2px 6px; margin-right: 6px; margin-bottom: 4px; }
+.badge { display: inline-block; border: 1px solid var(--line); background: var(--field-bg); padding: 2px 6px; margin-right: 6px; margin-bottom: 4px; }
 .game-canvas {
   width: auto;
   max-width: 100%;
