@@ -549,25 +549,31 @@
     });
 
     modalBody.querySelector("#saveDrainButton").addEventListener("click", async () => {
-      await fetchJson(`/api/drains/${encodeURIComponent(name)}/update`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          favorite: modalBody.querySelector("#favoriteField").checked,
-          visited: modalBody.querySelector("#visitedField").checked,
-          description: modalBody.querySelector("#descriptionField").value,
-          notes: modalBody.querySelector("#notesField").value,
-          difficulty,
-          value,
-          rating,
-          features: Array.from(modalBody.querySelectorAll(".featureField")).reduce((acc, field) => {
-            acc[field.value] = field.checked;
-            return acc;
-          }, {}),
-        }),
-      });
-      await refreshStats();
-      await openDrain(name);
+      const saveButton = modalBody.querySelector("#saveDrainButton");
+      saveButton.disabled = true;
+      try {
+        await fetchJson(`/api/drains/${encodeURIComponent(name)}/update`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            favorite: modalBody.querySelector("#favoriteField").checked,
+            visited: modalBody.querySelector("#visitedField").checked,
+            description: modalBody.querySelector("#descriptionField").value,
+            notes: modalBody.querySelector("#notesField").value,
+            difficulty,
+            value,
+            rating,
+            features: Array.from(modalBody.querySelectorAll(".featureField")).reduce((acc, field) => {
+              acc[field.value] = field.checked;
+              return acc;
+            }, {}),
+          }),
+        });
+        await refreshStats();
+        drawMessage(`Saved ${name}.`);
+      } finally {
+        saveButton.disabled = false;
+      }
     });
   }
 
