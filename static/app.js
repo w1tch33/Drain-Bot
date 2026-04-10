@@ -920,6 +920,10 @@
     openModal("Helpful Links", qs("#linksTemplate").content.cloneNode(true));
   }
 
+  function openTutorial() {
+    openModal("Tutorial", qs("#tutorialTemplate").content.cloneNode(true));
+  }
+
   function openAddDrain() {
     openModal("Add Drain", qs("#addDrainTemplate").content.cloneNode(true));
     qs("#addDrainForm").addEventListener("submit", async (event) => {
@@ -2283,6 +2287,7 @@
   qs("#randomButton").addEventListener("click", randomDrain);
   qs("#routeButton").addEventListener("click", buildRoute);
   qs("#linksButton").addEventListener("click", openLinks);
+  qs("#tutorialButton").addEventListener("click", openTutorial);
   qs("#addDrainButton").addEventListener("click", openAddDrain);
   qs("#profileButton").addEventListener("click", openProfile);
   if (qs("#syncMapButton")) qs("#syncMapButton").addEventListener("click", syncMap);

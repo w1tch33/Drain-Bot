@@ -32,11 +32,12 @@
 
     <section class="retro-window control-window">
       <div class="window-title"><span>Control Panel</span></div>
-      <div class="window-body control-body">
-        <button class="retro-button links-button" id="linksButton" type="button">Links</button>
+        <div class="window-body control-body">
+          <button class="retro-button links-button" id="linksButton" type="button">Links</button>
+          <button class="retro-button tutorial-button tutorial-flash-button" id="tutorialButton" type="button">Tutorial!</button>
 
-        <label class="retro-label" for="minDistance">Min km</label>
-        <div class="slider-wrap">
+          <label class="retro-label" for="minDistance">Min km</label>
+          <div class="slider-wrap">
           <input id="minDistance" class="retro-range" type="range" min="0" max="120" value="5">
           <div class="slider-value" id="minDistanceValue">5</div>
         </div>
@@ -166,15 +167,29 @@
     </div>
   </template>
 
-  <template id="addDrainTemplate">
-    <form class="modal-form" id="addDrainForm">
-      <label>Name <input class="retro-input" name="name" required></label>
-      <label>Latitude <input class="retro-input" name="lat" type="number" step="any" required></label>
-      <label>Longitude <input class="retro-input" name="lon" type="number" step="any" required></label>
-      <label>Description <textarea class="retro-textarea" name="description" rows="4"></textarea></label>
-      <button class="retro-button" type="submit">Save</button>
-    </form>
-  </template>
+    <template id="addDrainTemplate">
+      <form class="modal-form" id="addDrainForm">
+        <label>Name <input class="retro-input" name="name" required></label>
+        <label>Latitude <input class="retro-input" name="lat" type="number" step="any" required></label>
+        <label>Longitude <input class="retro-input" name="lon" type="number" step="any" required></label>
+        <label>Description <textarea class="retro-textarea" name="description" rows="4"></textarea></label>
+        <button class="retro-button" type="submit">Save</button>
+      </form>
+    </template>
+
+    <template id="tutorialTemplate">
+      <div class="stack-list tutorial-stack">
+        <div><strong>Welcome to Drain-Bot</strong></div>
+        <div>1. Create an account and wait for approval from <strong>witch</strong>.</div>
+        <div>2. Log in and click <strong>Sync Map</strong> to upload your KML/KMZ and add your drains.</div>
+        <div>3. Set your <strong>Min km</strong> and <strong>Max km</strong> sliders in the Control Panel.</div>
+        <div>4. Use <strong>Run</strong> to get drains, <strong>Random Drain</strong> for a surprise, and <strong>Build Route</strong> for a route plan.</div>
+        <div>5. Click any drain result to open the drain menu and save your own <strong>Description</strong>, <strong>Notes</strong>, <strong>Visited</strong>, rating, and photos.</div>
+        <div>6. Use <strong>Only Unvisited</strong> or <strong>Only Visited</strong> to filter your list.</div>
+        <div>7. Click your username top-right to open your profile, send friend requests, and compare stats/high scores.</div>
+        <div>8. Open <strong>Mini Games!</strong> to play Drain Climber and Drain Runner.</div>
+      </div>
+    </template>
 
   <template id="syncMapTemplate">
     <form class="modal-form" id="syncMapForm" enctype="multipart/form-data">

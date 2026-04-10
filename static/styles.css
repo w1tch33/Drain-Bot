@@ -247,6 +247,8 @@ body {
 .music-window { left: 716px; top: 602px; transform: translateX(-50%); width: 292px; height: 128px; }
 .control-body { padding-top: 24px; }
 .links-button { position: absolute; top: 48px; right: 8px; width: 78px; height: 32px; padding: 4px 2px; font-size: 12px; }
+.tutorial-button { position: absolute; top: 86px; right: 8px; width: 78px; height: 32px; padding: 4px 1px; font-size: 11px; }
+.tutorial-flash-button { animation: invertFlash 2.4s step-end infinite; }
 
 .panel-scroller, .search-results {
   overflow-y: auto;
@@ -548,6 +550,7 @@ body {
   display: block;
 }
 .stack-list, .modal-form { display: flex; flex-direction: column; gap: 8px; }
+.tutorial-stack { gap: 10px; line-height: 1.2; }
 .list-button { text-align: center; min-width: 160px; }
 .profile-section { display: grid; gap: 8px; margin-bottom: 14px; }
 .profile-heading, .profile-name { font-weight: 700; font-size: 15px; }
