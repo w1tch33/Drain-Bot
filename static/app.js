@@ -747,28 +747,6 @@
 
   function openGames() {
     openModal("Mini Games", qs("#miniGamesTemplate").content.cloneNode(true));
-    const canvas = qs("#gameCanvas");
-    const help = qs("#gameHelp");
-    const controls = qs("#gameControls");
-    canvas.classList.add("hidden");
-    help.classList.add("hidden");
-    controls.classList.add("hidden");
-    help.textContent = "SELECT GAME";
-    bindGameControls(controls);
-    modalBody.querySelectorAll(".game-button").forEach((button) => {
-      button.addEventListener("click", () => {
-        canvas.classList.remove("hidden");
-        help.classList.remove("hidden");
-        controls.classList.remove("hidden");
-        if (state.gameCleanup) {
-          state.gameCleanup();
-          state.gameCleanup = null;
-        }
-        if (button.dataset.game === "navigator") runNavigator(canvas, help);
-        else if (button.dataset.game === "drainman") runDrainMan(canvas, help);
-        else runClimber(canvas, help);
-      });
-    });
   }
 
   function runNavigator(canvas, help) {
