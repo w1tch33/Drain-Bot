@@ -4,6 +4,7 @@
     playlistIndex: 0,
     currentDrain: null,
     gameCleanup: null,
+    gameLoopCleanup: null,
     marqueeX: 0,
     meowTimer: null,
   };
@@ -932,9 +933,9 @@
   }
 
   function bindGameCleanup(handler, extraCleanup) {
-    const previousCleanup = state.gameCleanup;
+    const previousCleanup = state.gameLoopCleanup;
     if (previousCleanup) previousCleanup();
-    state.gameCleanup = () => {
+    state.gameLoopCleanup = () => {
       window.removeEventListener("keydown", handler);
       window.removeEventListener("keyup", handler);
       window.removeEventListener("game-control", handler);
@@ -1042,9 +1043,9 @@
         controls.classList.remove("hidden");
         if (window.innerWidth <= 980 && menu) menu.classList.add("hidden");
         canvas.focus();
-        if (state.gameCleanup) {
-          state.gameCleanup();
-          state.gameCleanup = null;
+        if (state.gameLoopCleanup) {
+          state.gameLoopCleanup();
+          state.gameLoopCleanup = null;
         }
         if (button.dataset.game === "ladderclimb") {
           configureGameControls(controls, {
@@ -1065,6 +1066,10 @@
     const previousCleanup = state.gameCleanup;
     state.gameCleanup = () => {
       cleanupControls();
+      if (state.gameLoopCleanup) {
+        state.gameLoopCleanup();
+        state.gameLoopCleanup = null;
+      }
       if (previousCleanup) previousCleanup();
     };
   }
