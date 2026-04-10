@@ -1535,12 +1535,11 @@
     let highScore = readStoredNumber(RUNNER_HIGH_SCORE_KEY);
     let ballX = 0;
     let velocityX = 0;
-    let curvePhase = 0;
     const keys = { left: false, right: false };
     const obstacles = [];
 
-    function roadCenter(z) {
-      return Math.sin(curvePhase + z * 2.6) * (0.70 - z * 0.22);
+    function roadCenter() {
+      return 0;
     }
 
     function roadHalfWidth(z) {
@@ -1724,7 +1723,6 @@
       gameOverTitle = "GAME OVER";
       spawnTimer = 18;
       speed = 0.58;
-      curvePhase = 0;
       ballX = 0;
       velocityX = 0;
       keys.left = false;
@@ -1762,7 +1760,6 @@
       speed += 0.00075 * frameScale;
       speed = Math.min(1.45, speed);
       distance += speed * 1.9 * frameScale;
-      curvePhase += (0.010 + speed * 0.005) * frameScale;
 
       const nearHalf = roadHalfWidth(1);
       const softEdge = Math.max(0.14, nearHalf - 0.035);
