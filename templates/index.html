@@ -10,7 +10,7 @@
           <a class="retro-button session-button" href="{{ url_for('admin_login') }}">Admin</a>
         {% endif %}
       {% endif %}
-      <span class="session-user">{{ current_username }}</span>
+      <button class="session-user session-user-button" id="profileButton" type="button">{{ current_username }}</button>
       <form class="session-form" method="post" action="{{ url_for('logout') }}">
         <button class="retro-button session-button" type="submit">Log Out</button>
       </form>

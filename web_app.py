@@ -212,6 +212,33 @@ def stats():
     return jsonify(drain_service.stats_summary(current_username()))
 
 
+@app.get("/api/profile")
+@login_required
+def profile():
+    return jsonify(drain_service.profile_summary(current_username(), current_username()))
+
+
+@app.post("/api/friends/request")
+@login_required
+def friend_request():
+    payload = request.get_json(silent=True) or request.form
+    try:
+        drain_service.send_friend_request(current_username(), str(payload.get("username", "")))
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
+    return jsonify({"ok": True, "profile": drain_service.profile_summary(current_username(), current_username())})
+
+
+@app.post("/api/friends/accept/<username>")
+@login_required
+def accept_friend(username: str):
+    try:
+        drain_service.accept_friend_request(current_username(), username)
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
+    return jsonify({"ok": True, "profile": drain_service.profile_summary(current_username(), current_username())})
+
+
 @app.get("/api/run")
 @login_required
 def run_picker():

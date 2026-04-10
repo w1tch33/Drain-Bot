@@ -266,6 +266,97 @@
     visitedCount.textContent = `Drains Completed: ${stats.visited}`;
   }
 
+  function profileHtml(profile) {
+    const incoming = (profile.incoming_requests || [])
+      .map(
+        (request) => `
+          <div class="profile-row">
+            <span>${escapeHtml(request.username)}</span>
+            <button class="retro-button accept-friend-button" type="button" data-username="${escapeHtml(request.username)}">Accept</button>
+          </div>
+        `
+      )
+      .join("");
+
+    const outgoing = (profile.outgoing_requests || [])
+      .map((request) => `<div class="profile-copy">Pending: ${escapeHtml(request.username)}</div>`)
+      .join("");
+
+    const friends = (profile.friends || [])
+      .map(
+        (friend) => `
+          <div class="profile-card">
+            <div class="profile-name">${escapeHtml(friend.username)}</div>
+            <div class="profile-copy">Drains: ${friend.stats.total}</div>
+            <div class="profile-copy">Visited: ${friend.stats.visited}</div>
+          </div>
+        `
+      )
+      .join("");
+
+    return `
+      <div class="profile-section">
+        <div class="profile-name">${escapeHtml(profile.username)}</div>
+        <div class="profile-copy">Drains: ${profile.stats.total}</div>
+        <div class="profile-copy">Visited: ${profile.stats.visited}</div>
+      </div>
+      <div class="profile-section">
+        <div class="profile-heading">Friends</div>
+        <div class="profile-list">${friends || "<div class=\"profile-copy\">No friends yet.</div>"}</div>
+      </div>
+      <div class="profile-section">
+        <div class="profile-heading">Add Friend</div>
+        <form class="modal-form" id="friendRequestForm">
+          <input class="retro-input" name="username" placeholder="username" required>
+          <button class="retro-button" type="submit">Send Request</button>
+        </form>
+        ${outgoing || ""}
+      </div>
+      <div class="profile-section">
+        <div class="profile-heading">Friend Requests</div>
+        <div class="profile-list">${incoming || "<div class=\"profile-copy\">No incoming requests.</div>"}</div>
+      </div>
+      <div class="profile-section">
+        <div class="profile-heading">High Scores</div>
+        <div class="profile-copy">Coming soon.</div>
+      </div>
+    `;
+  }
+
+  async function openProfile() {
+    setLoading(true);
+    try {
+      const profile = await fetchJson("/api/profile");
+      openModal(`${profile.username} Profile`, profileHtml(profile));
+      const friendRequestForm = modalBody.querySelector("#friendRequestForm");
+      if (friendRequestForm) {
+        friendRequestForm.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const formData = new FormData(event.currentTarget);
+          await fetchJson("/api/friends/request", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: formData.get("username") }),
+          });
+          await openProfile();
+        });
+      }
+
+      modalBody.querySelectorAll(".accept-friend-button").forEach((button) => {
+        button.addEventListener("click", async () => {
+          await fetchJson(`/api/friends/accept/${encodeURIComponent(button.dataset.username)}`, {
+            method: "POST",
+          });
+          await openProfile();
+        });
+      });
+    } catch (error) {
+      drawMessage(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function searchDrains() {
     const query = searchInput.value.trim();
     if (!query) {
@@ -1304,6 +1395,7 @@
   qs("#routeButton").addEventListener("click", buildRoute);
   qs("#linksButton").addEventListener("click", openLinks);
   qs("#addDrainButton").addEventListener("click", openAddDrain);
+  qs("#profileButton").addEventListener("click", openProfile);
   if (qs("#syncMapButton")) qs("#syncMapButton").addEventListener("click", syncMap);
   qs("#miniGamesButton").addEventListener("click", openGames);
   qs("#closeModal").addEventListener("click", closeModal);

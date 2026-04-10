@@ -96,6 +96,30 @@ def valid_username(username: str) -> bool:
     return bool(re.fullmatch(r"[a-zA-Z0-9_-]{3,32}", username or ""))
 
 
+def _unique_usernames(values: list[Any] | None) -> list[str]:
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for value in values or []:
+        normalized = normalize_username(str(value))
+        if normalized and normalized not in seen:
+            seen.add(normalized)
+            ordered.append(normalized)
+    return ordered
+
+
+def _normalize_account_record(username: str, account: dict[str, Any]) -> dict[str, Any]:
+    normalized = normalize_username(username or account.get("username", ""))
+    return {
+        "username": normalized,
+        "password_hash": account.get("password_hash", ""),
+        "approved": bool(account.get("approved")),
+        "map_uploaded": bool(account.get("map_uploaded")),
+        "friends": _unique_usernames(account.get("friends")),
+        "incoming_requests": _unique_usernames(account.get("incoming_requests")),
+        "outgoing_requests": _unique_usernames(account.get("outgoing_requests")),
+    }
+
+
 def user_metadata_path(username: str) -> str:
     return os.path.join(USERS_DIR, normalize_username(username), "metadata.json")
 
@@ -124,8 +148,7 @@ def _load_user_account(username: str) -> dict[str, Any] | None:
     normalized = normalize_username(account.get("username", username))
     if not normalized:
         return None
-    account["username"] = normalized
-    return account
+    return _normalize_account_record(normalized, account)
 
 
 def _save_user_account(username: str, account: dict[str, Any]) -> None:
@@ -158,9 +181,7 @@ def load_accounts() -> dict[str, Any]:
     for key, value in accounts.items():
         normalized = normalize_username(key if isinstance(key, str) else "")
         if normalized and isinstance(value, dict):
-            account = dict(value)
-            account["username"] = normalized
-            merged[normalized] = account
+            merged[normalized] = _normalize_account_record(normalized, dict(value))
 
     for username in _iter_usernames_from_dirs():
         account = _load_user_account(username)
@@ -216,6 +237,9 @@ def create_account(username: str, password: str) -> dict[str, Any]:
         "password_hash": generate_password_hash(password),
         "approved": False,
         "map_uploaded": False,
+        "friends": [],
+        "incoming_requests": [],
+        "outgoing_requests": [],
     }
     save_accounts(accounts)
     metadata = load_user_metadata(normalized)
@@ -255,6 +279,7 @@ def list_accounts() -> list[dict[str, Any]]:
                 "username": username,
                 "approved": bool(account.get("approved")),
                 "map_uploaded": bool(account.get("map_uploaded")),
+                "friend_count": len(_unique_usernames(account.get("friends"))),
             }
         )
     accounts_list.sort(key=lambda item: item["username"])
@@ -270,6 +295,114 @@ def approve_account(username: str) -> None:
     account["approved"] = True
     accounts[normalized] = account
     save_accounts(accounts)
+
+
+def account_exists(username: str) -> bool:
+    return normalize_username(username) in load_accounts()
+
+
+def _account_record(username: str) -> dict[str, Any]:
+    normalized = normalize_username(username)
+    account = load_accounts().get(normalized)
+    if not isinstance(account, dict):
+        raise ValueError("Account not found.")
+    return _normalize_account_record(normalized, account)
+
+
+def send_friend_request(from_username: str, to_username: str) -> None:
+    sender = normalize_username(from_username)
+    recipient = normalize_username(to_username)
+    if not sender or not recipient:
+        raise ValueError("Enter a valid username.")
+    if sender == recipient:
+        raise ValueError("You can't add yourself.")
+
+    accounts = load_accounts()
+    sender_account = accounts.get(sender)
+    recipient_account = accounts.get(recipient)
+    if not isinstance(sender_account, dict) or not isinstance(recipient_account, dict):
+        raise ValueError("That username doesn't exist.")
+
+    sender_account = _normalize_account_record(sender, sender_account)
+    recipient_account = _normalize_account_record(recipient, recipient_account)
+
+    if recipient in sender_account["friends"]:
+        raise ValueError("You're already friends.")
+    if recipient in sender_account["outgoing_requests"]:
+        raise ValueError("Friend request already sent.")
+    if sender in recipient_account["incoming_requests"]:
+        raise ValueError("Friend request already sent.")
+
+    sender_account["outgoing_requests"].append(recipient)
+    recipient_account["incoming_requests"].append(sender)
+    accounts[sender] = sender_account
+    accounts[recipient] = recipient_account
+    save_accounts(accounts)
+
+
+def accept_friend_request(username: str, from_username: str) -> None:
+    current = normalize_username(username)
+    requester = normalize_username(from_username)
+    accounts = load_accounts()
+    current_account = accounts.get(current)
+    requester_account = accounts.get(requester)
+    if not isinstance(current_account, dict) or not isinstance(requester_account, dict):
+        raise ValueError("Account not found.")
+
+    current_account = _normalize_account_record(current, current_account)
+    requester_account = _normalize_account_record(requester, requester_account)
+
+    if requester not in current_account["incoming_requests"]:
+        raise ValueError("No friend request from that user.")
+
+    current_account["incoming_requests"] = [name for name in current_account["incoming_requests"] if name != requester]
+    requester_account["outgoing_requests"] = [name for name in requester_account["outgoing_requests"] if name != current]
+
+    if requester not in current_account["friends"]:
+        current_account["friends"].append(requester)
+    if current not in requester_account["friends"]:
+        requester_account["friends"].append(current)
+
+    accounts[current] = current_account
+    accounts[requester] = requester_account
+    save_accounts(accounts)
+
+
+def profile_summary(username: str, viewer_username: str | None = None) -> dict[str, Any]:
+    normalized = normalize_username(username)
+    account = _account_record(normalized)
+    stats = stats_summary(normalized)
+    friends = []
+    for friend_name in account.get("friends", []):
+        if not account_exists(friend_name):
+            continue
+        friends.append(
+            {
+                "username": friend_name,
+                "stats": stats_summary(friend_name),
+            }
+        )
+
+    payload = {
+        "username": normalized,
+        "stats": stats,
+        "friends": friends,
+        "high_scores": {},
+    }
+
+    if viewer_username and normalize_username(viewer_username) == normalized:
+        payload["incoming_requests"] = [
+            {"username": requester}
+            for requester in account.get("incoming_requests", [])
+            if account_exists(requester)
+        ]
+        payload["outgoing_requests"] = [
+            {"username": recipient}
+            for recipient in account.get("outgoing_requests", [])
+            if account_exists(recipient)
+        ]
+
+    return payload
 
 
 def delete_account(username: str) -> None:
