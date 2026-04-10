@@ -145,6 +145,10 @@ def admin_accounts():
         "admin_accounts.html",
         pending_accounts=drain_service.list_pending_accounts(),
         all_accounts=drain_service.list_accounts(),
+        data_dir=drain_service.DATA_DIR,
+        accounts_file=drain_service.ACCOUNTS_FILE,
+        users_dir=drain_service.USERS_DIR,
+        volume_path=os.getenv("RAILWAY_VOLUME_MOUNT_PATH", ""),
     )
 
 

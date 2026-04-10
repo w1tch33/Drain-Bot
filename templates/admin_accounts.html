@@ -30,6 +30,12 @@
           <div class="auth-copy">No accounts found.</div>
         {% endif %}
 
+        <div class="auth-copy">Storage</div>
+        <div class="auth-copy">Data dir: {{ data_dir }}</div>
+        <div class="auth-copy">Accounts file: {{ accounts_file }}</div>
+        <div class="auth-copy">Users dir: {{ users_dir }}</div>
+        <div class="auth-copy">Railway volume path: {{ volume_path or 'not set' }}</div>
+
         <div class="auth-copy">Pending approvals</div>
         {% if pending_accounts %}
           <div class="stack-list">

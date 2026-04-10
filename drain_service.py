@@ -89,6 +89,10 @@ def user_metadata_path(username: str) -> str:
     return os.path.join(USERS_DIR, normalize_username(username), "metadata.json")
 
 
+def user_account_path(username: str) -> str:
+    return os.path.join(USERS_DIR, normalize_username(username), "account.json")
+
+
 def user_upload_dir(username: str) -> str:
     return os.path.join(UPLOAD_DIR, normalize_username(username))
 
@@ -98,10 +102,61 @@ def ensure_user_dirs(username: str) -> None:
     os.makedirs(user_upload_dir(username), exist_ok=True)
 
 
+def _load_user_account(username: str) -> dict[str, Any] | None:
+    path = user_account_path(username)
+    if not os.path.exists(path):
+        return None
+    with open(path, "r", encoding="utf-8") as handle:
+        account = json.load(handle)
+    if not isinstance(account, dict):
+        return None
+    normalized = normalize_username(account.get("username", username))
+    if not normalized:
+        return None
+    account["username"] = normalized
+    return account
+
+
+def _save_user_account(username: str, account: dict[str, Any]) -> None:
+    ensure_user_dirs(username)
+    with open(user_account_path(username), "w", encoding="utf-8") as handle:
+        json.dump(account, handle, indent=2, ensure_ascii=False)
+
+
+def _iter_usernames_from_dirs() -> list[str]:
+    ensure_runtime_dirs()
+    usernames: list[str] = []
+    for entry in os.listdir(USERS_DIR):
+        path = os.path.join(USERS_DIR, entry)
+        if os.path.isdir(path):
+            normalized = normalize_username(entry)
+            if normalized:
+                usernames.append(normalized)
+    usernames.sort()
+    return usernames
+
+
 def load_accounts() -> dict[str, Any]:
     bootstrap_accounts_file()
     with open(ACCOUNTS_FILE, "r", encoding="utf-8") as handle:
-        return json.load(handle)
+        accounts = json.load(handle)
+    if not isinstance(accounts, dict):
+        accounts = {}
+
+    merged: dict[str, Any] = {}
+    for key, value in accounts.items():
+        normalized = normalize_username(key if isinstance(key, str) else "")
+        if normalized and isinstance(value, dict):
+            account = dict(value)
+            account["username"] = normalized
+            merged[normalized] = account
+
+    for username in _iter_usernames_from_dirs():
+        account = _load_user_account(username)
+        if account:
+            merged[username] = account
+
+    return merged
 
 
 def save_accounts(accounts: dict[str, Any]) -> None:
@@ -109,6 +164,12 @@ def save_accounts(accounts: dict[str, Any]) -> None:
         ensure_runtime_dirs()
         with open(ACCOUNTS_FILE, "w", encoding="utf-8") as handle:
             json.dump(accounts, handle, indent=2, ensure_ascii=False)
+        for username, account in accounts.items():
+            normalized = normalize_username(username)
+            if normalized and isinstance(account, dict):
+                stored = dict(account)
+                stored["username"] = normalized
+                _save_user_account(normalized, stored)
 
 
 def load_user_metadata(username: str | None) -> dict[str, Any]:
@@ -215,6 +276,7 @@ def delete_account(username: str) -> None:
     save_accounts(accounts)
 
     metadata_path = user_metadata_path(normalized)
+    account_path = user_account_path(normalized)
     upload_path = user_upload_dir(normalized)
     user_dir = os.path.dirname(metadata_path)
 
@@ -223,6 +285,11 @@ def delete_account(username: str) -> None:
     if os.path.isfile(metadata_path):
         try:
             os.remove(metadata_path)
+        except OSError:
+            pass
+    if os.path.isfile(account_path):
+        try:
+            os.remove(account_path)
         except OSError:
             pass
     if os.path.isdir(user_dir):
@@ -1058,9 +1125,4 @@ def search_results(username: str | None, query: str, only_unvisited: bool = Fals
 
 
 def google_earth_url(lat: float, lon: float, name: str) -> str:
-    encoded_name = re.sub(r"\s+", "+", name.strip())
-    return (
-        "https://earth.google.com/web/search/"
-        f"{encoded_name}/@{lat},{lon},-26.54449985a,339492.64726963d,35y,-0h,0t,0r/"
-        "data=CgRCAggBMikKJwolCiExamhPeGdLRzE4T1NNTmFpSVh1cUFkQlhBYVYzU01oZkMgAToDCgEwQgIIAEoHCOv6sjsQAQ"
-    )
+    return f"https://earth.google.com/web/search/{lat},{lon}"
