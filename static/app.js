@@ -31,6 +31,7 @@
   const maxDistance = qs("#maxDistance");
   const onlyUnvisitedToggle = qs("#onlyUnvisited");
   const onlyVisitedToggle = qs("#onlyVisited");
+  const themeSelect = qs("#themeSelect");
   const volumeControl = qs("#volumeControl");
   const minDistanceValue = qs("#minDistanceValue");
   const maxDistanceValue = qs("#maxDistanceValue");
@@ -42,6 +43,8 @@
   const DRAIN_MAN_HIGH_SCORE_KEY = "draintool-drainman-high-score";
   const CLIMBER_HIGH_SCORE_KEY = "draintool-drainclimber-high-score";
   const RUNNER_HIGH_SCORE_KEY = "draintool-drainrunner-high-score";
+  const THEME_STORAGE_KEY = "draintool-theme";
+  const THEMES = new Set(["mac-system-1", "crt-green", "industrial-gray", "amber-terminal", "ice-blueprint"]);
   let musicMarqueeTimer = null;
   let audioUnlocked = false;
   let pendingAutoplay = false;
@@ -80,6 +83,36 @@
     }
     const scale = Math.min(window.innerWidth / BASE_WIDTH, window.innerHeight / BASE_HEIGHT, 1);
     desktop.style.transform = `scale(${scale})`;
+  }
+
+  function applyTheme(themeName) {
+    const theme = THEMES.has(themeName) ? themeName : "mac-system-1";
+    if (theme === "mac-system-1") {
+      document.documentElement.removeAttribute("data-theme");
+    } else {
+      document.documentElement.setAttribute("data-theme", theme);
+    }
+    if (themeSelect && themeSelect.value !== theme) {
+      themeSelect.value = theme;
+    }
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, theme);
+    } catch (_error) {
+      // Ignore storage failures (private mode, blocked storage).
+    }
+  }
+
+  function setupThemes() {
+    let storedTheme = "mac-system-1";
+    try {
+      storedTheme = localStorage.getItem(THEME_STORAGE_KEY) || "mac-system-1";
+    } catch (_error) {
+      storedTheme = "mac-system-1";
+    }
+    applyTheme(storedTheme);
+    if (themeSelect) {
+      themeSelect.addEventListener("change", () => applyTheme(themeSelect.value));
+    }
   }
 
   function escapeHtml(value) {
@@ -2414,6 +2447,7 @@
   setupLoadingDots();
   setupSmiley();
   setupMusic();
+  setupThemes();
   syncStoredHighScores();
   refreshNotifications();
   setInterval(refreshNotifications, 30000);
