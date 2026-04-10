@@ -1131,9 +1131,7 @@
         } else {
           configureGameControls(controls, {
             left: { label: "LEFT", key: "ArrowLeft" },
-            action: { label: "BOOST", key: "Space", code: "Space" },
             right: { label: "RIGHT", key: "ArrowRight" },
-            down: { label: "BRAKE", key: "ArrowDown" },
           });
           runDrainRunner(canvas, help);
         }
@@ -1516,10 +1514,13 @@
   function runDrainRunner(canvas, help) {
     const ctx = canvas.getContext("2d");
     const isMobile = window.innerWidth <= 980;
-    canvas.width = isMobile ? 560 : 680;
-    canvas.height = isMobile ? 250 : 320;
+    canvas.width = isMobile ? 560 : 700;
+    canvas.height = isMobile ? 260 : 340;
     canvas.classList.remove("climber-canvas");
     canvas.classList.add("runner-canvas");
+
+    const ballRadius = isMobile ? 11 : 13;
+    const horizonY = Math.floor(canvas.height * 0.20);
     let score = 0;
     let distance = 0;
     let gameRunning = false;
@@ -1530,27 +1531,32 @@
     let countdownTimer = null;
     let lastFrameMs = null;
     let spawnTimer = 0;
-    let speed = 0.72;
+    let speed = 0.58;
     let highScore = readStoredNumber(RUNNER_HIGH_SCORE_KEY);
-    let lane = 0;
-    let lives = 3;
-    let invulnTimer = 0;
-    let laneCooldown = 0;
-    let pulse = 0;
-    const keys = { boost: false, brake: false };
+    let ballX = 0;
+    let velocityX = 0;
+    let curvePhase = 0;
+    const keys = { left: false, right: false };
     const obstacles = [];
-    const pickups = [];
-    const horizonY = Math.floor(canvas.height * 0.22);
-    const baseY = canvas.height - 26;
 
-    function projectDepth(z) {
-      return 0.18 + (z * z * 0.95);
+    function roadCenter(z) {
+      return Math.sin(curvePhase + z * 2.6) * (0.70 - z * 0.22);
     }
 
-    function laneX(laneIndex, z) {
-      const center = canvas.width / 2;
-      const width = canvas.width * (0.58 * projectDepth(z));
-      return center + laneIndex * (width * 0.33);
+    function roadHalfWidth(z) {
+      return 0.86 - z * 0.54;
+    }
+
+    function project(z, xNorm) {
+      const depth = z * z;
+      const y = horizonY + depth * (canvas.height - horizonY);
+      const centerX = canvas.width / 2 + roadCenter(z) * canvas.width * 0.22;
+      const half = roadHalfWidth(z) * canvas.width * 0.30;
+      return {
+        x: centerX + xNorm * half,
+        y,
+        half,
+      };
     }
 
     function updateHelp(message = "") {
@@ -1563,140 +1569,118 @@
         return;
       }
       help.textContent = gameRunning
-        ? `Score: ${score} | Distance: ${Math.floor(distance)}m | Lives: ${lives} | High: ${highScore}`
-        : `DRAIN RUNNER 3D | ${countdown > 0 ? countdown : "GO"} | High: ${highScore}`;
+        ? `Score: ${score} | Distance: ${Math.floor(distance)}m | Speed: ${speed.toFixed(2)} | High: ${highScore}`
+        : `DRAIN RUNNER | SLOPE MODE | ${countdown > 0 ? countdown : "GO"} | High: ${highScore}`;
     }
 
     function drawGameOver(title) {
       ctx.fillStyle = "rgba(0, 0, 0, 0.72)";
-      ctx.fillRect(36, 60, canvas.width - 72, 170);
+      ctx.fillRect(42, 70, canvas.width - 84, 170);
       ctx.strokeStyle = "#ffffff";
       ctx.lineWidth = 2;
-      ctx.strokeRect(36, 60, canvas.width - 72, 170);
+      ctx.strokeRect(42, 70, canvas.width - 84, 170);
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 26px Chicago, Monaco, monospace";
       ctx.textAlign = "center";
-      ctx.fillText(title, canvas.width / 2, 98);
+      ctx.fillText(title, canvas.width / 2, 108);
       ctx.font = "18px Chicago, Monaco, monospace";
-      ctx.fillText(`Score: ${score}`, canvas.width / 2, 130);
-      ctx.fillText(`High: ${highScore}`, canvas.width / 2, 158);
+      ctx.fillText(`Score: ${score}`, canvas.width / 2, 140);
+      ctx.fillText(`High: ${highScore}`, canvas.width / 2, 168);
       ctx.font = "14px Chicago, Monaco, monospace";
-      ctx.fillText("Tap or click to retry", canvas.width / 2, 188);
+      ctx.fillText("Tap or click to retry", canvas.width / 2, 198);
       ctx.textAlign = "start";
     }
 
     function drawCountdownOverlay() {
       ctx.fillStyle = "rgba(0, 0, 0, 0.58)";
-      ctx.fillRect(90, 64, canvas.width - 180, 120);
+      ctx.fillRect(104, 74, canvas.width - 208, 120);
       ctx.strokeStyle = "#ffffff";
       ctx.lineWidth = 2;
-      ctx.strokeRect(90, 64, canvas.width - 180, 120);
+      ctx.strokeRect(104, 74, canvas.width - 208, 120);
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 52px Chicago, Monaco, monospace";
       ctx.textAlign = "center";
-      ctx.fillText(String(countdown), canvas.width / 2, 138);
+      ctx.fillText(String(countdown), canvas.width / 2, 148);
       ctx.textAlign = "start";
     }
 
-    function drawRunner() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#0d1014";
+    function drawRoad() {
+      ctx.fillStyle = "#0a0d11";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      const tunnelTopWidth = canvas.width * 0.20;
-      const tunnelBottomWidth = canvas.width * 0.94;
-      const centerX = canvas.width / 2;
-
-      ctx.fillStyle = "#171b21";
-      ctx.beginPath();
-      ctx.moveTo(centerX - tunnelTopWidth / 2, horizonY);
-      ctx.lineTo(centerX + tunnelTopWidth / 2, horizonY);
-      ctx.lineTo(centerX + tunnelBottomWidth / 2, canvas.height);
-      ctx.lineTo(centerX - tunnelBottomWidth / 2, canvas.height);
-      ctx.closePath();
-      ctx.fill();
-
-      for (let i = 0; i < 18; i += 1) {
-        const t = i / 17;
-        const y = horizonY + (t * t) * (canvas.height - horizonY);
-        const w = tunnelTopWidth + (t * t) * (tunnelBottomWidth - tunnelTopWidth);
-        ctx.strokeStyle = i % 2 === 0 ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)";
+      for (let i = 0; i < 34; i += 1) {
+        const z1 = i / 34;
+        const z2 = (i + 1) / 34;
+        const p1L = project(z1, -1);
+        const p1R = project(z1, 1);
+        const p2L = project(z2, -1);
+        const p2R = project(z2, 1);
+        ctx.fillStyle = i % 2 === 0 ? "#1e222a" : "#161a20";
         ctx.beginPath();
-        ctx.moveTo(centerX - w / 2, y);
-        ctx.lineTo(centerX + w / 2, y);
+        ctx.moveTo(p1L.x, p1L.y);
+        ctx.lineTo(p1R.x, p1R.y);
+        ctx.lineTo(p2R.x, p2R.y);
+        ctx.lineTo(p2L.x, p2L.y);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      for (let i = 0; i < 24; i += 1) {
+        const z = i / 24;
+        const left = project(z, -1);
+        const right = project(z, 1);
+        ctx.strokeStyle = "rgba(255,255,255,0.10)";
+        ctx.beginPath();
+        ctx.moveTo(left.x, left.y);
+        ctx.lineTo(right.x, right.y);
         ctx.stroke();
       }
 
-      [-1, 0, 1].forEach((laneIndex) => {
-        ctx.strokeStyle = "rgba(255,255,255,0.14)";
-        ctx.beginPath();
-        ctx.moveTo(laneX(laneIndex, 0.02), horizonY + 2);
-        ctx.lineTo(laneX(laneIndex, 1), canvas.height);
-        ctx.stroke();
-      });
+      const leftNear = project(1, -1);
+      const rightNear = project(1, 1);
+      const leftFar = project(0, -1);
+      const rightFar = project(0, 1);
+      ctx.strokeStyle = "#8fa3b8";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(leftFar.x, leftFar.y);
+      ctx.lineTo(leftNear.x, leftNear.y);
+      ctx.moveTo(rightFar.x, rightFar.y);
+      ctx.lineTo(rightNear.x, rightNear.y);
+      ctx.stroke();
+    }
+
+    function drawRunner() {
+      drawRoad();
 
       obstacles.sort((a, b) => a.z - b.z).forEach((obstacle) => {
-        const scale = projectDepth(obstacle.z);
-        const x = laneX(obstacle.lane, obstacle.z);
-        const y = horizonY + (obstacle.z * obstacle.z) * (canvas.height - horizonY);
-
-        if (obstacle.type === "gap") {
-          const w = 20 + 110 * scale;
-          const h = 4 + 10 * scale;
-          ctx.fillStyle = "rgba(0,0,0,0.85)";
-          ctx.fillRect(x - w / 2, y - h / 2, w, h);
-          ctx.strokeStyle = "rgba(255,255,255,0.22)";
-          ctx.strokeRect(x - w / 2, y - h / 2, w, h);
-          return;
-        }
-
-        const w = obstacle.type === "pipe" ? 16 + 52 * scale : 16 + 42 * scale;
-        const h = obstacle.type === "pipe" ? 18 + 72 * scale : 16 + 34 * scale;
-        ctx.fillStyle = obstacle.type === "pipe" ? "#90a4ae" : "#8d6e63";
-        ctx.fillRect(x - w / 2, y - h, w, h);
+        const p = project(obstacle.z, obstacle.x);
+        const scale = 0.25 + obstacle.z * obstacle.z * 1.1;
+        const size = ballRadius * (0.85 + scale * 1.15);
+        ctx.fillStyle = obstacle.type === "block" ? "#ff7043" : "#8d6e63";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y - size * 0.35, size, 0, Math.PI * 2);
+        ctx.fill();
         ctx.strokeStyle = "#000";
-        ctx.strokeRect(x - w / 2, y - h, w, h);
+        ctx.stroke();
       });
 
-      pickups.forEach((pickup) => {
-        const scale = projectDepth(pickup.z);
-        const x = laneX(pickup.lane, pickup.z);
-        const y = horizonY + (pickup.z * pickup.z) * (canvas.height - horizonY);
-        const w = 8 + 20 * scale;
-        const h = 10 + 24 * scale;
-        ctx.fillStyle = "#ffd54f";
-        ctx.fillRect(x - w / 2, y - h, w, h);
-        ctx.strokeStyle = "#000";
-        ctx.strokeRect(x - w / 2, y - h, w, h);
-      });
-
-      const playerX = laneX(lane, 1);
-      const bodyW = 28;
-      const bodyH = 40;
-      const py = baseY - bodyH;
-      ctx.fillStyle = invulnTimer > 0 && Math.floor(invulnTimer / 4) % 2 === 0 ? "#ffcc80" : "#dcdcdc";
-      ctx.fillRect(playerX - bodyW / 2, py, bodyW, bodyH);
+      const ballProj = project(1, ballX);
+      const shine = Math.max(0.2, 1 - Math.abs(velocityX) * 1.8);
+      ctx.fillStyle = `rgba(255, 214, 79, ${shine})`;
+      ctx.beginPath();
+      ctx.arc(ballProj.x, ballProj.y - ballRadius, ballRadius, 0, Math.PI * 2);
+      ctx.fill();
       ctx.strokeStyle = "#000";
-      ctx.strokeRect(playerX - bodyW / 2, py, bodyW, bodyH);
+      ctx.stroke();
 
-      for (let i = 0; i < 2; i += 1) {
-        const copX = laneX(i === 0 ? -1 : 1, 0.92) + Math.sin(pulse + i) * 6;
-        const copY = baseY + 2;
-        ctx.fillStyle = i === 0 ? "#e53935" : "#f06292";
-        ctx.fillRect(copX - 10, copY - 26, 20, 26);
-      }
+      ctx.fillStyle = "#f06292";
+      ctx.fillRect(12, 10, 120, 12);
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(12, 10, Math.min(120, Math.max(0, speed - 0.45) * 95), 12);
 
-      for (let i = 0; i < lives; i += 1) {
-        ctx.fillStyle = "#ff5252";
-        ctx.fillRect(12 + i * 18, 10, 12, 12);
-      }
-
-      if (!gameRunning && !gameOver && countdown > 0) {
-        drawCountdownOverlay();
-      }
-      if (gameOver) {
-        drawGameOver(gameOverTitle);
-      }
+      if (!gameRunning && !gameOver && countdown > 0) drawCountdownOverlay();
+      if (gameOver) drawGameOver(gameOverTitle);
       updateHelp();
     }
 
@@ -1708,55 +1692,28 @@
       }
     }
 
-    function spawnWave() {
-      const laneChoice = [-1, 0, 1][Math.floor(Math.random() * 3)];
-      const roll = Math.random();
-      if (roll < 0.48) {
-        obstacles.push({ type: "gap", lane: laneChoice, z: 0.03 });
-      } else if (roll < 0.78) {
-        obstacles.push({ type: "rat", lane: laneChoice, z: 0.03 });
-      } else {
-        obstacles.push({ type: "pipe", lane: laneChoice, z: 0.03 });
-      }
-      if (Math.random() < 0.35) {
-        pickups.push({ lane: [-1, 0, 1][Math.floor(Math.random() * 3)], z: 0.08 });
-      }
+    function spawnObstacle() {
+      const type = Math.random() < 0.78 ? "block" : "orb";
+      const x = (Math.random() * 1.6) - 0.8;
+      obstacles.push({ type, z: 0.02, x });
     }
 
     function onKey(event) {
       if (event.type === "game-control") {
         const detail = event.detail || {};
         const isDown = detail.phase === "down";
-        if (detail.slot === "left" && isDown && laneCooldown <= 0) {
-          lane = Math.max(-1, lane - 1);
-          laneCooldown = 7;
-        }
-        if (detail.slot === "right" && isDown && laneCooldown <= 0) {
-          lane = Math.min(1, lane + 1);
-          laneCooldown = 7;
-        }
-        if (detail.slot === "action") keys.boost = isDown;
-        if (detail.slot === "down") keys.brake = isDown;
+        if (detail.slot === "left") keys.left = isDown;
+        if (detail.slot === "right") keys.right = isDown;
         return;
       }
       const isDown = event.type === "keydown";
-      if (isDown && (event.key === " " || event.code === "Space" || event.key.startsWith("Arrow"))) {
-        event.preventDefault();
-      }
+      if (isDown && event.key.startsWith("Arrow")) event.preventDefault();
       if (gameOver && isDown && (event.key === " " || event.code === "Space" || event.key === "Enter")) {
         startRound();
         return;
       }
-      if (isDown && laneCooldown <= 0 && (event.key === "ArrowLeft" || event.key === "a")) {
-        lane = Math.max(-1, lane - 1);
-        laneCooldown = 7;
-      }
-      if (isDown && laneCooldown <= 0 && (event.key === "ArrowRight" || event.key === "d")) {
-        lane = Math.min(1, lane + 1);
-        laneCooldown = 7;
-      }
-      if (event.key === " " || event.code === "Space" || event.key === "ArrowUp" || event.key === "w") keys.boost = isDown;
-      if (event.key === "ArrowDown" || event.key === "s") keys.brake = isDown;
+      if (event.key === "ArrowLeft" || event.key === "a") keys.left = isDown;
+      if (event.key === "ArrowRight" || event.key === "d") keys.right = isDown;
     }
 
     function startRound() {
@@ -1766,16 +1723,13 @@
       gameOver = false;
       gameOverTitle = "GAME OVER";
       spawnTimer = 18;
-      speed = 0.72;
-      lane = 0;
-      lives = 3;
-      invulnTimer = 0;
-      laneCooldown = 0;
-      pulse = 0;
-      keys.boost = false;
-      keys.brake = false;
+      speed = 0.58;
+      ballX = 0;
+      velocityX = 0;
+      curvePhase = 0;
+      keys.left = false;
+      keys.right = false;
       obstacles.length = 0;
-      pickups.length = 0;
       gameRunning = false;
       drawRunner();
       countdownTimer = setInterval(() => {
@@ -1799,67 +1753,54 @@
       lastFrameMs = now;
       const frameScale = deltaMs / 16.67;
 
-      if (keys.boost) speed += 0.010 * frameScale;
-      if (keys.brake) speed -= 0.016 * frameScale;
-      speed += 0.0012 * frameScale;
-      speed -= 0.0040 * frameScale;
-      speed = Math.max(0.55, Math.min(1.45, speed));
-      distance += speed * 1.6 * frameScale;
-      pulse += 0.08 * frameScale;
-      if (laneCooldown > 0) laneCooldown -= frameScale;
-      if (invulnTimer > 0) invulnTimer -= frameScale;
+      if (keys.left) velocityX -= 0.019 * frameScale;
+      if (keys.right) velocityX += 0.019 * frameScale;
+      velocityX *= Math.pow(0.88, frameScale);
+      velocityX = Math.max(-0.12, Math.min(0.12, velocityX));
+      ballX += velocityX * frameScale;
+
+      speed += 0.00075 * frameScale;
+      speed = Math.min(1.45, speed);
+      distance += speed * 1.9 * frameScale;
+      curvePhase += (0.010 + speed * 0.005) * frameScale;
+
+      const nearCenter = roadCenter(1);
+      const nearHalf = roadHalfWidth(1);
+      if (Math.abs(ballX - nearCenter) > nearHalf - 0.12) {
+        gameRunning = false;
+        gameOver = true;
+        gameOverTitle = "FELL OFF THE EDGE";
+        updateHighScore();
+        drawRunner();
+        return;
+      }
 
       spawnTimer -= frameScale;
       if (spawnTimer <= 0) {
-        spawnWave();
-        spawnTimer = 24 + Math.random() * 20;
+        spawnObstacle();
+        spawnTimer = 24 + Math.random() * 26;
       }
 
-      const depthRate = (0.012 + speed * 0.0024) * frameScale;
+      const zRate = (0.011 + speed * 0.003) * frameScale;
       for (let i = obstacles.length - 1; i >= 0; i -= 1) {
         const obstacle = obstacles[i];
-        obstacle.z += depthRate;
+        obstacle.z += zRate;
         if (obstacle.z > 1.08) {
           obstacles.splice(i, 1);
-          score += 8;
+          score += 12;
           updateHighScore();
           continue;
         }
-        if (obstacle.z > 0.9 && obstacle.z < 1.03 && obstacle.lane === lane) {
-          if (invulnTimer <= 0) {
-            lives -= 1;
-            invulnTimer = 50;
-          }
-          obstacles.splice(i, 1);
-          if (lives <= 0) {
+        if (obstacle.z > 0.90 && obstacle.z < 1.03) {
+          const diff = Math.abs(obstacle.x - ballX);
+          if (diff < 0.18) {
             gameRunning = false;
             gameOver = true;
-            gameOverTitle =
-              obstacle.type === "gap"
-                ? "YOU CRASHED THE CAB"
-                : obstacle.type === "rat"
-                  ? "RAT WIPEOUT"
-                  : "ROADBLOCKED";
-          }
-          if (gameOver) {
+            gameOverTitle = "SMASHED";
             updateHighScore();
             drawRunner();
             return;
           }
-        }
-      }
-
-      for (let i = pickups.length - 1; i >= 0; i -= 1) {
-        const pickup = pickups[i];
-        pickup.z += depthRate * 1.02;
-        if (pickup.z > 1.08) {
-          pickups.splice(i, 1);
-          continue;
-        }
-        if (pickup.z > 0.88 && pickup.z < 1.02 && pickup.lane === lane) {
-          pickups.splice(i, 1);
-          score += 40;
-          updateHighScore();
         }
       }
 
