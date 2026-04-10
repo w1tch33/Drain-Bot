@@ -539,6 +539,16 @@ body {
 .profile-section { display: grid; gap: 8px; margin-bottom: 14px; }
 .profile-heading, .profile-name { font-weight: 700; font-size: 15px; }
 .profile-list { display: grid; gap: 8px; }
+.profile-status {
+  margin-bottom: 12px;
+  border: 2px solid #000;
+  background: #fff;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+.profile-status-error {
+  background: #f3d7d7;
+}
 .profile-row, .profile-card {
   display: flex;
   justify-content: space-between;

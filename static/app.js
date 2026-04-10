@@ -272,7 +272,7 @@
     visitedCount.textContent = `Drains Completed: ${stats.visited}`;
   }
 
-  function profileHtml(profile) {
+  function profileHtml(profile, statusMessage = "", statusIsError = false) {
     const incoming = (profile.incoming_requests || [])
       .map(
         (request) => `
@@ -301,6 +301,7 @@
       .join("");
 
     return `
+      <div class="profile-status ${statusMessage ? "" : "hidden"} ${statusIsError ? "profile-status-error" : ""}" id="profileStatus">${escapeHtml(statusMessage)}</div>
       <div class="profile-section">
         <div class="profile-name">${escapeHtml(profile.username)}</div>
         <div class="profile-copy">Drains: ${profile.stats.total}</div>
@@ -329,11 +330,11 @@
     `;
   }
 
-  async function openProfile() {
+  async function openProfile(statusMessage = "", statusIsError = false) {
     setLoading(true);
     try {
       const profile = await fetchJson("/api/profile");
-      openModal(`${profile.username} Profile`, profileHtml(profile));
+      openModal(`${profile.username} Profile`, profileHtml(profile, statusMessage, statusIsError));
       const friendRequestForm = modalBody.querySelector("#friendRequestForm");
       if (friendRequestForm) {
         friendRequestForm.addEventListener("submit", async (event) => {
@@ -345,10 +346,9 @@
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ username: formData.get("username") }),
             });
-            drawMessage(`Friend request sent to ${formData.get("username")}.`);
-            await openProfile();
+            await openProfile(`Friend request sent to ${formData.get("username")}.`, false);
           } catch (error) {
-            drawMessage(error.message);
+            await openProfile(error.message, true);
           }
         });
       }
@@ -358,7 +358,7 @@
           await fetchJson(`/api/friends/accept/${encodeURIComponent(button.dataset.username)}`, {
             method: "POST",
           });
-          await openProfile();
+          await openProfile(`You are now friends with ${button.dataset.username}.`, false);
         });
       });
     } catch (error) {

@@ -170,6 +170,24 @@ def _iter_usernames_from_dirs() -> list[str]:
     return usernames
 
 
+def _synth_account_from_user_dir(username: str) -> dict[str, Any] | None:
+    normalized = normalize_username(username)
+    if not normalized:
+        return None
+    metadata = load_user_metadata(normalized)
+    if not isinstance(metadata, dict) or not metadata:
+        return None
+    return {
+        "username": normalized,
+        "password_hash": "",
+        "approved": True,
+        "map_uploaded": bool(metadata.get("_map_uploaded")),
+        "friends": _unique_usernames(metadata.get("_friends")),
+        "incoming_requests": _unique_usernames(metadata.get("_incoming_requests")),
+        "outgoing_requests": _unique_usernames(metadata.get("_outgoing_requests")),
+    }
+
+
 def load_accounts() -> dict[str, Any]:
     bootstrap_accounts_file()
     with open(ACCOUNTS_FILE, "r", encoding="utf-8") as handle:
@@ -187,6 +205,10 @@ def load_accounts() -> dict[str, Any]:
         account = _load_user_account(username)
         if account:
             merged[username] = account
+            continue
+        synthetic = _synth_account_from_user_dir(username)
+        if synthetic:
+            merged[username] = _normalize_account_record(username, synthetic)
 
     return merged
 
@@ -320,8 +342,10 @@ def send_friend_request(from_username: str, to_username: str) -> None:
     accounts = load_accounts()
     sender_account = accounts.get(sender)
     recipient_account = accounts.get(recipient)
-    if not isinstance(sender_account, dict) or not isinstance(recipient_account, dict):
-        raise ValueError("That username doesn't exist.")
+    if not isinstance(sender_account, dict):
+        raise ValueError("Your account data couldn't be found. Try logging out and back in.")
+    if not isinstance(recipient_account, dict):
+        raise ValueError("No account exists with that username.")
 
     sender_account = _normalize_account_record(sender, sender_account)
     recipient_account = _normalize_account_record(recipient, recipient_account)
