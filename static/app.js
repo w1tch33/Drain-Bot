@@ -1725,7 +1725,7 @@
       spawnTimer = 18;
       speed = 0.58;
       curvePhase = 0;
-      ballX = roadCenter(1);
+      ballX = 0;
       velocityX = 0;
       keys.left = false;
       keys.right = false;
@@ -1764,9 +1764,8 @@
       distance += speed * 1.9 * frameScale;
       curvePhase += (0.010 + speed * 0.005) * frameScale;
 
-      const nearCenter = roadCenter(1);
       const nearHalf = roadHalfWidth(1);
-      if (Math.abs(ballX - nearCenter) > nearHalf - 0.08) {
+      if (Math.abs(ballX) > nearHalf - 0.08) {
         gameRunning = false;
         gameOver = true;
         gameOverTitle = "FELL OFF THE EDGE";
