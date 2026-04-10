@@ -103,7 +103,7 @@ body {
   display: grid;
   justify-items: center;
   align-content: start;
-  padding: 128px 24px 24px;
+  padding: 152px 24px 24px;
 }
 
 .auth-window {
@@ -347,6 +347,12 @@ body {
   background: #fff;
   padding: 4px 6px;
   font-size: 14px;
+}
+
+.retro-file-input {
+  min-height: 42px;
+  padding: 8px 6px;
+  line-height: 1.2;
 }
 
 .result-item { width: 100%; text-align: left; margin-bottom: 2px; min-height: 34px; }
