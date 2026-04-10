@@ -863,6 +863,7 @@
       if (extraCleanup) extraCleanup();
     };
     window.addEventListener("keydown", handler);
+    window.addEventListener("keyup", handler);
   }
 
   function dispatchGameKey(type, key, code = "") {
@@ -877,16 +878,16 @@
   function bindGameControls(container) {
     const cleanups = [];
     container.querySelectorAll(".game-control").forEach((button) => {
-      const key = button.dataset.key || "";
-      const code = button.dataset.code || "";
-      const press = () => dispatchGameKey("keydown", key, code);
-      const release = () => dispatchGameKey("keyup", key, code);
+      const press = () => dispatchGameKey("keydown", button.dataset.key || "", button.dataset.code || button.dataset.key || "");
+      const release = () => dispatchGameKey("keyup", button.dataset.key || "", button.dataset.code || button.dataset.key || "");
 
       button.addEventListener("pointerdown", press);
       button.addEventListener("pointerup", release);
       button.addEventListener("pointercancel", release);
       button.addEventListener("pointerleave", release);
       button.addEventListener("click", () => {
+        const key = button.dataset.key || "";
+        const code = button.dataset.code || key;
         if (key !== "Space") {
           dispatchGameKey("keydown", key, code);
           dispatchGameKey("keyup", key, code);
@@ -1001,7 +1002,7 @@
         const width = 2 + Math.floor(Math.random() * 3);
         const x = Math.floor(Math.random() * Math.max(1, WIDTH - width));
         const typeRoll = Math.random();
-        const type = typeRoll > 0.84 ? "bounce" : typeRoll > 0.64 ? "break" : "normal";
+        const type = typeRoll > 0.82 ? "bounce" : "normal";
         platforms.push({ x, y, width, type });
         y -= 4 + Math.floor(Math.random() * 2);
       }
@@ -1014,11 +1015,8 @@
         const width = 2 + Math.floor(Math.random() * 3);
         const x = Math.floor(Math.random() * Math.max(1, WIDTH - width));
         const typeRoll = Math.random();
-        const type = typeRoll > 0.88 ? "bounce" : typeRoll > 0.68 ? "break" : "normal";
+        const type = typeRoll > 0.86 ? "bounce" : "normal";
         platforms.push({ x, y: highest, width, type });
-      }
-      for (let index = platforms.length - 1; index >= 0; index -= 1) {
-        if (platforms[index].y > player.y + 34) platforms.splice(index, 1);
       }
     }
 
@@ -1043,7 +1041,7 @@
       platforms.forEach((platform) => {
         const px = platform.x * TILE;
         const py = platform.y * TILE - offsetY;
-        ctx.fillStyle = platform.type === "bounce" ? "#8bc34a" : platform.type === "break" ? "#d7ccc8" : "#efefef";
+        ctx.fillStyle = platform.type === "bounce" ? "#8bc34a" : "#efefef";
         ctx.fillRect(px, py, platform.width * TILE, 10);
         ctx.strokeStyle = "#000";
         ctx.strokeRect(px, py, platform.width * TILE, 10);
@@ -1108,16 +1106,22 @@
     function step() {
       if (!gameRunning) return;
       const previousY = player.y;
-      if (keys.left) velocityX -= 0.075;
-      if (keys.right) velocityX += 0.075;
-      velocityX *= 0.9;
-      velocityX = Math.max(-0.24, Math.min(0.24, velocityX));
+      if (keys.left) velocityX -= 0.05;
+      if (keys.right) velocityX += 0.05;
+      velocityX *= 0.82;
+      velocityX = Math.max(-0.16, Math.min(0.16, velocityX));
       player.x += velocityX;
-      if (player.x < 0) player.x = WIDTH - player.w;
-      if (player.x + player.w > WIDTH) player.x = 0;
+      if (player.x < 0) {
+        player.x = 0;
+        velocityX = 0;
+      }
+      if (player.x + player.w > WIDTH) {
+        player.x = WIDTH - player.w;
+        velocityX = 0;
+      }
 
       if (jumpQueued && onGround) {
-        velocityY = Math.abs(velocityX) > 0.14 ? -0.82 : -0.7;
+        velocityY = Math.abs(velocityX) > 0.1 ? -0.78 : -0.68;
         onGround = false;
         jumpQueued = false;
       }
@@ -1135,9 +1139,6 @@
           player.y = platform.y - player.h;
           velocityY = platform.type === "bounce" ? -0.98 : 0;
           onGround = true;
-          if (platform.type === "break") {
-            platforms.splice(index, 1);
-          }
           break;
         }
       }
@@ -1177,11 +1178,9 @@
 
     spawnInitialPlatforms();
     bindGameCleanup(onKey, () => {
-      window.removeEventListener("keyup", onKey);
       if (rafId) cancelAnimationFrame(rafId);
       if (countdownTimer) clearInterval(countdownTimer);
     });
-    window.addEventListener("keyup", onKey);
     draw();
     startRound();
   }
@@ -1383,11 +1382,9 @@
     }
 
     bindGameCleanup(onKey, () => {
-      window.removeEventListener("keyup", onKey);
       if (rafId) cancelAnimationFrame(rafId);
       if (countdownTimer) clearInterval(countdownTimer);
     });
-    window.addEventListener("keyup", onKey);
     drawRunner();
     startRound();
   }
