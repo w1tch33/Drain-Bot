@@ -545,7 +545,7 @@ def _merge_metadata(base: dict[str, Any], item: dict[str, Any] | None) -> dict[s
     merged["rating"] = meta.get("rating")
     merged["value"] = meta.get("value", "")
     merged["photos"] = [p for p in meta.get("photos", []) if isinstance(p, str)]
-    merged["notes"] = meta.get("witch_notes") or meta.get("description", "") or merged.get("description", "")
+    merged["notes"] = meta.get("witch_notes") or meta.get("notes") or ""
     merged["features"] = meta.get("features", {})
     return merged
 

@@ -430,7 +430,7 @@
         <label class="check-row"><input id="visitedField" type="checkbox" ${drain.visited ? "checked" : ""}><span>Visited</span></label>
       </div>
       <div class="detail-section"><label>Description</label><textarea class="retro-textarea" id="descriptionField" rows="6">${escapeHtml(drain.description || "")}</textarea></div>
-      <div class="detail-section"><label>Witch's Notes</label><textarea class="retro-textarea" id="notesField" rows="5">${escapeHtml(drain.notes || "")}</textarea></div>
+      <div class="detail-section"><label>Notes</label><textarea class="retro-textarea" id="notesField" rows="5">${escapeHtml(drain.notes || "")}</textarea></div>
       <div class="detail-section"><div>FEATURES:</div><div class="feature-grid">${features
         .map(
           (feature) =>
