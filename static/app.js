@@ -1131,9 +1131,9 @@
         } else {
           configureGameControls(controls, {
             left: { label: "LEFT", key: "ArrowLeft" },
-            action: { label: "JUMP", key: "Space", code: "Space" },
+            action: { label: "BOOST", key: "Space", code: "Space" },
             right: { label: "RIGHT", key: "ArrowRight" },
-            down: { label: "DUCK", key: "ArrowDown" },
+            down: { label: "BRAKE", key: "ArrowDown" },
           });
           runDrainRunner(canvas, help);
         }
@@ -1530,16 +1530,14 @@
     let countdownTimer = null;
     let lastFrameMs = null;
     let spawnTimer = 0;
-    let speed = 0.95;
+    let speed = 0.72;
     let highScore = readStoredNumber(RUNNER_HIGH_SCORE_KEY);
     let lane = 0;
-    let jumpY = 0;
-    let jumpV = 0;
-    let sliding = false;
-    let slideTimer = 0;
+    let lives = 3;
+    let invulnTimer = 0;
     let laneCooldown = 0;
     let pulse = 0;
-    const keys = { jump: false, duck: false };
+    const keys = { boost: false, brake: false };
     const obstacles = [];
     const pickups = [];
     const horizonY = Math.floor(canvas.height * 0.22);
@@ -1565,7 +1563,7 @@
         return;
       }
       help.textContent = gameRunning
-        ? `Score: ${score} | Distance: ${Math.floor(distance)}m | High: ${highScore}`
+        ? `Score: ${score} | Distance: ${Math.floor(distance)}m | Lives: ${lives} | High: ${highScore}`
         : `DRAIN RUNNER 3D | ${countdown > 0 ? countdown : "GO"} | High: ${highScore}`;
     }
 
@@ -1674,9 +1672,9 @@
 
       const playerX = laneX(lane, 1);
       const bodyW = 28;
-      const bodyH = sliding ? 22 : 42;
-      const py = baseY - jumpY - bodyH;
-      ctx.fillStyle = "#dcdcdc";
+      const bodyH = 40;
+      const py = baseY - bodyH;
+      ctx.fillStyle = invulnTimer > 0 && Math.floor(invulnTimer / 4) % 2 === 0 ? "#ffcc80" : "#dcdcdc";
       ctx.fillRect(playerX - bodyW / 2, py, bodyW, bodyH);
       ctx.strokeStyle = "#000";
       ctx.strokeRect(playerX - bodyW / 2, py, bodyW, bodyH);
@@ -1686,6 +1684,11 @@
         const copY = baseY + 2;
         ctx.fillStyle = i === 0 ? "#e53935" : "#f06292";
         ctx.fillRect(copX - 10, copY - 26, 20, 26);
+      }
+
+      for (let i = 0; i < lives; i += 1) {
+        ctx.fillStyle = "#ff5252";
+        ctx.fillRect(12 + i * 18, 10, 12, 12);
       }
 
       if (!gameRunning && !gameOver && countdown > 0) {
@@ -1726,14 +1729,14 @@
         const isDown = detail.phase === "down";
         if (detail.slot === "left" && isDown && laneCooldown <= 0) {
           lane = Math.max(-1, lane - 1);
-          laneCooldown = 10;
+          laneCooldown = 7;
         }
         if (detail.slot === "right" && isDown && laneCooldown <= 0) {
           lane = Math.min(1, lane + 1);
-          laneCooldown = 10;
+          laneCooldown = 7;
         }
-        if (detail.slot === "action") keys.jump = isDown;
-        if (detail.slot === "down") keys.duck = isDown;
+        if (detail.slot === "action") keys.boost = isDown;
+        if (detail.slot === "down") keys.brake = isDown;
         return;
       }
       const isDown = event.type === "keydown";
@@ -1746,14 +1749,14 @@
       }
       if (isDown && laneCooldown <= 0 && (event.key === "ArrowLeft" || event.key === "a")) {
         lane = Math.max(-1, lane - 1);
-        laneCooldown = 10;
+        laneCooldown = 7;
       }
       if (isDown && laneCooldown <= 0 && (event.key === "ArrowRight" || event.key === "d")) {
         lane = Math.min(1, lane + 1);
-        laneCooldown = 10;
+        laneCooldown = 7;
       }
-      if (event.key === " " || event.code === "Space" || event.key === "ArrowUp" || event.key === "w") keys.jump = isDown;
-      if (event.key === "ArrowDown" || event.key === "s") keys.duck = isDown;
+      if (event.key === " " || event.code === "Space" || event.key === "ArrowUp" || event.key === "w") keys.boost = isDown;
+      if (event.key === "ArrowDown" || event.key === "s") keys.brake = isDown;
     }
 
     function startRound() {
@@ -1763,16 +1766,14 @@
       gameOver = false;
       gameOverTitle = "GAME OVER";
       spawnTimer = 18;
-      speed = 0.95;
+      speed = 0.72;
       lane = 0;
-      jumpY = 0;
-      jumpV = 0;
-      sliding = false;
-      slideTimer = 0;
+      lives = 3;
+      invulnTimer = 0;
       laneCooldown = 0;
       pulse = 0;
-      keys.jump = false;
-      keys.duck = false;
+      keys.boost = false;
+      keys.brake = false;
       obstacles.length = 0;
       pickups.length = 0;
       gameRunning = false;
@@ -1798,36 +1799,20 @@
       lastFrameMs = now;
       const frameScale = deltaMs / 16.67;
 
-      speed += 0.0016 * frameScale;
+      if (keys.boost) speed += 0.010 * frameScale;
+      if (keys.brake) speed -= 0.016 * frameScale;
+      speed += 0.0012 * frameScale;
+      speed -= 0.0040 * frameScale;
+      speed = Math.max(0.55, Math.min(1.45, speed));
       distance += speed * 1.6 * frameScale;
       pulse += 0.08 * frameScale;
       if (laneCooldown > 0) laneCooldown -= frameScale;
+      if (invulnTimer > 0) invulnTimer -= frameScale;
 
       spawnTimer -= frameScale;
       if (spawnTimer <= 0) {
         spawnWave();
-        spawnTimer = 22 + Math.random() * 18;
-      }
-
-      if (keys.jump && jumpY <= 0.001 && !sliding) {
-        jumpV = 0.72;
-      }
-      if (keys.duck && jumpY < 1) {
-        sliding = true;
-        slideTimer = Math.max(slideTimer, 18);
-      }
-
-      jumpV -= 0.048 * frameScale;
-      jumpY = Math.max(0, jumpY + jumpV * frameScale);
-      if (jumpY <= 0) {
-        jumpY = 0;
-        jumpV = 0;
-      }
-
-      if (slideTimer > 0) {
-        slideTimer -= frameScale;
-      } else {
-        sliding = false;
+        spawnTimer = 24 + Math.random() * 20;
       }
 
       const depthRate = (0.012 + speed * 0.0024) * frameScale;
@@ -1841,18 +1826,20 @@
           continue;
         }
         if (obstacle.z > 0.9 && obstacle.z < 1.03 && obstacle.lane === lane) {
-          if (obstacle.type === "gap" && jumpY < 8) {
+          if (invulnTimer <= 0) {
+            lives -= 1;
+            invulnTimer = 50;
+          }
+          obstacles.splice(i, 1);
+          if (lives <= 0) {
             gameRunning = false;
             gameOver = true;
-            gameOverTitle = "YOU FELL IN";
-          } else if (obstacle.type === "rat" && jumpY < 10) {
-            gameRunning = false;
-            gameOver = true;
-            gameOverTitle = "BUSTED BY A RAT";
-          } else if (obstacle.type === "pipe" && !sliding && jumpY < 6) {
-            gameRunning = false;
-            gameOver = true;
-            gameOverTitle = "HIT THE PIPE";
+            gameOverTitle =
+              obstacle.type === "gap"
+                ? "YOU CRASHED THE CAB"
+                : obstacle.type === "rat"
+                  ? "RAT WIPEOUT"
+                  : "ROADBLOCKED";
           }
           if (gameOver) {
             updateHighScore();
@@ -1869,9 +1856,9 @@
           pickups.splice(i, 1);
           continue;
         }
-        if (pickup.z > 0.88 && pickup.z < 1.02 && pickup.lane === lane && jumpY < 14) {
+        if (pickup.z > 0.88 && pickup.z < 1.02 && pickup.lane === lane) {
           pickups.splice(i, 1);
-          score += 30;
+          score += 40;
           updateHighScore();
         }
       }
