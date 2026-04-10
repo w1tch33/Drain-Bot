@@ -36,6 +36,7 @@
   const BASE_HEIGHT = 768;
   const DRAIN_MAN_HIGH_SCORE_KEY = "draintool-drainman-high-score";
   const CLIMBER_HIGH_SCORE_KEY = "draintool-drainclimber-high-score";
+  const RUNNER_HIGH_SCORE_KEY = "draintool-drainrunner-high-score";
   let musicMarqueeTimer = null;
   let audioUnlocked = false;
   let pendingAutoplay = false;
@@ -842,9 +843,11 @@
   }
 
   function bindGameCleanup(handler, extraCleanup) {
-    if (state.gameCleanup) state.gameCleanup();
+    const previousCleanup = state.gameCleanup;
+    if (previousCleanup) previousCleanup();
     state.gameCleanup = () => {
       window.removeEventListener("keydown", handler);
+      window.removeEventListener("keyup", handler);
       if (extraCleanup) extraCleanup();
     };
     window.addEventListener("keydown", handler);
@@ -887,8 +890,494 @@
     return () => cleanups.forEach((cleanup) => cleanup());
   }
 
+  function configureGameControls(container, config = {}) {
+    const buttons = {
+      up: container.querySelector('[data-control-slot="up"]'),
+      left: container.querySelector('[data-control-slot="left"]'),
+      action: container.querySelector('[data-control-slot="action"]'),
+      right: container.querySelector('[data-control-slot="right"]'),
+      down: container.querySelector('[data-control-slot="down"]'),
+    };
+    Object.entries(buttons).forEach(([slot, button]) => {
+      if (!button) return;
+      const next = config[slot];
+      if (!next) {
+        button.classList.add("hidden");
+        return;
+      }
+      button.classList.remove("hidden");
+      button.textContent = next.label || button.textContent;
+      button.dataset.key = next.key || "";
+      button.dataset.code = next.code || next.key || "";
+    });
+  }
+
   function openGames() {
     openModal("Mini Games", qs("#miniGamesTemplate").content.cloneNode(true));
+    const canvas = qs("#gameCanvas");
+    const help = qs("#gameHelp");
+    const controls = qs("#gameControls");
+    const cleanupControls = bindGameControls(controls);
+    canvas.classList.add("hidden");
+    help.classList.add("hidden");
+    controls.classList.add("hidden");
+    help.textContent = "Pick a game.";
+    modalBody.querySelectorAll(".game-button").forEach((button) => {
+      button.addEventListener("click", () => {
+        canvas.classList.remove("hidden");
+        help.classList.remove("hidden");
+        controls.classList.remove("hidden");
+        if (state.gameCleanup) {
+          state.gameCleanup();
+          state.gameCleanup = null;
+        }
+        if (button.dataset.game === "ladderclimb") {
+          configureGameControls(controls, {
+            left: { label: "LEFT", key: "ArrowLeft" },
+            action: { label: "JUMP", key: "Space", code: "Space" },
+            right: { label: "RIGHT", key: "ArrowRight" },
+          });
+          runLadderClimb(canvas, help);
+        } else {
+          configureGameControls(controls, {
+            action: { label: "JUMP", key: "Space", code: "Space" },
+            down: { label: "DUCK", key: "ArrowDown" },
+          });
+          runDrainRunner(canvas, help);
+        }
+      });
+    });
+    const previousCleanup = state.gameCleanup;
+    state.gameCleanup = () => {
+      cleanupControls();
+      if (previousCleanup) previousCleanup();
+    };
+  }
+
+  function runLadderClimb(canvas, help) {
+    const ctx = canvas.getContext("2d");
+    const WIDTH = 12;
+    const HEIGHT = 260;
+    const TILE = 18;
+    canvas.width = WIDTH * TILE;
+    canvas.height = 520;
+    let player = { x: WIDTH / 2, y: HEIGHT - 5, w: 0.9, h: 0.95 };
+    let velocityY = 0;
+    let velocityX = 0;
+    let score = 0;
+    let floorReached = 0;
+    let combo = 0;
+    let comboTimer = 0;
+    let gameRunning = false;
+    let countdown = 3;
+    let cameraY = player.y;
+    let waterLevel = HEIGHT + 16;
+    let onGround = false;
+    let rafId = null;
+    let countdownTimer = null;
+    let jumpQueued = false;
+    let highScore = readStoredNumber(CLIMBER_HIGH_SCORE_KEY);
+    const keys = { left: false, right: false };
+    const platforms = [];
+    const ghosts = [];
+
+    function spawnInitialPlatforms() {
+      platforms.length = 0;
+      platforms.push({ x: 1, y: HEIGHT - 3, width: WIDTH - 2, type: "start" });
+      let y = HEIGHT - 8;
+      while (y > 0) {
+        const width = 2 + Math.floor(Math.random() * 3);
+        const x = Math.floor(Math.random() * Math.max(1, WIDTH - width));
+        const typeRoll = Math.random();
+        const type = typeRoll > 0.84 ? "bounce" : typeRoll > 0.64 ? "break" : "normal";
+        platforms.push({ x, y, width, type });
+        y -= 4 + Math.floor(Math.random() * 2);
+      }
+    }
+
+    function fillAhead() {
+      let highest = Math.min(...platforms.map((platform) => platform.y));
+      while (highest > player.y - 70) {
+        highest -= 4 + Math.floor(Math.random() * 2);
+        const width = 2 + Math.floor(Math.random() * 3);
+        const x = Math.floor(Math.random() * Math.max(1, WIDTH - width));
+        const typeRoll = Math.random();
+        const type = typeRoll > 0.88 ? "bounce" : typeRoll > 0.68 ? "break" : "normal";
+        platforms.push({ x, y: highest, width, type });
+      }
+      for (let index = platforms.length - 1; index >= 0; index -= 1) {
+        if (platforms[index].y > player.y + 34) platforms.splice(index, 1);
+      }
+    }
+
+    function updateHelp() {
+      if (!gameRunning) {
+        help.textContent = countdown > 0
+          ? `LADDER CLIMB | ${countdown} | High: ${highScore}`
+          : `LADDER CLIMB | High: ${highScore}`;
+        return;
+      }
+      help.textContent = `Score: ${score} | Floor: ${floorReached} | Combo: x${Math.max(combo, 1)} | High: ${highScore}`;
+    }
+
+    function draw() {
+      const offsetY = cameraY * TILE - canvas.height * 0.58;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < canvas.height / 20; i += 1) {
+        ctx.fillStyle = i % 2 === 0 ? "#161616" : "#1f1f1f";
+        ctx.fillRect(0, i * 20, canvas.width, 20);
+      }
+
+      platforms.forEach((platform) => {
+        const px = platform.x * TILE;
+        const py = platform.y * TILE - offsetY;
+        ctx.fillStyle = platform.type === "bounce" ? "#8bc34a" : platform.type === "break" ? "#d7ccc8" : "#efefef";
+        ctx.fillRect(px, py, platform.width * TILE, 10);
+        ctx.strokeStyle = "#000";
+        ctx.strokeRect(px, py, platform.width * TILE, 10);
+      });
+
+      ghosts.forEach((ghost, index) => {
+        const alpha = Math.max(0, 1 - index / ghosts.length);
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.3})`;
+        ctx.fillRect(ghost.x * TILE, ghost.y * TILE - offsetY, player.w * TILE, player.h * TILE);
+      });
+
+      ctx.fillStyle = "#ffd54f";
+      ctx.fillRect(player.x * TILE, player.y * TILE - offsetY, player.w * TILE, player.h * TILE);
+      ctx.strokeStyle = "#000";
+      ctx.strokeRect(player.x * TILE, player.y * TILE - offsetY, player.w * TILE, player.h * TILE);
+
+      const waterY = waterLevel * TILE - offsetY;
+      ctx.fillStyle = "#2979ff";
+      ctx.fillRect(0, waterY, canvas.width, canvas.height - waterY);
+      ctx.fillStyle = "rgba(255,255,255,0.25)";
+      ctx.fillRect(0, waterY, canvas.width, 6);
+
+      updateHelp();
+    }
+
+    function updateHighScore() {
+      if (score > highScore) {
+        highScore = score;
+        writeStoredNumber(CLIMBER_HIGH_SCORE_KEY, highScore);
+      }
+    }
+
+    function startRound() {
+      countdown = 3;
+      gameRunning = false;
+      updateHelp();
+      draw();
+      countdownTimer = setInterval(() => {
+        countdown -= 1;
+        if (countdown <= 0) {
+          clearInterval(countdownTimer);
+          countdownTimer = null;
+          gameRunning = true;
+          rafId = requestAnimationFrame(step);
+        } else {
+          draw();
+        }
+      }, 1000);
+    }
+
+    function onKey(event) {
+      if (event.type === "keydown") {
+        if (event.key === "ArrowLeft" || event.key === "a") keys.left = true;
+        if (event.key === "ArrowRight" || event.key === "d") keys.right = true;
+        if (event.key === " " || event.code === "Space") jumpQueued = true;
+      } else {
+        if (event.key === "ArrowLeft" || event.key === "a") keys.left = false;
+        if (event.key === "ArrowRight" || event.key === "d") keys.right = false;
+      }
+    }
+
+    function step() {
+      if (!gameRunning) return;
+      const previousY = player.y;
+      if (keys.left) velocityX -= 0.11;
+      if (keys.right) velocityX += 0.11;
+      velocityX *= 0.94;
+      velocityX = Math.max(-0.38, Math.min(0.38, velocityX));
+      player.x += velocityX;
+      if (player.x < 0) player.x = WIDTH - player.w;
+      if (player.x + player.w > WIDTH) player.x = 0;
+
+      if (jumpQueued && onGround) {
+        velocityY = Math.abs(velocityX) > 0.18 ? -0.9 : -0.76;
+        onGround = false;
+        jumpQueued = false;
+      }
+      jumpQueued = false;
+
+      velocityY += 0.032;
+      player.y += velocityY;
+      onGround = false;
+
+      for (let index = 0; index < platforms.length; index += 1) {
+        const platform = platforms[index];
+        const intersectsX = player.x + player.w > platform.x && player.x < platform.x + platform.width;
+        const landing = previousY + player.h <= platform.y && player.y + player.h >= platform.y;
+        if (velocityY >= 0 && intersectsX && landing) {
+          player.y = platform.y - player.h;
+          velocityY = platform.type === "bounce" ? -0.98 : 0;
+          onGround = true;
+          if (platform.type === "break") {
+            platforms.splice(index, 1);
+          }
+          break;
+        }
+      }
+
+      ghosts.unshift({ x: player.x, y: player.y });
+      if (ghosts.length > 8) ghosts.pop();
+
+      cameraY += (player.y - cameraY) * 0.08;
+      waterLevel -= 0.03;
+      fillAhead();
+
+      const climbed = Math.max(0, Math.floor((HEIGHT - player.y) * 10));
+      if (climbed > score) {
+        const gained = climbed - score;
+        score = climbed + combo * 10;
+        combo = comboTimer > 0 ? combo + 1 : 1;
+        comboTimer = 36;
+        floorReached = Math.max(floorReached, Math.floor((HEIGHT - player.y) / 4));
+        updateHighScore();
+      } else if (comboTimer > 0) {
+        comboTimer -= 1;
+      } else {
+        combo = 0;
+      }
+
+      if (player.y > waterLevel) {
+        gameRunning = false;
+        updateHighScore();
+        help.textContent = `GAME OVER | Score: ${score} | High: ${highScore} | Click Ladder Climb to retry`;
+        draw();
+        return;
+      }
+
+      draw();
+      rafId = requestAnimationFrame(step);
+    }
+
+    spawnInitialPlatforms();
+    bindGameCleanup(onKey, () => {
+      window.removeEventListener("keyup", onKey);
+      if (rafId) cancelAnimationFrame(rafId);
+      if (countdownTimer) clearInterval(countdownTimer);
+    });
+    window.addEventListener("keyup", onKey);
+    draw();
+    startRound();
+  }
+
+  function runDrainRunner(canvas, help) {
+    const ctx = canvas.getContext("2d");
+    canvas.width = 520;
+    canvas.height = 260;
+    let player = { x: 88, y: 182, w: 28, h: 42, vy: 0, ducking: false };
+    let score = 0;
+    let distance = 0;
+    let gameRunning = false;
+    let countdown = 3;
+    let rafId = null;
+    let countdownTimer = null;
+    let spawnTimer = 0;
+    let copPulse = 0;
+    let speed = 4.2;
+    let highScore = readStoredNumber(RUNNER_HIGH_SCORE_KEY);
+    const keys = { jump: false, duck: false };
+    const obstacles = [];
+    const pickups = [];
+    const cops = [{ x: 12, y: 182 }, { x: 40, y: 182 }];
+
+    function updateHelp(message = "") {
+      if (message) {
+        help.textContent = message;
+        return;
+      }
+      help.textContent = gameRunning
+        ? `Score: ${score} | Distance: ${Math.floor(distance)}m | High: ${highScore}`
+        : `DRAIN RUNNER | ${countdown > 0 ? countdown : "GO"} | High: ${highScore}`;
+    }
+
+    function drawRunner() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#0f0f0f";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#2b2b2b";
+      ctx.fillRect(0, 196, canvas.width, 64);
+      ctx.fillStyle = "#111";
+      ctx.fillRect(0, 164, canvas.width, 18);
+      ctx.fillStyle = "#666";
+      for (let i = 0; i < canvas.width; i += 42) {
+        ctx.fillRect((i - distance * 2) % (canvas.width + 42), 212, 24, 6);
+      }
+
+      cops.forEach((cop, index) => {
+        ctx.fillStyle = index === 0 ? "#e53935" : "#f06292";
+        const pulse = Math.sin(copPulse + index) * 3;
+        ctx.fillRect(cop.x + pulse, cop.y, 22, 40);
+      });
+
+      pickups.forEach((pickup) => {
+        ctx.fillStyle = "#ffd54f";
+        ctx.fillRect(pickup.x, pickup.y, 12, 18);
+      });
+
+      obstacles.forEach((obstacle) => {
+        ctx.fillStyle = obstacle.type === "rat" ? "#8d6e63" : obstacle.type === "pipe" ? "#90a4ae" : "#424242";
+        ctx.fillRect(obstacle.x, obstacle.y, obstacle.w, obstacle.h);
+      });
+
+      ctx.fillStyle = "#dcdcdc";
+      const playerHeight = player.ducking ? 24 : player.h;
+      const playerY = player.ducking ? player.y + 18 : player.y;
+      ctx.fillRect(player.x, playerY, player.w, playerHeight);
+      ctx.strokeStyle = "#000";
+      ctx.strokeRect(player.x, playerY, player.w, playerHeight);
+
+      updateHelp();
+    }
+
+    function updateHighScore() {
+      if (score > highScore) {
+        highScore = score;
+        writeStoredNumber(RUNNER_HIGH_SCORE_KEY, highScore);
+      }
+    }
+
+    function spawnObstacle() {
+      const roll = Math.random();
+      if (roll < 0.5) {
+        obstacles.push({ type: "gap", x: canvas.width + 20, y: 236, w: 34, h: 24 });
+      } else if (roll < 0.78) {
+        obstacles.push({ type: "rat", x: canvas.width + 20, y: 202, w: 24, h: 20 });
+      } else {
+        obstacles.push({ type: "pipe", x: canvas.width + 20, y: 168, w: 20, h: 54 });
+      }
+      if (Math.random() < 0.34) {
+        pickups.push({ x: canvas.width + 60, y: 176 - Math.random() * 50 });
+      }
+    }
+
+    function onKey(event) {
+      const isDown = event.type === "keydown";
+      if (event.key === " " || event.code === "Space" || event.key === "ArrowUp" || event.key === "w") keys.jump = isDown;
+      if (event.key === "ArrowDown" || event.key === "s") keys.duck = isDown;
+    }
+
+    function startRound() {
+      countdown = 3;
+      gameRunning = false;
+      drawRunner();
+      countdownTimer = setInterval(() => {
+        countdown -= 1;
+        if (countdown <= 0) {
+          clearInterval(countdownTimer);
+          countdownTimer = null;
+          gameRunning = true;
+          rafId = requestAnimationFrame(step);
+        } else {
+          drawRunner();
+        }
+      }, 1000);
+    }
+
+    function step() {
+      if (!gameRunning) return;
+      speed += 0.0025;
+      distance += speed * 0.12;
+      copPulse += 0.12;
+      spawnTimer -= 1;
+      if (spawnTimer <= 0) {
+        spawnObstacle();
+        spawnTimer = 34 + Math.random() * 28;
+      }
+
+      if (keys.jump && player.y >= 182 && !player.ducking) {
+        player.vy = -8.4;
+      }
+      player.ducking = keys.duck && player.y >= 182;
+      player.vy += 0.42;
+      player.y += player.vy;
+      if (player.y > 182) {
+        player.y = 182;
+        player.vy = 0;
+      }
+
+      for (let index = obstacles.length - 1; index >= 0; index -= 1) {
+        const obstacle = obstacles[index];
+        obstacle.x -= speed;
+        if (obstacle.x + obstacle.w < -40) {
+          obstacles.splice(index, 1);
+          score += 5;
+          updateHighScore();
+          continue;
+        }
+
+        const playerHeight = player.ducking ? 24 : player.h;
+        const playerY = player.ducking ? player.y + 18 : player.y;
+        const overlap =
+          player.x < obstacle.x + obstacle.w &&
+          player.x + player.w > obstacle.x &&
+          playerY < obstacle.y + obstacle.h &&
+          playerY + playerHeight > obstacle.y;
+
+        if (obstacle.type === "gap") {
+          const overGap = player.x + player.w > obstacle.x && player.x < obstacle.x + obstacle.w;
+          if (overGap && player.y >= 182) {
+            gameRunning = false;
+            updateHighScore();
+            drawRunner();
+            help.textContent = `YOU FELL IN | Score: ${score} | High: ${highScore} | Click Drain Runner to retry`;
+            return;
+          }
+        } else if (overlap) {
+          gameRunning = false;
+          updateHighScore();
+          drawRunner();
+          help.textContent = `BUSTED BY THE COPS | Score: ${score} | High: ${highScore} | Click Drain Runner to retry`;
+          return;
+        }
+      }
+
+      for (let index = pickups.length - 1; index >= 0; index -= 1) {
+        const pickup = pickups[index];
+        pickup.x -= speed;
+        if (pickup.x < -20) {
+          pickups.splice(index, 1);
+          continue;
+        }
+        const playerHeight = player.ducking ? 24 : player.h;
+        const playerY = player.ducking ? player.y + 18 : player.y;
+        const hit =
+          player.x < pickup.x + 12 &&
+          player.x + player.w > pickup.x &&
+          playerY < pickup.y + 18 &&
+          playerY + playerHeight > pickup.y;
+        if (hit) {
+          pickups.splice(index, 1);
+          score += 25;
+          updateHighScore();
+        }
+      }
+
+      drawRunner();
+      rafId = requestAnimationFrame(step);
+    }
+
+    bindGameCleanup(onKey, () => {
+      window.removeEventListener("keyup", onKey);
+      if (rafId) cancelAnimationFrame(rafId);
+      if (countdownTimer) clearInterval(countdownTimer);
+    });
+    window.addEventListener("keyup", onKey);
+    drawRunner();
+    startRound();
   }
 
   function runNavigator(canvas, help) {

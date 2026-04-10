@@ -141,10 +141,19 @@
 
   <template id="miniGamesTemplate">
     <div class="stack-list">
-      <div class="auth-copy">Mini games menu</div>
-      <div class="auth-copy">The old mini games have been cleared out.</div>
-      <div class="auth-copy">This menu is ready for new ones.</div>
-      <button class="retro-button list-button" type="button" disabled>Coming Soon</button>
+      <button class="retro-button list-button game-button" type="button" data-game="ladderclimb">Ladder Climb</button>
+      <button class="retro-button list-button game-button" type="button" data-game="drainrunner">Drain Runner</button>
+    </div>
+    <canvas class="game-canvas hidden" id="gameCanvas" width="480" height="480"></canvas>
+    <div class="game-help hidden" id="gameHelp"></div>
+    <div class="game-controls hidden" id="gameControls">
+      <button class="retro-button game-control" type="button" data-control-slot="up" data-key="ArrowUp">UP</button>
+      <div class="game-controls-row">
+        <button class="retro-button game-control" type="button" data-control-slot="left" data-key="ArrowLeft">LEFT</button>
+        <button class="retro-button game-control game-control-action" type="button" data-control-slot="action" data-key="Space" data-code="Space">JUMP</button>
+        <button class="retro-button game-control" type="button" data-control-slot="right" data-key="ArrowRight">RIGHT</button>
+      </div>
+      <button class="retro-button game-control" type="button" data-control-slot="down" data-key="ArrowDown">DOWN</button>
     </div>
   </template>
 
