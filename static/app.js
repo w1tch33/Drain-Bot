@@ -1099,6 +1099,7 @@
     let onGround = false;
     let rafId = null;
     let countdownTimer = null;
+    let lastFrameMs = null;
     let jumpQueued = false;
     let highScore = readStoredNumber(CLIMBER_HIGH_SCORE_KEY);
     let level = 1;
@@ -1291,6 +1292,7 @@
         if (countdown <= 0) {
           clearInterval(countdownTimer);
           countdownTimer = null;
+          lastFrameMs = null;
           gameRunning = true;
           rafId = requestAnimationFrame(step);
         } else {
@@ -1325,14 +1327,18 @@
       }
     }
 
-    function step() {
+    function step(timestamp) {
       if (!gameRunning) return;
+      const now = typeof timestamp === "number" ? timestamp : performance.now();
+      const deltaMs = lastFrameMs == null ? 16.67 : Math.max(10, Math.min(50, now - lastFrameMs));
+      lastFrameMs = now;
+      const frameScale = deltaMs / 16.67;
       const previousY = player.y;
-      if (keys.left) velocityX -= onGround ? 0.038 : 0.028;
-      if (keys.right) velocityX += onGround ? 0.038 : 0.028;
-      velocityX *= onGround ? 0.85 : 0.985;
+      if (keys.left) velocityX -= (onGround ? 0.038 : 0.028) * frameScale;
+      if (keys.right) velocityX += (onGround ? 0.038 : 0.028) * frameScale;
+      velocityX *= Math.pow(onGround ? 0.85 : 0.985, frameScale);
       velocityX = Math.max(-0.24, Math.min(0.24, velocityX));
-      player.x += velocityX;
+      player.x += velocityX * frameScale;
       if (player.x < 0) {
         player.x = 0;
         velocityX = Math.max(0.08, Math.abs(velocityX) * 0.88);
@@ -1349,8 +1355,8 @@
       }
       jumpQueued = false;
 
-      velocityY += 0.03;
-      player.y += velocityY;
+      velocityY += 0.03 * frameScale;
+      player.y += velocityY * frameScale;
       onGround = false;
 
       for (let index = 0; index < platforms.length; index += 1) {
@@ -1368,11 +1374,14 @@
       ghosts.unshift({ x: player.x, y: player.y });
       if (ghosts.length > 12) ghosts.pop();
 
-      cameraY += (player.y - cameraY) * 0.08;
-      waterLevel -= 0.028 + level * 0.003;
+      cameraY += (player.y - cameraY) * Math.min(0.22, 0.08 * frameScale);
+      waterLevel -= (0.028 + level * 0.003) * frameScale;
       const desiredWater = player.y + 26;
       if (waterLevel - desiredWater > 20) {
-        waterLevel = Math.max(desiredWater, waterLevel - Math.min(0.38, (waterLevel - desiredWater) * 0.05));
+        waterLevel = Math.max(
+          desiredWater,
+          waterLevel - Math.min(0.38 * frameScale, (waterLevel - desiredWater) * 0.05 * frameScale)
+        );
       }
       fillAhead();
 
@@ -1391,12 +1400,12 @@
         }
         updateHighScore();
       } else if (comboTimer > 0) {
-        comboTimer -= 1;
+        comboTimer -= frameScale;
       } else {
         combo = 0;
       }
 
-      if (milestoneTimer > 0) milestoneTimer -= 1;
+      if (milestoneTimer > 0) milestoneTimer -= frameScale;
 
       if (player.y > waterLevel) {
         gameRunning = false;
@@ -1444,6 +1453,7 @@
     let gameOverTitle = "GAME OVER";
     let rafId = null;
     let countdownTimer = null;
+    let lastFrameMs = null;
     let spawnTimer = 0;
     let copPulse = 0;
     let speed = 4.2;
@@ -1608,6 +1618,7 @@
         if (countdown <= 0) {
           clearInterval(countdownTimer);
           countdownTimer = null;
+          lastFrameMs = null;
           gameRunning = true;
           rafId = requestAnimationFrame(step);
         } else {
@@ -1616,12 +1627,16 @@
       }, 1000);
     }
 
-    function step() {
+    function step(timestamp) {
       if (!gameRunning) return;
-      speed += 0.0025;
-      distance += speed * 0.12;
-      copPulse += 0.12;
-      spawnTimer -= 1;
+      const now = typeof timestamp === "number" ? timestamp : performance.now();
+      const deltaMs = lastFrameMs == null ? 16.67 : Math.max(10, Math.min(50, now - lastFrameMs));
+      lastFrameMs = now;
+      const frameScale = deltaMs / 16.67;
+      speed += 0.0025 * frameScale;
+      distance += speed * 0.12 * frameScale;
+      copPulse += 0.12 * frameScale;
+      spawnTimer -= frameScale;
       if (spawnTimer <= 0) {
         spawnObstacle();
         spawnTimer = 34 + Math.random() * 28;
@@ -1631,8 +1646,8 @@
         player.vy = -8.4;
       }
       player.ducking = keys.duck && player.y >= 182;
-      player.vy += 0.42;
-      player.y += player.vy;
+      player.vy += 0.42 * frameScale;
+      player.y += player.vy * frameScale;
       if (player.y > 182) {
         player.y = 182;
         player.vy = 0;
@@ -1640,7 +1655,7 @@
 
       for (let index = obstacles.length - 1; index >= 0; index -= 1) {
         const obstacle = obstacles[index];
-        obstacle.x -= speed;
+        obstacle.x -= speed * frameScale;
         if (obstacle.x + obstacle.w < -40) {
           obstacles.splice(index, 1);
           score += 5;
@@ -1680,7 +1695,7 @@
 
       for (let index = pickups.length - 1; index >= 0; index -= 1) {
         const pickup = pickups[index];
-        pickup.x -= speed;
+        pickup.x -= speed * frameScale;
         if (pickup.x < -20) {
           pickups.splice(index, 1);
           continue;
