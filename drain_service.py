@@ -203,7 +203,7 @@ def account_uses_personal_map(username: str | None) -> bool:
         return bool(metadata.get("_map_uploaded"))
     account = load_accounts().get(normalize_username(username))
     if not isinstance(account, dict):
-        return False
+        return True
     if "map_uploaded" not in account:
         return False
     return bool(account.get("map_uploaded"))
@@ -217,10 +217,10 @@ def include_shared_map(username: str | None) -> bool:
         return not bool(metadata.get("_map_uploaded"))
     account = load_accounts().get(normalize_username(username))
     if not isinstance(account, dict):
-        return True
+        return False
     if "map_uploaded" not in account:
         return True
-    return False
+    return not bool(account.get("map_uploaded"))
 
 
 def get_user_origin(username: str | None) -> tuple[float, float]:
