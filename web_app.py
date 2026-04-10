@@ -259,6 +259,7 @@ def run_picker():
             min_distance=_float_arg("min_distance", 5),
             max_distance=_float_arg("max_distance", 30),
             only_unvisited=_bool_arg("only_unvisited"),
+            only_visited=_bool_arg("only_visited"),
         )
     )
 
@@ -271,6 +272,7 @@ def random_drain():
         min_distance=_float_arg("min_distance", 0),
         max_distance=_float_arg("max_distance", 100),
         only_unvisited=_bool_arg("only_unvisited"),
+        only_visited=_bool_arg("only_visited"),
     )
     if not drain:
         return jsonify({"error": "No drains found."}), 404
@@ -286,6 +288,7 @@ def route_builder():
             min_distance=_float_arg("min_distance", 5),
             max_distance=_float_arg("max_distance", 30),
             only_unvisited=_bool_arg("only_unvisited"),
+            only_visited=_bool_arg("only_visited"),
         )
     )
 
@@ -294,7 +297,14 @@ def route_builder():
 @login_required
 def search():
     query = request.args.get("q", "")
-    return jsonify(drain_service.search_results(current_username(), query, _bool_arg("only_unvisited")))
+    return jsonify(
+        drain_service.search_results(
+            current_username(),
+            query,
+            _bool_arg("only_unvisited"),
+            _bool_arg("only_visited"),
+        )
+    )
 
 
 @app.post("/api/sync-kml")

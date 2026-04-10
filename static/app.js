@@ -27,6 +27,8 @@
   const searchInput = qs("#searchInput");
   const minDistance = qs("#minDistance");
   const maxDistance = qs("#maxDistance");
+  const onlyUnvisitedToggle = qs("#onlyUnvisited");
+  const onlyVisitedToggle = qs("#onlyVisited");
   const volumeControl = qs("#volumeControl");
   const minDistanceValue = qs("#minDistanceValue");
   const maxDistanceValue = qs("#maxDistanceValue");
@@ -117,9 +119,19 @@
     return new URLSearchParams({
       min_distance: minDistance.value,
       max_distance: maxDistance.value,
-      only_unvisited: qs("#onlyUnvisited").checked ? "1" : "0",
+      only_unvisited: onlyUnvisitedToggle.checked ? "1" : "0",
+      only_visited: onlyVisitedToggle.checked ? "1" : "0",
       session_type: "long",
     });
+  }
+
+  function syncVisitFilters(changed) {
+    if (changed === "unvisited" && onlyUnvisitedToggle.checked) {
+      onlyVisitedToggle.checked = false;
+    }
+    if (changed === "visited" && onlyVisitedToggle.checked) {
+      onlyUnvisitedToggle.checked = false;
+    }
   }
 
   async function fetchJson(url, options) {
@@ -411,7 +423,7 @@
     }
     try {
       const rows = await fetchJson(
-        `/api/search?q=${encodeURIComponent(query)}&only_unvisited=${qs("#onlyUnvisited").checked ? "1" : "0"}`
+        `/api/search?q=${encodeURIComponent(query)}&only_unvisited=${onlyUnvisitedToggle.checked ? "1" : "0"}&only_visited=${onlyVisitedToggle.checked ? "1" : "0"}`
       );
       searchPanel.innerHTML = "";
       rows.forEach((row) => searchPanel.appendChild(resultButton(row)));
@@ -1948,6 +1960,8 @@
 
   minDistance.addEventListener("input", syncSliders);
   maxDistance.addEventListener("input", syncSliders);
+  onlyUnvisitedToggle.addEventListener("change", () => syncVisitFilters("unvisited"));
+  onlyVisitedToggle.addEventListener("change", () => syncVisitFilters("visited"));
   searchInput.addEventListener("input", searchDrains);
   searchInput.addEventListener("blur", () => {
     setTimeout(() => {

@@ -932,8 +932,9 @@ def random_drain(
     min_distance: float = 0,
     max_distance: float = 100,
     only_unvisited: bool = False,
+    only_visited: bool = False,
 ) -> dict[str, Any] | None:
-    candidates = filter_drains(username, min_distance, max_distance, only_unvisited)
+    candidates = filter_drains(username, min_distance, max_distance, only_unvisited, only_visited=only_visited)
     if not candidates:
         return None
     return random.choice(candidates)
@@ -945,6 +946,7 @@ def filter_drains(
     max_distance: float = 60,
     only_unvisited: bool = False,
     search: str = "",
+    only_visited: bool = False,
 ) -> list[dict[str, Any]]:
     drains = []
     term = search.strip().casefold()
@@ -954,6 +956,8 @@ def filter_drains(
         if drain["distance_km"] < min_distance or drain["distance_km"] > max_distance:
             continue
         if only_unvisited and drain["visited"]:
+            continue
+        if only_visited and not drain["visited"]:
             continue
         if term:
             name_text = drain["name"].casefold()
@@ -977,8 +981,9 @@ def recommend_session(
     min_distance: float = 0,
     max_distance: float = 60,
     only_unvisited: bool = False,
+    only_visited: bool = False,
 ) -> dict[str, Any]:
-    candidates = filter_drains(username, min_distance, max_distance, only_unvisited)
+    candidates = filter_drains(username, min_distance, max_distance, only_unvisited, only_visited=only_visited)
     if not candidates:
         return {"primary": None, "route": [], "options": []}
 
@@ -999,11 +1004,12 @@ def build_route_plan(
     min_distance: float = 0,
     max_distance: float = 60,
     only_unvisited: bool = False,
+    only_visited: bool = False,
     stop_limit: int = 4,
     max_leg_km: float = 5,
     max_total_minutes: float = 120,
 ) -> dict[str, Any]:
-    pool = filter_drains(username, min_distance, max_distance, only_unvisited)
+    pool = filter_drains(username, min_distance, max_distance, only_unvisited, only_visited=only_visited)
     if len(pool) < 2:
         return {"route": [], "total_minutes": 0, "total_distance_km": 0}
 
@@ -1311,8 +1317,9 @@ def session_results(
     min_distance: float = 0,
     max_distance: float = 60,
     only_unvisited: bool = False,
+    only_visited: bool = False,
 ) -> list[dict[str, Any]]:
-    recommendation = recommend_session(username, session_type, min_distance, max_distance, only_unvisited)
+    recommendation = recommend_session(username, session_type, min_distance, max_distance, only_unvisited, only_visited)
     ordered: list[dict[str, Any]] = []
     seen: set[str] = set()
     for bucket in ("primary", "route", "options"):
@@ -1329,8 +1336,8 @@ def session_results(
     return result_rows(ordered)
 
 
-def search_results(username: str | None, query: str, only_unvisited: bool = False) -> list[dict[str, Any]]:
-    drains = filter_drains(username, 0, 9999, only_unvisited, query)
+def search_results(username: str | None, query: str, only_unvisited: bool = False, only_visited: bool = False) -> list[dict[str, Any]]:
+    drains = filter_drains(username, 0, 9999, only_unvisited, query, only_visited)
     return result_rows(drains)
 
 
