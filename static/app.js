@@ -918,6 +918,9 @@
   }
 
   function setupSmiley() {
+    if (meowFlash && meowFlash.parentElement !== document.body) {
+      document.body.appendChild(meowFlash);
+    }
     const frame = qs("#smileyFrame");
     let phase = 0;
     setInterval(() => {

@@ -1050,7 +1050,7 @@ html[data-theme="special-chaos"] .desktop::after {
   padding: 0;
   background: transparent;
 }
-.slider-value { position: absolute; top: 8px; left: 0; font-weight: 700; pointer-events: none; font-size: 14px; background: rgba(255,255,255,0.92); padding: 0 2px; transform: translateX(-50%); line-height: 1; }
+.slider-value { position: absolute; top: 8px; left: 0; font-weight: 700; pointer-events: none; font-size: 14px; color: #000; background: rgba(255,255,255,0.92); padding: 0 2px; transform: translateX(-50%); line-height: 1; }
 .retro-range {
   width: 100%;
   margin-top: 11px;
