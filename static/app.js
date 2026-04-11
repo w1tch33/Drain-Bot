@@ -688,8 +688,6 @@
       if (audioPlayer.muted && !audioPlayer.paused) {
         audioPlayer.muted = false;
         fadeInToTarget(Number(volumeControl.value), 420);
-      } else if (audioPlayer.paused && state.playlist.length) {
-        startPlaybackAt(state.playlistIndex, true, false, false);
       }
       return;
     }
@@ -699,7 +697,7 @@
       fadeInToTarget(Number(volumeControl.value), 420);
       return;
     }
-    if (pendingAutoplay || audioPlayer.paused) {
+    if (pendingAutoplay) {
       pendingAutoplay = false;
       startPlaybackAt(state.playlistIndex, true, false, false);
     }
@@ -935,7 +933,6 @@
     }, 70);
 
     qs("#smileyImage").addEventListener("click", () => {
-      unlockAudio();
       frame.animate(
         [
           { transform: frame.style.transform || "translate(0,0)" },
