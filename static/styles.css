@@ -167,25 +167,25 @@ html[data-theme="camcorder-vhs"] {
 }
 
 html[data-theme="special-chaos"] {
-  --desktop-bg: #2a0038;
-  --window-fill: #1a335f;
-  --line: #ffe65a;
-  --button-face: #ff3f8e;
+  --desktop-bg: #190022;
+  --window-fill: #2a145f;
+  --line: #fff36b;
+  --button-face: #ff2f9e;
   --button-shadow: #310847;
-  --button-highlight: #00d5ff;
+  --button-highlight: #00f2ff;
   --text: #fff;
-  --dot-color: rgba(255, 230, 90, 0.35);
-  --title-stripe-light: #ff8fc8;
-  --title-stripe-dark: #00a0cc;
-  --title-fill: #7f2dff;
-  --field-bg: #3f0b63;
+  --dot-color: rgba(255, 240, 110, 0.44);
+  --title-stripe-light: #ff8ed6;
+  --title-stripe-dark: #00b7da;
+  --title-fill: #8f1dff;
+  --field-bg: #4b0a70;
   --window-radius: 16px;
   --button-radius: 14px;
-  --window-inset: 0 0 0 2px rgba(255, 255, 255, 0.2) inset;
-  --window-drop: 0 10px 24px rgba(13, 0, 41, 0.44);
-  --button-extra: 0 0 0 1px rgba(255, 230, 90, 0.28) inset;
+  --window-inset: 0 0 0 2px rgba(255, 255, 255, 0.24) inset;
+  --window-drop: 0 12px 28px rgba(13, 0, 41, 0.52);
+  --button-extra: 0 0 0 1px rgba(255, 230, 90, 0.38) inset;
   --title-shape: rotate(1.2deg);
-  --ui-filter: saturate(1.18) contrast(1.08);
+  --ui-filter: saturate(1.35) contrast(1.2) hue-rotate(-12deg);
 }
 
 * { box-sizing: border-box; }
@@ -331,12 +331,14 @@ html[data-theme="camcorder-vhs"] .desktop > .title-shell::before {
 
 html[data-theme="special-chaos"] body {
   background:
-    radial-gradient(circle, var(--dot-color) 0 1px, transparent 1px 100%),
-    linear-gradient(135deg, rgba(255, 44, 156, 0.34), rgba(0, 255, 230, 0.28)),
-    repeating-linear-gradient(45deg, rgba(255, 230, 90, 0.16) 0 10px, transparent 10px 20px),
-    repeating-linear-gradient(-45deg, rgba(98, 0, 255, 0.14) 0 8px, transparent 8px 16px),
+    radial-gradient(circle, var(--dot-color) 0 1.2px, transparent 1.2px 100%),
+    conic-gradient(from 20deg at 20% 10%, rgba(255, 47, 158, 0.38), rgba(0, 242, 255, 0.34), rgba(255, 243, 107, 0.3), rgba(128, 0, 255, 0.35), rgba(255, 47, 158, 0.38)),
+    linear-gradient(135deg, rgba(255, 44, 156, 0.38), rgba(0, 255, 230, 0.32)),
+    repeating-linear-gradient(45deg, rgba(255, 230, 90, 0.2) 0 8px, transparent 8px 16px),
+    repeating-linear-gradient(-45deg, rgba(98, 0, 255, 0.2) 0 6px, transparent 6px 12px),
     var(--desktop-bg);
-  background-size: 6px 6px, auto, 30px 30px, 24px 24px, auto;
+  background-size: 6px 6px, 200% 200%, auto, 24px 24px, 18px 18px, auto;
+  animation: chaosWarp 6s linear infinite;
 }
 
 html[data-theme="pink-noir"] .retro-window,
@@ -696,13 +698,21 @@ html[data-theme="crt-green"] .desktop::after {
 }
 
 html[data-theme="special-chaos"] .retro-button {
-  text-shadow: 1px 0 #00d5ff, -1px 0 #ff3f8e;
-  animation: chaosButton 0.7s steps(2, end) infinite;
+  text-shadow: 1px 0 #00d5ff, -1px 0 #ff3f8e, 0 0 6px rgba(255, 255, 255, 0.24);
+  animation: chaosButton 0.55s steps(2, end) infinite;
+  background:
+    linear-gradient(125deg, rgba(255, 47, 158, 0.56), rgba(0, 242, 255, 0.48)),
+    var(--button-face);
+  box-shadow:
+    0 0 0 1px rgba(255, 243, 107, 0.48) inset,
+    0 0 12px rgba(255, 47, 158, 0.28),
+    0 0 12px rgba(0, 242, 255, 0.22);
 }
 
 html[data-theme="special-chaos"] .window-title > span,
 html[data-theme="special-chaos"] .title-pill {
   animation: chaosPulse 0.95s steps(2, end) infinite;
+  filter: saturate(1.4);
 }
 
 html[data-theme="special-chaos"] body::after {
@@ -712,12 +722,12 @@ html[data-theme="special-chaos"] body::after {
   pointer-events: none;
   z-index: 8;
   background:
-    repeating-linear-gradient(90deg, rgba(255, 63, 142, 0.12) 0 2px, transparent 2px 6px),
-    repeating-linear-gradient(0deg, rgba(0, 213, 255, 0.1) 0 1px, transparent 1px 4px),
-    radial-gradient(circle at 20% 30%, rgba(255, 230, 90, 0.18), transparent 26%),
-    radial-gradient(circle at 78% 68%, rgba(98, 0, 255, 0.2), transparent 24%);
+    repeating-linear-gradient(90deg, rgba(255, 63, 142, 0.18) 0 2px, transparent 2px 6px),
+    repeating-linear-gradient(0deg, rgba(0, 213, 255, 0.16) 0 1px, transparent 1px 4px),
+    radial-gradient(circle at 20% 30%, rgba(255, 230, 90, 0.24), transparent 26%),
+    radial-gradient(circle at 78% 68%, rgba(98, 0, 255, 0.26), transparent 24%);
   mix-blend-mode: screen;
-  animation: chaosStrobe 0.18s steps(2, end) infinite;
+  animation: chaosStrobe 0.12s steps(2, end) infinite;
 }
 
 html[data-theme="special-chaos"] body::before {
@@ -726,13 +736,13 @@ html[data-theme="special-chaos"] body::before {
   inset: 0;
   pointer-events: none;
   z-index: 7;
-  opacity: 0.46;
+  opacity: 0.58;
   background:
-    repeating-linear-gradient(135deg, rgba(255, 63, 142, 0.16) 0 2px, transparent 2px 10px),
-    repeating-linear-gradient(45deg, rgba(0, 213, 255, 0.14) 0 1px, transparent 1px 8px),
-    radial-gradient(circle at 15% 85%, rgba(255, 230, 90, 0.26), transparent 20%),
-    radial-gradient(circle at 86% 10%, rgba(0, 255, 230, 0.24), transparent 18%);
-  animation: chaosHue 0.7s linear infinite;
+    repeating-linear-gradient(135deg, rgba(255, 63, 142, 0.22) 0 2px, transparent 2px 10px),
+    repeating-linear-gradient(45deg, rgba(0, 213, 255, 0.2) 0 1px, transparent 1px 8px),
+    radial-gradient(circle at 15% 85%, rgba(255, 230, 90, 0.32), transparent 20%),
+    radial-gradient(circle at 86% 10%, rgba(0, 255, 230, 0.3), transparent 18%);
+  animation: chaosHue 0.55s linear infinite;
 }
 
 html[data-theme="special-chaos"] .desktop {
@@ -744,6 +754,12 @@ html[data-theme="special-chaos"] .speech-bubble,
 html[data-theme="special-chaos"] .title-shell {
   border-width: 3px;
   border-style: dashed;
+  box-shadow:
+    0 0 0 2px rgba(255, 243, 107, 0.32),
+    0 0 20px rgba(255, 47, 158, 0.24),
+    0 0 24px rgba(0, 242, 255, 0.2),
+    var(--window-inset),
+    var(--window-drop);
 }
 
 html[data-theme="special-chaos"] .retro-button:nth-child(odd) {
@@ -778,10 +794,11 @@ html[data-theme="special-chaos"] .desktop::after {
   inset: 0;
   pointer-events: none;
   background:
-    repeating-linear-gradient(90deg, rgba(255, 230, 90, 0.24) 0 2px, transparent 2px 10px),
-    repeating-linear-gradient(0deg, rgba(255, 63, 142, 0.2) 0 1px, transparent 1px 6px);
+    conic-gradient(from 0deg at 60% 46%, rgba(255, 63, 142, 0.18), rgba(0, 213, 255, 0.16), rgba(255, 230, 90, 0.22), rgba(98, 0, 255, 0.18), rgba(255, 63, 142, 0.18)),
+    repeating-linear-gradient(90deg, rgba(255, 230, 90, 0.28) 0 2px, transparent 2px 10px),
+    repeating-linear-gradient(0deg, rgba(255, 63, 142, 0.24) 0 1px, transparent 1px 6px);
   mix-blend-mode: hard-light;
-  animation: chaosStrobe 0.14s steps(2, end) infinite;
+  animation: chaosStrobe 0.1s steps(2, end) infinite;
 }
 
 .flash-stack {
@@ -1539,6 +1556,12 @@ html[data-theme="special-chaos"] .desktop::after {
   0% { filter: hue-rotate(0deg) saturate(1.15); }
   50% { filter: hue-rotate(180deg) saturate(1.35); }
   100% { filter: hue-rotate(360deg) saturate(1.15); }
+}
+
+@keyframes chaosWarp {
+  0% { background-position: 0 0, 0% 0%, 0 0, 0 0, 0 0, 0 0; }
+  50% { background-position: 0 0, 100% 100%, 0 0, 12px 8px, -10px 6px, 0 0; }
+  100% { background-position: 0 0, 0% 0%, 0 0, 24px 16px, -20px 12px, 0 0; }
 }
 
 @keyframes chaosButton {
