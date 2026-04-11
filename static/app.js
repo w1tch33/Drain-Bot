@@ -45,7 +45,7 @@
   const TORCH_SPRINT_HIGH_SCORE_KEY = "draintool-torchsprint-high-score";
   const GAME_LABELS = {
     ladderclimb: "Drain Climber Turbo",
-    torchsprint: "Torch Sprint",
+    torchsprint: "Drain Runner",
   };
   const GAME_STORAGE_KEYS = {
     ladderclimb: CLIMBER_HIGH_SCORE_KEY,
@@ -1894,14 +1894,14 @@
 
     function updateHelp() {
       if (gameOver) {
-        help.textContent = `TORCH SPRINT | GAME OVER | Score: ${score} | High: ${highScore}`;
+        help.textContent = `DRAIN RUNNER | GAME OVER | Score: ${score} | High: ${highScore}`;
         return;
       }
       if (!gameRunning) {
-        help.textContent = `TORCH SPRINT | ${countdown > 0 ? countdown : ""} | High: ${highScore}`;
+        help.textContent = `DRAIN RUNNER | ${countdown > 0 ? countdown : ""} | High: ${highScore}`;
         return;
       }
-      help.textContent = `Torch Sprint | Score: ${score} | Dist: ${distance}m | High: ${highScore}`;
+      help.textContent = `Drain Runner | Score: ${score} | Dist: ${distance}m | High: ${highScore}`;
     }
 
     function maybeUpdateHighScore() {
@@ -1926,7 +1926,7 @@
     function spawnObject() {
       const lane = Math.floor(Math.random() * 3);
       const y = -40;
-      if (Math.random() < 0.2) {
+      if (Math.random() < 0.18) {
         torches.push({ lane, y });
         return;
       }
@@ -1965,12 +1965,13 @@
       spawnTimer -= deltaMs;
       if (spawnTimer <= 0) {
         spawnObject();
-        spawnTimer = Math.max(620, 1400 - speed * 120);
+        if (distance > 320 && Math.random() < 0.36) spawnObject();
+        spawnTimer = Math.max(320, 980 - speed * 120 - distance * 0.35);
       }
-      const targetSpeed = Math.min(5.0, 1.0 + distance / 900);
+      const targetSpeed = Math.min(7.6, 1.0 + distance / 520);
       speed += (targetSpeed - speed) * Math.min(0.12, 0.06 * frameScale);
       distance += Math.max(1, Math.floor((1.2 + speed) * (deltaMs / 45)));
-      score += Math.max(1, Math.floor((1.6 + speed * 0.7) * (deltaMs / 35)));
+      score += Math.max(1, Math.floor((1.9 + speed * 0.85) * (deltaMs / 35)));
 
       for (let i = torches.length - 1; i >= 0; i -= 1) {
         const torch = torches[i];

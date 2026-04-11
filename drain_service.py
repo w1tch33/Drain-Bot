@@ -602,7 +602,7 @@ def progression_summary(username: str | None) -> dict[str, Any]:
 
 GAME_SCORE_LABELS = {
     "ladderclimb": "Drain Climber Turbo",
-    "torchsprint": "Torch Sprint",
+    "torchsprint": "Drain Runner",
 }
 
 
