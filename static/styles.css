@@ -50,7 +50,7 @@ html[data-theme="pink-noir"] {
   --button-face: #ff6acc;
   --button-shadow: #9c2c72;
   --button-highlight: #ffc1eb;
-  --text: #fff;
+  --text: #18000f;
   --dot-color: rgba(255, 255, 255, 0.62);
   --title-stripe-light: #ffd6f3;
   --title-stripe-dark: #ff69cb;
@@ -143,23 +143,23 @@ html[data-theme="sunset-haze"] {
 }
 
 html[data-theme="camcorder-vhs"] {
-  --desktop-bg: #3b3d37;
-  --window-fill: #696d63;
-  --line: #ece9dd;
-  --button-face: #7f8478;
-  --button-shadow: #4c4f48;
-  --button-highlight: #9a9f92;
-  --text: #fff;
-  --dot-color: rgba(255, 255, 255, 0.22);
-  --title-stripe-light: #b7bcad;
-  --title-stripe-dark: #6a6f63;
-  --title-fill: #8e9388;
-  --field-bg: #575b52;
+  --desktop-bg: #1f2d24;
+  --window-fill: #3d5445;
+  --line: #dcefd8;
+  --button-face: #506b59;
+  --button-shadow: #26342b;
+  --button-highlight: #6d8d79;
+  --text: #e8f9e6;
+  --dot-color: rgba(211, 239, 203, 0.25);
+  --title-stripe-light: #9fb89d;
+  --title-stripe-dark: #4a6552;
+  --title-fill: #6f8d76;
+  --field-bg: #314639;
   --window-radius: 0px;
   --button-radius: 0px;
   --window-inset: 1px 1px 0 rgba(240, 240, 240, 0.34) inset, -1px -1px 0 rgba(30, 30, 30, 0.58) inset;
   --window-drop: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 0 0 3px rgba(20, 20, 20, 0.2);
-  --ui-filter: contrast(1.02) saturate(0.85);
+  --ui-filter: contrast(1.08) saturate(0.66) sepia(0.14) hue-rotate(-18deg);
 }
 
 html[data-theme="special-chaos"] {
@@ -292,10 +292,27 @@ html[data-theme="pink-noir"] .desktop::after {
   opacity: 0.4;
 }
 
+html[data-theme="pink-noir"] .window-title > span,
+html[data-theme="pink-noir"] .title-pill {
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+html[data-theme="pink-noir"] .retro-input,
+html[data-theme="pink-noir"] .theme-select,
+html[data-theme="pink-noir"] .theme-select option {
+  color: #18000f;
+}
+
 html[data-theme="blood-red"] .retro-window,
 html[data-theme="blood-red"] .speech-bubble {
   border-style: double;
   border-width: 4px;
+}
+
+html[data-theme="blood-red"] .window-title > span,
+html[data-theme="blood-red"] .title-pill {
+  box-shadow: 0 0 10px rgba(255, 74, 74, 0.22);
+  animation: bloodPulse 2.4s ease-in-out infinite;
 }
 
 html[data-theme="emo-night"] .window-title > span,
@@ -304,13 +321,39 @@ html[data-theme="emo-night"] .title-pill {
   letter-spacing: 1.2px;
 }
 
+html[data-theme="emo-night"] .desktop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.18;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.12) 0 2px, transparent 2px 6px);
+}
+
 html[data-theme="icy-blue"] .retro-window,
 html[data-theme="icy-blue"] .speech-bubble {
   backdrop-filter: blur(1.5px);
 }
 
+html[data-theme="icy-blue"] .retro-window {
+  box-shadow: var(--window-inset), 0 0 0 1px rgba(155, 233, 255, 0.4), var(--window-drop);
+}
+
 html[data-theme="sunset-haze"] .title-pill {
   letter-spacing: 1px;
+}
+
+html[data-theme="sunset-haze"] .desktop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.22;
+  background:
+    radial-gradient(circle at 18% 16%, rgba(255, 236, 186, 0.35), transparent 22%),
+    repeating-linear-gradient(45deg, rgba(130, 85, 33, 0.1) 0 2px, transparent 2px 6px);
 }
 
 html[data-theme="camcorder-vhs"] body::after {
@@ -320,11 +363,67 @@ html[data-theme="camcorder-vhs"] body::after {
   pointer-events: none;
   z-index: 9;
   mix-blend-mode: screen;
+  opacity: 0.35;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.17) 0 1px, rgba(0, 0, 0, 0.04) 1px 3px),
+    radial-gradient(circle at 50% 50%, transparent 58%, rgba(0, 0, 0, 0.66) 100%),
+    linear-gradient(90deg, rgba(255, 0, 0, 0.04), transparent 35%, transparent 65%, rgba(0, 255, 255, 0.04));
+  animation: vhsFlicker 95ms steps(2, end) infinite;
+}
+
+html[data-theme="camcorder-vhs"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  opacity: 0.22;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 2px),
+    repeating-radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 3px);
+  animation: vhsNoise 130ms steps(3, end) infinite;
+}
+
+html[data-theme="camcorder-vhs"] .desktop::before {
+  content: "REC  SP   00:13:27";
+  position: absolute;
+  left: 12px;
+  top: 8px;
+  width: auto;
+  height: auto;
+  border: none;
+  background: transparent;
+  color: #e8f9e6;
+  font-size: 12px;
+  letter-spacing: 1px;
+  opacity: 0.78;
+}
+
+html[data-theme="camcorder-vhs"] .desktop::after {
+  content: "\2022";
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  color: #ff7a7a;
+  font-size: 14px;
+  animation: recBlink 1s steps(2, end) infinite;
+  pointer-events: none;
+}
+
+html[data-theme="crt-green"] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8;
   opacity: 0.2;
   background:
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.1) 0 1px, transparent 1px 3px),
-    radial-gradient(circle at 50% 50%, transparent 62%, rgba(0, 0, 0, 0.5) 100%);
-  animation: vhsFlicker 140ms steps(2, end) infinite;
+    repeating-linear-gradient(0deg, rgba(132, 255, 182, 0.09) 0 1px, rgba(0, 0, 0, 0.02) 1px 3px),
+    radial-gradient(circle at 50% 50%, transparent 62%, rgba(0, 0, 0, 0.48) 100%);
+}
+
+html[data-theme="crt-green"] .desktop {
+  text-shadow: 0 0 2px rgba(84, 240, 143, 0.6);
 }
 
 html[data-theme="special-chaos"] .retro-button {
@@ -334,6 +433,18 @@ html[data-theme="special-chaos"] .retro-button {
 html[data-theme="special-chaos"] .window-title > span,
 html[data-theme="special-chaos"] .title-pill {
   animation: chaosPulse 1.8s ease-in-out infinite;
+}
+
+html[data-theme="special-chaos"] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8;
+  background:
+    conic-gradient(from 180deg, rgba(255, 63, 142, 0.12), rgba(0, 213, 255, 0.12), rgba(255, 230, 90, 0.12), rgba(255, 63, 142, 0.12));
+  mix-blend-mode: screen;
+  animation: chaosSpin 12s linear infinite;
 }
 
 .flash-stack {
@@ -1056,9 +1167,32 @@ html[data-theme="special-chaos"] .title-pill {
   100% { opacity: 0.16; transform: translateY(0); }
 }
 
+@keyframes vhsNoise {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-0.4px, 0.2px); }
+  50% { transform: translate(0.3px, -0.2px); }
+  75% { transform: translate(-0.2px, -0.1px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes recBlink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.2; }
+}
+
 @keyframes chaosPulse {
   0%, 100% { filter: saturate(1) brightness(1); }
   50% { filter: saturate(1.4) brightness(1.12); }
+}
+
+@keyframes chaosSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes bloodPulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.18); }
 }
 
 @media (max-width: 980px) {
