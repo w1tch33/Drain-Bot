@@ -50,7 +50,6 @@
     "pink-noir",
     "blood-red",
     "icy-blue",
-    "ancient-scripts",
     "camcorder-vhs",
     "special-chaos",
   ]);
@@ -95,7 +94,7 @@
   }
 
   function applyTheme(themeName) {
-    if (themeName === "sunset-haze") themeName = "ancient-scripts";
+    if (themeName === "sunset-haze" || themeName === "ancient-scripts") themeName = "mac-system-1";
     const theme = THEMES.has(themeName) ? themeName : "mac-system-1";
     if (theme === "mac-system-1") {
       document.documentElement.removeAttribute("data-theme");
