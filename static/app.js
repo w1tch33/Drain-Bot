@@ -1567,7 +1567,8 @@
     canvas.classList.add("runner-canvas");
 
     const ballRadius = isMobile ? 11 : 13;
-    const horizonY = Math.floor(canvas.height * 0.20);
+    const horizonY = Math.floor(canvas.height * 0.2);
+    const TRAIL_MAX = 14;
     let score = 0;
     let distance = 0;
     let gameRunning = false;
@@ -1578,19 +1579,26 @@
     let countdownTimer = null;
     let lastFrameMs = null;
     let spawnTimer = 0;
-    let speed = 0.58;
+    let speed = 0.52;
     let highScore = readStoredNumber(RUNNER_HIGH_SCORE_KEY);
     let ballX = 0;
     let velocityX = 0;
+    let swayTime = 0;
+    let nearMissStreak = 0;
+    let nearMissFlash = 0;
+    let torchGlow = 0;
     const keys = { left: false, right: false };
     const obstacles = [];
+    const trail = [];
 
-    function roadCenter() {
-      return 0;
+    function roadCenter(z) {
+      const waveA = Math.sin(swayTime * 0.72 + z * 3.4) * 0.11;
+      const waveB = Math.sin(swayTime * 1.08 + z * 6.8) * 0.06;
+      return (waveA + waveB) * (0.4 + z * 0.6);
     }
 
     function roadHalfWidth(z) {
-      return 0.86 - z * 0.54;
+      return 0.84 - z * 0.5;
     }
 
     function project(z, xNorm) {
@@ -1598,11 +1606,7 @@
       const y = horizonY + depth * (canvas.height - horizonY);
       const centerX = canvas.width / 2 + roadCenter(z) * canvas.width * 0.22;
       const half = roadHalfWidth(z) * canvas.width * 0.30;
-      return {
-        x: centerX + xNorm * half,
-        y,
-        half,
-      };
+      return { x: centerX + xNorm * half, y, half };
     }
 
     function updateHelp(message = "") {
@@ -1615,25 +1619,26 @@
         return;
       }
       help.textContent = gameRunning
-        ? `Score: ${score} | Distance: ${Math.floor(distance)}m | Speed: ${speed.toFixed(2)} | High: ${highScore}`
-        : `DRAIN RUNNER | SLOPE MODE | ${countdown > 0 ? countdown : "GO"} | High: ${highScore}`;
+        ? `Score: ${score} | ${Math.floor(distance)}m | Speed: ${speed.toFixed(2)} | Near Miss x${Math.max(nearMissStreak, 1)}`
+        : `DRAIN RUNNER | ${countdown > 0 ? countdown : "GO"} | High: ${highScore}`;
     }
 
     function drawGameOver(title) {
       ctx.fillStyle = "rgba(0, 0, 0, 0.72)";
-      ctx.fillRect(42, 70, canvas.width - 84, 170);
+      ctx.fillRect(42, 62, canvas.width - 84, 182);
       ctx.strokeStyle = "#ffffff";
       ctx.lineWidth = 2;
-      ctx.strokeRect(42, 70, canvas.width - 84, 170);
+      ctx.strokeRect(42, 62, canvas.width - 84, 182);
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 26px Chicago, Monaco, monospace";
       ctx.textAlign = "center";
-      ctx.fillText(title, canvas.width / 2, 108);
+      ctx.fillText(title, canvas.width / 2, 102);
       ctx.font = "18px Chicago, Monaco, monospace";
-      ctx.fillText(`Score: ${score}`, canvas.width / 2, 140);
-      ctx.fillText(`High: ${highScore}`, canvas.width / 2, 168);
+      ctx.fillText(`Score: ${score}`, canvas.width / 2, 136);
+      ctx.fillText(`Distance: ${Math.floor(distance)}m`, canvas.width / 2, 162);
+      ctx.fillText(`High: ${highScore}`, canvas.width / 2, 188);
       ctx.font = "14px Chicago, Monaco, monospace";
-      ctx.fillText("Tap or click to retry", canvas.width / 2, 198);
+      ctx.fillText("Tap or click to retry", canvas.width / 2, 220);
       ctx.textAlign = "start";
     }
 
@@ -1651,8 +1656,15 @@
     }
 
     function drawRoad() {
-      ctx.fillStyle = "#0a0d11";
+      const skyA = nearMissFlash > 0 ? "#4b0017" : "#0b0f14";
+      const skyB = nearMissFlash > 0 ? "#1a0b22" : "#0a0d11";
+      ctx.fillStyle = skyB;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const sky = ctx.createLinearGradient(0, 0, 0, horizonY + 28);
+      sky.addColorStop(0, skyA);
+      sky.addColorStop(1, skyB);
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, canvas.width, horizonY + 28);
 
       for (let i = 0; i < 34; i += 1) {
         const z1 = i / 34;
@@ -1661,7 +1673,7 @@
         const p1R = project(z1, 1);
         const p2L = project(z2, -1);
         const p2R = project(z2, 1);
-        ctx.fillStyle = i % 2 === 0 ? "#1e222a" : "#161a20";
+        ctx.fillStyle = i % 2 === 0 ? "#1f2430" : "#181d26";
         ctx.beginPath();
         ctx.moveTo(p1L.x, p1L.y);
         ctx.lineTo(p1R.x, p1R.y);
@@ -1686,7 +1698,7 @@
       const rightNear = project(1, 1);
       const leftFar = project(0, -1);
       const rightFar = project(0, 1);
-      ctx.strokeStyle = "#8fa3b8";
+      ctx.strokeStyle = "#9cb4d4";
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(leftFar.x, leftFar.y);
@@ -1696,23 +1708,72 @@
       ctx.stroke();
     }
 
-    function drawRunner() {
-      drawRoad();
-
-      obstacles.sort((a, b) => a.z - b.z).forEach((obstacle) => {
-        const p = project(obstacle.z, obstacle.x);
-        const scale = 0.25 + obstacle.z * obstacle.z * 1.1;
-        const size = ballRadius * (0.85 + scale * 1.15);
-        ctx.fillStyle = obstacle.type === "block" ? "#ff7043" : "#8d6e63";
+    function drawObstacle(obstacle) {
+      const p = project(obstacle.z, obstacle.x);
+      const scale = 0.26 + obstacle.z * obstacle.z * 1.18;
+      const size = ballRadius * (0.8 + scale);
+      if (obstacle.type === "torch") {
+        ctx.fillStyle = "#ffcc66";
         ctx.beginPath();
-        ctx.arc(p.x, p.y - size * 0.35, size, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y - size * 0.6, size * 0.58, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#4e2b10";
+        ctx.fillRect(p.x - size * 0.22, p.y - size * 0.2, size * 0.44, size * 1.05);
+        ctx.fillStyle = "rgba(255, 190, 80, 0.24)";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y - size * 0.62, size * 1.35, 0, Math.PI * 2);
+        ctx.fill();
+        return;
+      }
+      if (obstacle.type === "rat") {
+        ctx.fillStyle = "#7f6f63";
+        ctx.beginPath();
+        ctx.ellipse(p.x, p.y - size * 0.4, size * 1.05, size * 0.68, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#a3968d";
+        ctx.beginPath();
+        ctx.ellipse(p.x + size * 0.7, p.y - size * 0.56, size * 0.44, size * 0.32, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.strokeStyle = "#000";
+        ctx.beginPath();
+        ctx.moveTo(p.x - size * 0.9, p.y - size * 0.42);
+        ctx.quadraticCurveTo(p.x - size * 1.5, p.y - size * 0.7, p.x - size * 1.9, p.y - size * 0.3);
         ctx.stroke();
+        return;
+      }
+      ctx.fillStyle = obstacle.type === "grate" ? "#9da7b2" : "#ff7043";
+      ctx.beginPath();
+      ctx.arc(p.x, p.y - size * 0.35, size, 0, Math.PI * 2);
+      ctx.fill();
+      if (obstacle.type === "grate") {
+        ctx.strokeStyle = "#535c66";
+        ctx.lineWidth = 1.4;
+        for (let i = -2; i <= 2; i += 1) {
+          ctx.beginPath();
+          ctx.moveTo(p.x + i * (size * 0.28), p.y - size * 1.2);
+          ctx.lineTo(p.x + i * (size * 0.28), p.y + size * 0.45);
+          ctx.stroke();
+        }
+      }
+      ctx.strokeStyle = "#000";
+      ctx.stroke();
+    }
+
+    function drawRunner() {
+      drawRoad();
+      obstacles.sort((a, b) => a.z - b.z).forEach(drawObstacle);
+
+      trail.forEach((ghost, idx) => {
+        const p = project(1, ghost.x);
+        const alpha = Math.max(0.05, 0.25 - idx * 0.02);
+        ctx.fillStyle = `rgba(255, 220, 120, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y - ballRadius, Math.max(2, ballRadius - idx * 0.55), 0, Math.PI * 2);
+        ctx.fill();
       });
 
       const ballProj = project(1, ballX);
-      const shine = Math.max(0.2, 1 - Math.abs(velocityX) * 1.8);
+      const shine = Math.max(0.25, 1 - Math.abs(velocityX) * 1.6);
       ctx.fillStyle = `rgba(255, 214, 79, ${shine})`;
       ctx.beginPath();
       ctx.arc(ballProj.x, ballProj.y - ballRadius, ballRadius, 0, Math.PI * 2);
@@ -1720,11 +1781,22 @@
       ctx.strokeStyle = "#000";
       ctx.stroke();
 
+      if (torchGlow > 0) {
+        ctx.fillStyle = `rgba(255, 190, 84, ${Math.min(0.32, torchGlow * 0.015)})`;
+        ctx.beginPath();
+        ctx.arc(ballProj.x, ballProj.y - ballRadius, ballRadius * 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
       ctx.fillStyle = "#f06292";
       ctx.fillRect(12, 10, 120, 12);
       ctx.fillStyle = "#fff";
       ctx.fillRect(12, 10, Math.min(120, Math.max(0, speed - 0.45) * 95), 12);
 
+      if (nearMissFlash > 0) {
+        ctx.fillStyle = "rgba(255, 96, 96, 0.17)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
       if (!gameRunning && !gameOver && countdown > 0) drawCountdownOverlay();
       if (gameOver) drawGameOver(gameOverTitle);
       updateHelp();
@@ -1738,10 +1810,23 @@
       }
     }
 
-    function spawnObstacle() {
-      const type = Math.random() < 0.78 ? "block" : "orb";
-      const x = (Math.random() * 1.6) - 0.8;
-      obstacles.push({ type, z: 0.02, x });
+    function spawnPattern() {
+      const mode = Math.random();
+      const laneA = (Math.floor(Math.random() * 5) - 2) * 0.36;
+      if (mode < 0.26) {
+        obstacles.push({ type: "block", z: 0.02, x: laneA, radius: 0.2, scored: false, nearMiss: false });
+      } else if (mode < 0.46) {
+        const laneB = Math.max(-0.72, Math.min(0.72, laneA + (Math.random() < 0.5 ? -0.36 : 0.36)));
+        obstacles.push({ type: "block", z: 0.02, x: laneA, radius: 0.2, scored: false, nearMiss: false });
+        obstacles.push({ type: "grate", z: 0.12, x: laneB, radius: 0.23, scored: false, nearMiss: false });
+      } else if (mode < 0.7) {
+        obstacles.push({ type: "rat", z: 0.02, x: laneA, radius: 0.19, scored: false, nearMiss: false, drift: (Math.random() - 0.5) * 0.28 });
+      } else if (mode < 0.88) {
+        obstacles.push({ type: "torch", z: 0.03, x: laneA, radius: 0.18, scored: false, nearMiss: false });
+      } else {
+        obstacles.push({ type: "block", z: 0.03, x: -0.55, radius: 0.2, scored: false, nearMiss: false });
+        obstacles.push({ type: "block", z: 0.1, x: 0.55, radius: 0.2, scored: false, nearMiss: false });
+      }
     }
 
     function onKey(event) {
@@ -1768,10 +1853,15 @@
       countdown = 3;
       gameOver = false;
       gameOverTitle = "GAME OVER";
-      spawnTimer = 18;
-      speed = 0.58;
+      nearMissStreak = 0;
+      nearMissFlash = 0;
+      torchGlow = 0;
+      spawnTimer = 20;
+      speed = 0.52;
       ballX = 0;
       velocityX = 0;
+      swayTime = 0;
+      trail.length = 0;
       keys.left = false;
       keys.right = false;
       obstacles.length = 0;
@@ -1791,6 +1881,14 @@
       }, 1000);
     }
 
+    function endRound(reason) {
+      gameRunning = false;
+      gameOver = true;
+      gameOverTitle = reason;
+      updateHighScore();
+      drawRunner();
+    }
+
     function step(timestamp) {
       if (!gameRunning) return;
       const now = typeof timestamp === "number" ? timestamp : performance.now();
@@ -1798,63 +1896,92 @@
       lastFrameMs = now;
       const frameScale = deltaMs / 16.67;
 
-      if (keys.left) velocityX -= 0.0135 * frameScale;
-      if (keys.right) velocityX += 0.0135 * frameScale;
-      velocityX *= Math.pow(0.88, frameScale);
-      velocityX = Math.max(-0.095, Math.min(0.095, velocityX));
+      swayTime += 0.012 * frameScale;
+      if (keys.left) velocityX -= 0.0108 * frameScale;
+      if (keys.right) velocityX += 0.0108 * frameScale;
+      velocityX *= Math.pow(0.9, frameScale);
+      const maxVel = 0.072 + Math.min(0.02, speed * 0.02);
+      velocityX = Math.max(-maxVel, Math.min(maxVel, velocityX));
       const intendedX = ballX + velocityX * frameScale;
 
-      speed += 0.00075 * frameScale;
-      speed = Math.min(1.45, speed);
-      distance += speed * 1.9 * frameScale;
+      speed += 0.00034 * frameScale;
+      speed = Math.min(1.2, speed);
+      distance += speed * 1.75 * frameScale;
+      score = Math.max(score, Math.floor(distance) + nearMissStreak * 6);
 
       const nearHalf = roadHalfWidth(1);
-      const softEdge = Math.max(0.14, nearHalf - 0.035);
-      const hardEdge = nearHalf + 0.15;
+      const softEdge = Math.max(0.15, nearHalf - 0.05);
+      const hardEdge = nearHalf + 0.11;
       if (Math.abs(intendedX) > hardEdge) {
-        gameRunning = false;
-        gameOver = true;
-        gameOverTitle = "FELL OFF THE EDGE";
-        updateHighScore();
-        drawRunner();
+        endRound("FELL OFF THE EDGE");
         return;
       }
       ballX = intendedX;
       if (Math.abs(ballX) > softEdge) {
         const edgeDir = Math.sign(ballX || 1);
         ballX = edgeDir * softEdge;
-        velocityX *= -0.24;
+        velocityX *= -0.16;
+        nearMissFlash = Math.max(nearMissFlash, 4);
       }
+
+      trail.unshift({ x: ballX });
+      if (trail.length > TRAIL_MAX) trail.pop();
+      if (nearMissFlash > 0) nearMissFlash -= frameScale;
+      if (torchGlow > 0) torchGlow -= frameScale;
 
       spawnTimer -= frameScale;
       if (spawnTimer <= 0) {
-        spawnObstacle();
-        spawnTimer = 24 + Math.random() * 26;
+        spawnPattern();
+        const rhythm = 20 + Math.random() * 16;
+        const difficulty = Math.max(8, 18 - speed * 7);
+        spawnTimer = rhythm + difficulty;
       }
 
-      const zRate = (0.011 + speed * 0.003) * frameScale;
+      const zRate = (0.0098 + speed * 0.0031) * frameScale;
       for (let i = obstacles.length - 1; i >= 0; i -= 1) {
         const obstacle = obstacles[i];
         obstacle.z += zRate;
-        if (obstacle.z > 1.08) {
-          obstacles.splice(i, 1);
-          score += 12;
-          updateHighScore();
-          continue;
+        if (obstacle.type === "rat") {
+          obstacle.x += Math.sin(swayTime * 3 + obstacle.z * 7) * 0.0012 + obstacle.drift * 0.001;
+          obstacle.x = Math.max(-0.82, Math.min(0.82, obstacle.x));
         }
-        if (obstacle.z > 0.90 && obstacle.z < 1.03) {
+
+        if (!obstacle.nearMiss && obstacle.z > 0.82 && obstacle.z < 1.02) {
           const diff = Math.abs(obstacle.x - ballX);
-          if (diff < 0.18) {
-            gameRunning = false;
-            gameOver = true;
-            gameOverTitle = "SMASHED";
+          if (diff < obstacle.radius + 0.07 && diff > obstacle.radius + 0.01 && obstacle.type !== "torch") {
+            obstacle.nearMiss = true;
+            nearMissStreak += 1;
+            score += 18 + nearMissStreak * 4;
+            nearMissFlash = 5;
             updateHighScore();
-            drawRunner();
+          }
+        }
+
+        if (obstacle.z > 0.88 && obstacle.z < 1.03) {
+          const diff = Math.abs(obstacle.x - ballX);
+          if (diff < obstacle.radius) {
+            if (obstacle.type === "torch") {
+              score += 45;
+              torchGlow = 14;
+              obstacle.z = 1.2;
+              continue;
+            }
+            endRound("SMASHED");
             return;
           }
         }
+
+        if (obstacle.z > 1.08) {
+          obstacles.splice(i, 1);
+          if (obstacle.type !== "torch") {
+            score += 8 + Math.floor(speed * 4);
+            if (!obstacle.nearMiss && nearMissStreak > 0) nearMissStreak = Math.max(0, nearMissStreak - 1);
+          }
+          updateHighScore();
+        }
       }
 
+      updateHighScore();
       drawRunner();
       rafId = requestAnimationFrame(step);
     }
