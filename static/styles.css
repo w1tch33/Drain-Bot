@@ -372,6 +372,16 @@ html[data-theme="blood-red"] .speech-bubble {
   border-style: double;
   border-width: 4px;
   box-shadow: 0 0 0 1px rgba(255, 25, 63, 0.36), var(--window-inset), var(--window-drop);
+  background: rgba(82, 9, 19, 0.8);
+  backdrop-filter: blur(1.2px) saturate(1.05);
+}
+
+html[data-theme="blood-red"] .window-body {
+  background: rgba(82, 9, 19, 0.74);
+}
+
+html[data-theme="blood-red"] .title-shell {
+  background: rgba(82, 9, 19, 0.78);
 }
 
 html[data-theme="blood-red"] .window-title > span,
