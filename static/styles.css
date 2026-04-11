@@ -224,37 +224,24 @@ html[data-theme="crt-green"] body {
 
 html[data-theme="pink-noir"] body {
   background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='800' viewBox='0 0 1200 800'%3E%3Cg fill='%23170010' fill-opacity='0.34'%3E%3Cpath d='M86 120c12-24 48-14 48 13 0 20-20 34-48 54-28-20-48-34-48-54 0-27 36-37 48-13z'/%3E%3Cpath d='M268 204c10-20 40-12 40 10 0 17-16 28-40 44-24-16-40-27-40-44 0-22 30-30 40-10z'/%3E%3Cpath d='M1014 188c11-22 43-13 43 11 0 18-17 30-43 48-26-18-43-30-43-48 0-24 32-33 43-11z'/%3E%3Cpath d='M898 558c12-24 48-14 48 13 0 20-20 34-48 54-28-20-48-34-48-54 0-27 36-37 48-13z'/%3E%3Cpath d='M222 612c10-20 40-12 40 10 0 17-16 28-40 44-24-16-40-27-40-44 0-22 30-30 40-10z'/%3E%3Cpolygon points='470,90 478,112 502,112 482,126 490,148 470,134 450,148 458,126 438,112 462,112'/%3E%3Cpolygon points='760,146 768,168 792,168 772,182 780,204 760,190 740,204 748,182 728,168 752,168'/%3E%3Cpolygon points='1060,332 1068,354 1092,354 1072,368 1080,390 1060,376 1040,390 1048,368 1028,354 1052,354'/%3E%3Cpolygon points='612,622 620,644 644,644 624,658 632,680 612,666 592,680 600,658 580,644 604,644'/%3E%3Cpolygon points='340,500 348,522 372,522 352,536 360,558 340,544 320,558 328,536 308,522 332,522'/%3E%3C/g%3E%3C/svg%3E"),
     radial-gradient(circle, var(--dot-color) 0 1px, transparent 1px 100%),
-    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.35), transparent 26%),
-    radial-gradient(circle at 82% 72%, rgba(255, 128, 214, 0.32), transparent 30%),
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.22), transparent 26%),
+    radial-gradient(circle at 82% 72%, rgba(255, 128, 214, 0.24), transparent 30%),
     linear-gradient(155deg, rgba(255, 230, 246, 0.35), rgba(255, 72, 188, 0.2) 45%, rgba(255, 170, 225, 0.2) 80%),
     var(--desktop-bg);
-  background-size: 6px 6px, auto, auto, auto, auto;
-}
-
-html[data-theme="pink-noir"] body::before {
-  content: "★  ♥  ★  ♥  ★  ♥  ★  ♥  ★  ♥\A♥  ★  ♥  ★  ♥  ★  ♥  ★  ♥  ★\A★  ♥  ★  ♥  ★  ♥  ★  ♥  ★  ♥\A♥  ★  ♥  ★  ♥  ★  ♥  ★  ♥  ★";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 6;
-  white-space: pre;
-  line-height: 2.2;
-  letter-spacing: 7px;
-  font-size: clamp(16px, 2.2vw, 28px);
-  color: rgba(20, 0, 14, 0.32);
-  padding: 34px 24px;
-  animation: sparkleDrift 2.2s ease-in-out infinite;
+  background-size: cover, 6px 6px, auto, auto, auto, auto;
 }
 
 html[data-theme="blood-red"] body {
   background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='900' viewBox='0 0 1400 900'%3E%3Crect width='1400' height='900' fill='none'/%3E%3Cg fill='%230f0f12' fill-opacity='0.86'%3E%3Crect x='20' y='690' width='180' height='190'/%3E%3Crect x='92' y='600' width='34' height='90'/%3E%3Cpolygon points='92,600 109,560 126,600'/%3E%3Crect x='238' y='710' width='150' height='170'/%3E%3Crect x='292' y='630' width='32' height='80'/%3E%3Cpolygon points='292,630 308,592 324,630'/%3E%3Crect x='420' y='670' width='220' height='210'/%3E%3Crect x='518' y='560' width='26' height='110'/%3E%3Cpolygon points='518,560 531,525 544,560'/%3E%3Crect x='680' y='725' width='168' height='155'/%3E%3Crect x='748' y='650' width='30' height='75'/%3E%3Cpolygon points='748,650 763,618 778,650'/%3E%3Crect x='892' y='688' width='210' height='192'/%3E%3Crect x='992' y='592' width='30' height='96'/%3E%3Cpolygon points='992,592 1007,552 1022,592'/%3E%3Crect x='1130' y='728' width='210' height='152'/%3E%3Crect x='1222' y='662' width='26' height='66'/%3E%3Cpolygon points='1222,662 1235,632 1248,662'/%3E%3C/g%3E%3C/svg%3E"),
     radial-gradient(circle, var(--dot-color) 0 1.3px, transparent 1.3px 100%),
     radial-gradient(circle at 15% 15%, rgba(255, 56, 90, 0.22), transparent 30%),
     radial-gradient(circle at 76% 66%, rgba(55, 0, 8, 0.4), transparent 42%),
     linear-gradient(180deg, rgba(0, 0, 0, 0.4), transparent 25%, rgba(0, 0, 0, 0.5) 100%),
     var(--desktop-bg);
-  background-size: 6px 6px, auto, auto, auto, auto;
+  background-size: cover, 6px 6px, auto, auto, auto, auto;
 }
 
 html[data-theme="emo-night"] body {
@@ -354,20 +341,6 @@ html[data-theme="pink-noir"] .speech-bubble {
 html[data-theme="pink-noir"] .retro-button {
   font-weight: 700;
   letter-spacing: 0.2px;
-}
-
-html[data-theme="pink-noir"] .desktop::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 12% 22%, rgba(255, 255, 255, 0.28) 0 13px, transparent 14px),
-    radial-gradient(circle at 82% 16%, rgba(255, 255, 255, 0.24) 0 9px, transparent 10px),
-    radial-gradient(circle at 90% 72%, rgba(255, 255, 255, 0.2) 0 8px, transparent 9px),
-    radial-gradient(circle at 20% 72%, rgba(255, 255, 255, 0.22) 0 7px, transparent 8px);
-  opacity: 0.5;
-  animation: sparkleDrift 2.2s ease-in-out infinite;
 }
 
 html[data-theme="pink-noir"] .window-title > span,
@@ -550,7 +523,7 @@ html[data-theme="camcorder-vhs"] body::after {
     repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.26) 0 1px, rgba(0, 0, 0, 0.12) 1px 5px),
     radial-gradient(circle at 50% 50%, transparent 56%, rgba(0, 0, 0, 0.75) 100%),
     linear-gradient(90deg, rgba(255, 0, 102, 0.16), transparent 32%, transparent 68%, rgba(0, 220, 255, 0.16));
-  animation: vhsFlicker 55ms steps(2, end) infinite;
+  animation: vhsFlicker 42ms steps(2, end) infinite;
 }
 
 html[data-theme="camcorder-vhs"] body::before {
@@ -559,12 +532,12 @@ html[data-theme="camcorder-vhs"] body::before {
   inset: 0;
   z-index: 8;
   pointer-events: none;
-  opacity: 0.55;
+  opacity: 0.66;
   background:
     repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 2px),
     repeating-radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.1) 0 1px, transparent 1px 3px),
     linear-gradient(180deg, rgba(255, 0, 140, 0.1), rgba(120, 160, 255, 0.08) 60%, rgba(255, 120, 190, 0.1));
-  animation: vhsNoise 45ms steps(3, end) infinite;
+  animation: vhsNoise 32ms steps(3, end) infinite;
 }
 
 html[data-theme="camcorder-vhs"] .desktop::before {
@@ -594,6 +567,18 @@ html[data-theme="camcorder-vhs"] .desktop::after {
   pointer-events: none;
 }
 
+html[data-theme="camcorder-vhs"] .desktop .credit::before {
+  content: "AUTO  Hi8  TRACKING";
+  position: absolute;
+  right: calc(100% + 14px);
+  top: -2px;
+  color: rgba(255, 226, 244, 0.86);
+  font-size: 10px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  text-shadow: 0 0 4px rgba(255, 161, 214, 0.7);
+}
+
 html[data-theme="camcorder-vhs"] .desktop {
   animation: bootIn 420ms ease-out;
 }
@@ -607,7 +592,7 @@ html[data-theme="camcorder-vhs"] .speech-bubble {
 
 html[data-theme="camcorder-vhs"] .window-title > span,
 html[data-theme="camcorder-vhs"] .title-pill {
-  text-shadow: 1px 0 rgba(255, 90, 170, 0.55), -1px 0 rgba(110, 220, 255, 0.55);
+  text-shadow: 2px 0 rgba(255, 90, 170, 0.72), -2px 0 rgba(110, 220, 255, 0.72);
 }
 
 html[data-theme="camcorder-vhs"] .desktop > .title-shell::after {
@@ -706,7 +691,7 @@ html[data-theme="special-chaos"] body::after {
     radial-gradient(circle at 20% 30%, rgba(255, 230, 90, 0.18), transparent 26%),
     radial-gradient(circle at 78% 68%, rgba(98, 0, 255, 0.2), transparent 24%);
   mix-blend-mode: screen;
-  animation: chaosStrobe 0.32s steps(2, end) infinite;
+  animation: chaosStrobe 0.18s steps(2, end) infinite;
 }
 
 html[data-theme="special-chaos"] body::before {
@@ -715,11 +700,13 @@ html[data-theme="special-chaos"] body::before {
   inset: 0;
   pointer-events: none;
   z-index: 7;
-  opacity: 0.28;
+  opacity: 0.46;
   background:
     repeating-linear-gradient(135deg, rgba(255, 63, 142, 0.16) 0 2px, transparent 2px 10px),
     repeating-linear-gradient(45deg, rgba(0, 213, 255, 0.14) 0 1px, transparent 1px 8px),
-    radial-gradient(circle at 15% 85%, rgba(255, 230, 90, 0.26), transparent 20%);
+    radial-gradient(circle at 15% 85%, rgba(255, 230, 90, 0.26), transparent 20%),
+    radial-gradient(circle at 86% 10%, rgba(0, 255, 230, 0.24), transparent 18%);
+  animation: chaosHue 0.7s linear infinite;
 }
 
 html[data-theme="special-chaos"] .desktop {
@@ -748,7 +735,7 @@ html[data-theme="special-chaos"] .window-title > span {
 
 html[data-theme="special-chaos"] .window-title > span,
 html[data-theme="special-chaos"] .title-pill {
-  text-shadow: 2px 0 #00d5ff, -2px 0 #ff3f8e;
+  text-shadow: 3px 0 #00d5ff, -3px 0 #ff3f8e;
 }
 
 html[data-theme="special-chaos"] .retro-window,
@@ -768,7 +755,7 @@ html[data-theme="special-chaos"] .desktop::after {
     repeating-linear-gradient(90deg, rgba(255, 230, 90, 0.24) 0 2px, transparent 2px 10px),
     repeating-linear-gradient(0deg, rgba(255, 63, 142, 0.2) 0 1px, transparent 1px 6px);
   mix-blend-mode: hard-light;
-  animation: chaosStrobe 0.22s steps(2, end) infinite;
+  animation: chaosStrobe 0.14s steps(2, end) infinite;
 }
 
 .flash-stack {
@@ -1489,17 +1476,17 @@ html[data-theme="special-chaos"] .desktop::after {
 }
 
 @keyframes vhsFlicker {
-  0% { opacity: 0.14; transform: translateY(0); }
-  50% { opacity: 0.22; transform: translateY(0.5px); }
-  100% { opacity: 0.16; transform: translateY(0); }
+  0% { opacity: 0.24; filter: brightness(1.05); background-position: 0 0, 0 0, 0 0; }
+  50% { opacity: 0.72; filter: brightness(1.18); background-position: 0 2px, 0 0, 1px 0; }
+  100% { opacity: 0.28; filter: brightness(0.96); background-position: 0 -1px, 0 0, -1px 0; }
 }
 
 @keyframes vhsNoise {
-  0% { transform: translate(0, 0); }
-  25% { transform: translate(-0.4px, 0.2px); }
-  50% { transform: translate(0.3px, -0.2px); }
-  75% { transform: translate(-0.2px, -0.1px); }
-  100% { transform: translate(0, 0); }
+  0% { transform: translate(0, 0); filter: contrast(1); }
+  25% { transform: translate(-0.6px, 0.35px); filter: contrast(1.08); }
+  50% { transform: translate(0.5px, -0.25px); filter: contrast(0.95); }
+  75% { transform: translate(-0.35px, -0.15px); filter: contrast(1.12); }
+  100% { transform: translate(0, 0); filter: contrast(1); }
 }
 
 @keyframes recBlink {
@@ -1520,6 +1507,12 @@ html[data-theme="special-chaos"] .desktop::after {
 @keyframes chaosStrobe {
   0%, 100% { opacity: 0.24; filter: hue-rotate(0deg); }
   50% { opacity: 0.46; filter: hue-rotate(120deg); }
+}
+
+@keyframes chaosHue {
+  0% { filter: hue-rotate(0deg) saturate(1.15); }
+  50% { filter: hue-rotate(180deg) saturate(1.35); }
+  100% { filter: hue-rotate(360deg) saturate(1.15); }
 }
 
 @keyframes chaosButton {
