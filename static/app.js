@@ -368,6 +368,7 @@
 
   function notificationsHtml(payload) {
     const rows = (payload.items || [])
+      .filter((item) => !item.read)
       .map(
         (item) => `
           <div class="notification-item ${item.read ? "" : "unread"}" data-id="${escapeHtml(item.id)}">

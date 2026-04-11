@@ -159,7 +159,7 @@ html[data-theme="camcorder-vhs"] {
   --button-radius: 0px;
   --window-inset: 1px 1px 0 rgba(240, 240, 240, 0.34) inset, -1px -1px 0 rgba(30, 30, 30, 0.58) inset;
   --window-drop: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 0 0 3px rgba(20, 20, 20, 0.2);
-  --ui-filter: contrast(1.08) saturate(0.66) sepia(0.14) hue-rotate(-18deg);
+  --ui-filter: contrast(1.16) saturate(0.72) sepia(0.18) hue-rotate(-20deg);
 }
 
 html[data-theme="special-chaos"] {
@@ -175,12 +175,12 @@ html[data-theme="special-chaos"] {
   --title-stripe-dark: #00a0cc;
   --title-fill: #7f2dff;
   --field-bg: #3f0b63;
-  --window-radius: 14px;
+  --window-radius: 16px;
   --button-radius: 12px;
   --window-inset: 0 0 0 2px rgba(255, 255, 255, 0.2) inset;
   --window-drop: 0 10px 24px rgba(13, 0, 41, 0.44);
   --button-extra: 0 0 0 1px rgba(255, 230, 90, 0.28) inset;
-  --title-shape: rotate(0.8deg);
+  --title-shape: rotate(1.2deg);
 }
 
 * { box-sizing: border-box; }
@@ -363,12 +363,12 @@ html[data-theme="camcorder-vhs"] body::after {
   pointer-events: none;
   z-index: 9;
   mix-blend-mode: screen;
-  opacity: 0.35;
+  opacity: 0.5;
   background:
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.17) 0 1px, rgba(0, 0, 0, 0.04) 1px 3px),
-    radial-gradient(circle at 50% 50%, transparent 58%, rgba(0, 0, 0, 0.66) 100%),
-    linear-gradient(90deg, rgba(255, 0, 0, 0.04), transparent 35%, transparent 65%, rgba(0, 255, 255, 0.04));
-  animation: vhsFlicker 95ms steps(2, end) infinite;
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.22) 0 1px, rgba(0, 0, 0, 0.08) 1px 4px),
+    radial-gradient(circle at 50% 50%, transparent 56%, rgba(0, 0, 0, 0.75) 100%),
+    linear-gradient(90deg, rgba(255, 0, 0, 0.08), transparent 35%, transparent 65%, rgba(0, 220, 255, 0.08));
+  animation: vhsFlicker 80ms steps(2, end) infinite;
 }
 
 html[data-theme="camcorder-vhs"] body::before {
@@ -377,15 +377,15 @@ html[data-theme="camcorder-vhs"] body::before {
   inset: 0;
   z-index: 8;
   pointer-events: none;
-  opacity: 0.22;
+  opacity: 0.3;
   background:
     repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 2px),
     repeating-radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 3px);
-  animation: vhsNoise 130ms steps(3, end) infinite;
+  animation: vhsNoise 95ms steps(3, end) infinite;
 }
 
 html[data-theme="camcorder-vhs"] .desktop::before {
-  content: "REC  SP   00:13:27";
+  content: "REC  SP   00:13:27   VHS-C";
   position: absolute;
   left: 12px;
   top: 8px;
@@ -393,7 +393,7 @@ html[data-theme="camcorder-vhs"] .desktop::before {
   height: auto;
   border: none;
   background: transparent;
-  color: #e8f9e6;
+  color: #dcf5d8;
   font-size: 12px;
   letter-spacing: 1px;
   opacity: 0.78;
@@ -408,6 +408,17 @@ html[data-theme="camcorder-vhs"] .desktop::after {
   font-size: 14px;
   animation: recBlink 1s steps(2, end) infinite;
   pointer-events: none;
+}
+
+html[data-theme="camcorder-vhs"] .desktop {
+  animation: bootIn 420ms ease-out, vhsWarp 2.8s ease-in-out infinite;
+}
+
+html[data-theme="camcorder-vhs"] .retro-window,
+html[data-theme="camcorder-vhs"] .title-shell,
+html[data-theme="camcorder-vhs"] .speech-bubble {
+  border-color: #d6e8d2;
+  box-shadow: 0 0 0 1px rgba(220, 245, 216, 0.12), var(--window-inset), var(--window-drop);
 }
 
 html[data-theme="crt-green"] body::after {
@@ -444,7 +455,31 @@ html[data-theme="special-chaos"] body::after {
   background:
     conic-gradient(from 180deg, rgba(255, 63, 142, 0.12), rgba(0, 213, 255, 0.12), rgba(255, 230, 90, 0.12), rgba(255, 63, 142, 0.12));
   mix-blend-mode: screen;
-  animation: chaosSpin 12s linear infinite;
+  animation: chaosSpin 7s linear infinite;
+}
+
+html[data-theme="special-chaos"] .desktop {
+  animation: bootIn 420ms ease-out, chaosShake 850ms steps(2, end) infinite;
+}
+
+html[data-theme="special-chaos"] .retro-window,
+html[data-theme="special-chaos"] .speech-bubble,
+html[data-theme="special-chaos"] .title-shell {
+  border-width: 3px;
+  border-style: dashed;
+}
+
+html[data-theme="special-chaos"] .retro-button:nth-child(odd) {
+  transform: rotate(-1.2deg);
+}
+
+html[data-theme="special-chaos"] .retro-button:nth-child(even) {
+  transform: rotate(1.2deg);
+}
+
+html[data-theme="special-chaos"] .window-title > span {
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
 }
 
 .flash-stack {
@@ -663,6 +698,9 @@ html[data-theme="special-chaos"] body::after {
   padding: 8px;
   background: repeating-linear-gradient(90deg, var(--title-stripe-light) 0 4px, var(--title-stripe-dark) 4px 8px);
   border-radius: calc(var(--window-radius) + 1px);
+  left: auto;
+  top: auto;
+  transform: none;
 }
 
 .title-pill {
@@ -1193,6 +1231,19 @@ html[data-theme="special-chaos"] body::after {
 @keyframes bloodPulse {
   0%, 100% { filter: brightness(1); }
   50% { filter: brightness(1.18); }
+}
+
+@keyframes vhsWarp {
+  0%, 100% { transform: translateY(0) skewX(0deg); }
+  50% { transform: translateY(0.8px) skewX(0.2deg); }
+}
+
+@keyframes chaosShake {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(0.8px, -0.5px); }
+  40% { transform: translate(-0.9px, 0.7px); }
+  60% { transform: translate(0.6px, 0.5px); }
+  80% { transform: translate(-0.6px, -0.6px); }
 }
 
 @media (max-width: 980px) {
