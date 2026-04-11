@@ -36,37 +36,52 @@ html[data-theme="crt-green"] {
   --field-bg: #0b170e;
 }
 
-html[data-theme="industrial-gray"] {
-  --desktop-bg: #26272b;
-  --window-fill: #3a3d43;
-  --line: #ff9d2a;
-  --button-face: #4b4f57;
-  --button-shadow: #23262b;
-  --button-highlight: #696d77;
+html[data-theme="pink-noir"] {
+  --desktop-bg: #2f0c1f;
+  --window-fill: #4f1d3a;
+  --line: #ff8fd1;
+  --button-face: #6a2e4e;
+  --button-shadow: #2b1121;
+  --button-highlight: #8a4768;
   --text: #fff;
-  --dot-color: rgba(255, 170, 64, 0.42);
-  --title-stripe-light: #6c707a;
-  --title-stripe-dark: #2b2e34;
-  --title-fill: #4a4e56;
-  --field-bg: #2d3036;
+  --dot-color: rgba(255, 157, 214, 0.34);
+  --title-stripe-light: #a34c7a;
+  --title-stripe-dark: #4a1d35;
+  --title-fill: #6f2f52;
+  --field-bg: #3b1730;
 }
 
-html[data-theme="amber-terminal"] {
-  --desktop-bg: #1a1306;
-  --window-fill: #2a1f0d;
-  --line: #ffbe46;
-  --button-face: #3a2a11;
-  --button-shadow: #1f1609;
-  --button-highlight: #5a4119;
+html[data-theme="blood-red"] {
+  --desktop-bg: #210306;
+  --window-fill: #3b0d12;
+  --line: #ff4a4a;
+  --button-face: #5b1a20;
+  --button-shadow: #25080b;
+  --button-highlight: #7d2a32;
   --text: #fff;
-  --dot-color: rgba(255, 187, 64, 0.24);
-  --title-stripe-light: #704e1a;
-  --title-stripe-dark: #3f2b0e;
-  --title-fill: #3f2b0e;
-  --field-bg: #2f220f;
+  --dot-color: rgba(255, 74, 74, 0.3);
+  --title-stripe-light: #8f2a33;
+  --title-stripe-dark: #431015;
+  --title-fill: #601b23;
+  --field-bg: #2e0b10;
 }
 
-html[data-theme="ice-blueprint"] {
+html[data-theme="emo-night"] {
+  --desktop-bg: #0d0d10;
+  --window-fill: #1d1e22;
+  --line: #d3d3d8;
+  --button-face: #2a2b31;
+  --button-shadow: #111217;
+  --button-highlight: #3d3f47;
+  --text: #fff;
+  --dot-color: rgba(255, 255, 255, 0.14);
+  --title-stripe-light: #4b4d55;
+  --title-stripe-dark: #1f2025;
+  --title-fill: #2d2f36;
+  --field-bg: #191a1e;
+}
+
+html[data-theme="icy-blue"] {
   --desktop-bg: #0b2d52;
   --window-fill: #144372;
   --line: #9be9ff;
@@ -79,6 +94,51 @@ html[data-theme="ice-blueprint"] {
   --title-stripe-dark: #103d67;
   --title-fill: #1b5e98;
   --field-bg: #0f3960;
+}
+
+html[data-theme="sunset-haze"] {
+  --desktop-bg: #6a4015;
+  --window-fill: #92622b;
+  --line: #ffe08f;
+  --button-face: #ba8447;
+  --button-shadow: #69451f;
+  --button-highlight: #d8a96c;
+  --text: #2f1906;
+  --dot-color: rgba(255, 224, 143, 0.42);
+  --title-stripe-light: #f4cf8a;
+  --title-stripe-dark: #ad7539;
+  --title-fill: #e1b26f;
+  --field-bg: #f8ddb0;
+}
+
+html[data-theme="camcorder-vhs"] {
+  --desktop-bg: #3b3d37;
+  --window-fill: #696d63;
+  --line: #ece9dd;
+  --button-face: #7f8478;
+  --button-shadow: #4c4f48;
+  --button-highlight: #9a9f92;
+  --text: #fff;
+  --dot-color: rgba(255, 255, 255, 0.22);
+  --title-stripe-light: #b7bcad;
+  --title-stripe-dark: #6a6f63;
+  --title-fill: #8e9388;
+  --field-bg: #575b52;
+}
+
+html[data-theme="special-chaos"] {
+  --desktop-bg: #2a0038;
+  --window-fill: #1a335f;
+  --line: #ffe65a;
+  --button-face: #ff3f8e;
+  --button-shadow: #310847;
+  --button-highlight: #00d5ff;
+  --text: #fff;
+  --dot-color: rgba(255, 230, 90, 0.35);
+  --title-stripe-light: #ff8fc8;
+  --title-stripe-dark: #00a0cc;
+  --title-fill: #7f2dff;
+  --field-bg: #3f0b63;
 }
 
 * { box-sizing: border-box; }
@@ -106,21 +166,65 @@ body {
   align-items: flex-start;
 }
 
-html[data-theme="industrial-gray"] body {
+html[data-theme="pink-noir"] body {
   background:
-    radial-gradient(circle, var(--dot-color) 0 1.2px, transparent 1.2px 100%),
-    repeating-linear-gradient(135deg, rgba(255, 157, 42, 0.06) 0 8px, rgba(0, 0, 0, 0.06) 8px 16px),
+    radial-gradient(circle, var(--dot-color) 0 1px, transparent 1px 100%),
+    radial-gradient(circle at 20% 20%, rgba(255, 159, 215, 0.16), transparent 32%),
+    radial-gradient(circle at 80% 70%, rgba(255, 110, 184, 0.12), transparent 34%),
     var(--desktop-bg);
-  background-size: 6px 6px, 24px 24px, auto;
+  background-size: 6px 6px, auto, auto, auto;
 }
 
-html[data-theme="ice-blueprint"] body {
+html[data-theme="blood-red"] body {
+  background:
+    radial-gradient(circle, var(--dot-color) 0 1.2px, transparent 1.2px 100%),
+    radial-gradient(circle at 15% 15%, rgba(255, 78, 78, 0.12), transparent 30%),
+    radial-gradient(circle at 75% 65%, rgba(150, 0, 20, 0.2), transparent 36%),
+    var(--desktop-bg);
+  background-size: 6px 6px, auto, auto, auto;
+}
+
+html[data-theme="emo-night"] body {
+  background:
+    radial-gradient(circle, var(--dot-color) 0 1px, transparent 1px 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 30%),
+    var(--desktop-bg);
+  background-size: 6px 6px, auto, auto;
+}
+
+html[data-theme="icy-blue"] body {
   background:
     radial-gradient(circle, var(--dot-color) 0 1px, transparent 1px 100%),
     linear-gradient(to right, rgba(155, 233, 255, 0.16) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(155, 233, 255, 0.16) 1px, transparent 1px),
     var(--desktop-bg);
   background-size: 6px 6px, 36px 36px, 36px 36px, auto;
+}
+
+html[data-theme="sunset-haze"] body {
+  background:
+    radial-gradient(circle, var(--dot-color) 0 1px, transparent 1px 100%),
+    linear-gradient(160deg, rgba(255, 195, 88, 0.2), rgba(255, 130, 58, 0.1) 45%, transparent 75%),
+    var(--desktop-bg);
+  background-size: 6px 6px, auto, auto;
+}
+
+html[data-theme="camcorder-vhs"] body {
+  background:
+    radial-gradient(circle, var(--dot-color) 0 1px, transparent 1px 100%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.07) 0 1px, rgba(0, 0, 0, 0.05) 1px 3px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.1), transparent 18%, transparent 82%, rgba(0, 0, 0, 0.1)),
+    var(--desktop-bg);
+  background-size: 6px 6px, 100% 3px, 100% 100%, auto;
+}
+
+html[data-theme="special-chaos"] body {
+  background:
+    radial-gradient(circle, var(--dot-color) 0 1px, transparent 1px 100%),
+    linear-gradient(135deg, rgba(255, 63, 142, 0.2), rgba(0, 213, 255, 0.2)),
+    repeating-linear-gradient(45deg, rgba(255, 230, 90, 0.08) 0 10px, transparent 10px 20px),
+    var(--desktop-bg);
+  background-size: 6px 6px, auto, 30px 30px, auto;
 }
 
 .flash-stack {
@@ -358,6 +462,11 @@ html[data-theme="ice-blueprint"] body {
 .themes-wrap { position: absolute; top: 124px; right: 8px; width: 120px; }
 .themes-label { margin: 0 0 4px; text-align: left; font-size: 12px; }
 .theme-select { width: 120px; height: 28px; padding: 2px 4px; font-size: 11px; }
+.theme-select,
+.theme-select option {
+  color: var(--text);
+  background: var(--field-bg);
+}
 
 .panel-scroller, .search-results {
   overflow-y: auto;
@@ -467,6 +576,7 @@ html[data-theme="ice-blueprint"] body {
   border-right-color: #fff;
   border-bottom-color: #fff;
   background: var(--field-bg);
+  color: var(--text);
   padding: 4px 6px;
   font-size: 14px;
 }

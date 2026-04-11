@@ -44,7 +44,17 @@
   const CLIMBER_HIGH_SCORE_KEY = "draintool-drainclimber-high-score";
   const RUNNER_HIGH_SCORE_KEY = "draintool-drainrunner-high-score";
   const THEME_STORAGE_KEY = "draintool-theme";
-  const THEMES = new Set(["mac-system-1", "crt-green", "industrial-gray", "amber-terminal", "ice-blueprint"]);
+  const THEMES = new Set([
+    "mac-system-1",
+    "crt-green",
+    "pink-noir",
+    "blood-red",
+    "emo-night",
+    "icy-blue",
+    "sunset-haze",
+    "camcorder-vhs",
+    "special-chaos",
+  ]);
   let musicMarqueeTimer = null;
   let audioUnlocked = false;
   let pendingAutoplay = false;
