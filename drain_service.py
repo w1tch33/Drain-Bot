@@ -13,6 +13,7 @@ import urllib.request
 import uuid
 import xml.etree.ElementTree as ET
 import zipfile
+from datetime import datetime, timedelta, timezone
 from typing import Any
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -413,6 +414,191 @@ def get_activity_feed(username: str | None, limit: int = 80) -> dict[str, Any]:
     return {"items": merged[:safe_limit]}
 
 
+RANK_TIERS: list[tuple[str, int]] = [
+    ("Rookie", 0),
+    ("Scout", 350),
+    ("Tunnel Rat", 900),
+    ("Explorer", 1700),
+    ("Urban Legend", 2800),
+    ("Drain Wizard", 4200),
+    ("Storm King", 6200),
+]
+
+
+def _visit_streaks(activity: list[dict[str, Any]]) -> tuple[int, int]:
+    visit_days: set[datetime.date] = set()
+    for item in activity:
+        if str(item.get("kind", "")).lower() != "visit":
+            continue
+        try:
+            ts = float(item.get("ts", 0))
+        except (TypeError, ValueError):
+            continue
+        visit_days.add(datetime.fromtimestamp(ts, tz=timezone.utc).date())
+
+    if not visit_days:
+        return 0, 0
+
+    sorted_days = sorted(visit_days)
+    longest = 1
+    chain = 1
+    for index in range(1, len(sorted_days)):
+        if sorted_days[index] - sorted_days[index - 1] == timedelta(days=1):
+            chain += 1
+            longest = max(longest, chain)
+        else:
+            chain = 1
+
+    today = datetime.now(timezone.utc).date()
+    anchor = today if today in visit_days else today - timedelta(days=1)
+    if anchor not in visit_days:
+        return 0, longest
+
+    current = 0
+    cursor = anchor
+    while cursor in visit_days:
+        current += 1
+        cursor -= timedelta(days=1)
+
+    return current, longest
+
+
+def _photo_count_from_metadata(metadata: dict[str, Any]) -> int:
+    total = 0
+    for value in metadata.values():
+        if not isinstance(value, dict):
+            continue
+        photos = value.get("photos", [])
+        if isinstance(photos, list):
+            total += len([photo for photo in photos if isinstance(photo, str) and photo.strip()])
+    return total
+
+
+def progression_summary(username: str | None) -> dict[str, Any]:
+    normalized = normalize_username(username)
+    if not normalized:
+        return {
+            "xp": 0,
+            "rank": {"name": "Rookie", "xp": 0, "next_name": "Scout", "next_xp": 350, "progress": 0},
+            "streaks": {"current": 0, "longest": 0},
+            "badges": [],
+            "seasonal": {"label": "Monthly Challenges", "completed": 0, "total": 0, "challenges": []},
+        }
+
+    metadata = load_user_metadata(normalized)
+    activity = _normalize_activity(metadata.get("_activity"))
+    stats = stats_summary(normalized)
+    high_scores = get_user_high_scores(normalized)
+    score_total = sum(int(item.get("score", 0)) for item in high_scores.values())
+    photo_count = _photo_count_from_metadata(metadata)
+    game_events = sum(1 for item in activity if str(item.get("kind", "")).lower() == "game")
+    photo_events = sum(1 for item in activity if str(item.get("kind", "")).lower() == "photo")
+    visit_events = sum(1 for item in activity if str(item.get("kind", "")).lower() == "visit")
+
+    try:
+        friend_count = len(_account_record(normalized).get("friends", []))
+    except ValueError:
+        friend_count = 0
+
+    xp = (
+        stats["visited"] * 120
+        + photo_count * 35
+        + friend_count * 45
+        + stats["custom"] * 25
+        + int(score_total * 0.18)
+    )
+
+    current_rank_name = RANK_TIERS[0][0]
+    current_rank_xp = RANK_TIERS[0][1]
+    next_rank_name = None
+    next_rank_xp = None
+    for index, (name, threshold) in enumerate(RANK_TIERS):
+        if xp >= threshold:
+            current_rank_name = name
+            current_rank_xp = threshold
+            if index + 1 < len(RANK_TIERS):
+                next_rank_name, next_rank_xp = RANK_TIERS[index + 1]
+            else:
+                next_rank_name, next_rank_xp = None, None
+
+    if next_rank_xp is None:
+        rank_progress = 100
+    else:
+        span = max(1, next_rank_xp - current_rank_xp)
+        rank_progress = max(0, min(100, int(((xp - current_rank_xp) / span) * 100)))
+
+    current_streak, longest_streak = _visit_streaks(activity)
+
+    month_start = datetime.now(timezone.utc).replace(day=1, hour=0, minute=0, second=0, microsecond=0).timestamp()
+    monthly_visits = sum(
+        1
+        for item in activity
+        if str(item.get("kind", "")).lower() == "visit" and float(item.get("ts", 0) or 0) >= month_start
+    )
+    monthly_photos = sum(
+        1
+        for item in activity
+        if str(item.get("kind", "")).lower() == "photo" and float(item.get("ts", 0) or 0) >= month_start
+    )
+    monthly_games = sum(
+        1
+        for item in activity
+        if str(item.get("kind", "")).lower() == "game" and float(item.get("ts", 0) or 0) >= month_start
+    )
+
+    seasonal_challenges = [
+        {"id": "visit_5", "label": "Visit 5 drains", "target": 5, "progress": min(5, monthly_visits)},
+        {"id": "photo_3", "label": "Upload 3 photos", "target": 3, "progress": min(3, monthly_photos)},
+        {"id": "game_2", "label": "Beat 2 high scores", "target": 2, "progress": min(2, monthly_games)},
+    ]
+
+    badge_models = [
+        ("first_visit", "First Splash", "Visit your first drain", stats["visited"], 1),
+        ("week_streak", "Week Walker", "Reach a 7-day visit streak", longest_streak, 7),
+        ("photo_hunter", "Photo Hunter", "Upload 20 drain photos", photo_count, 20),
+        ("map_maker", "Map Maker", "Add 10 custom drains", stats["custom"], 10),
+        ("social_rat", "Social Rat", "Have 5 friends", friend_count, 5),
+        ("legend_score", "Arcade Ghost", "Earn 1000+ total game score", score_total, 1000),
+    ]
+    badges = [
+        {
+            "id": badge_id,
+            "label": label,
+            "description": description,
+            "progress": int(progress),
+            "target": int(target),
+            "earned": int(progress) >= int(target),
+        }
+        for badge_id, label, description, progress, target in badge_models
+    ]
+
+    return {
+        "xp": int(xp),
+        "rank": {
+            "name": current_rank_name,
+            "xp": int(xp),
+            "next_name": next_rank_name,
+            "next_xp": int(next_rank_xp) if next_rank_xp is not None else None,
+            "progress": rank_progress,
+        },
+        "streaks": {"current": int(current_streak), "longest": int(longest_streak), "visit_events": int(visit_events)},
+        "badges": badges,
+        "seasonal": {
+            "label": f"{datetime.now(timezone.utc).strftime('%B')} Challenges",
+            "completed": sum(1 for challenge in seasonal_challenges if challenge["progress"] >= challenge["target"]),
+            "total": len(seasonal_challenges),
+            "challenges": seasonal_challenges,
+        },
+        "metrics": {
+            "photos": int(photo_count),
+            "high_score_total": int(score_total),
+            "friends": int(friend_count),
+            "photo_events": int(photo_events),
+            "game_events": int(game_events),
+        },
+    }
+
+
 GAME_SCORE_LABELS = {
     "ladderclimb": "Drain Climber",
     "drainrunner": "Drain Runner",
@@ -666,6 +852,7 @@ def profile_summary(username: str, viewer_username: str | None = None) -> dict[s
                 "username": friend_name,
                 "stats": stats_summary(friend_name),
                 "high_scores": get_user_high_scores(friend_name),
+                "progression": progression_summary(friend_name),
             }
         )
 
@@ -674,6 +861,7 @@ def profile_summary(username: str, viewer_username: str | None = None) -> dict[s
         "stats": stats,
         "friends": friends,
         "high_scores": get_user_high_scores(normalized),
+        "progression": progression_summary(normalized),
     }
 
     if viewer_username and normalize_username(viewer_username) == normalized:

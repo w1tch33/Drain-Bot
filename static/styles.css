@@ -1410,6 +1410,18 @@ html[data-theme="special-chaos"] .desktop::after {
 .profile-copy { font-size: 13px; }
 .profile-score-list { gap: 4px; }
 .profile-score-row { font-size: 13px; }
+.badge-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.badge-pill {
+  border: 2px solid var(--line);
+  background: var(--field-bg);
+  padding: 3px 8px 2px;
+  font-size: 12px;
+  font-weight: 700;
+}
 .client-flash {
   display: flex;
   align-items: center;

@@ -504,6 +504,39 @@
     }
   }
 
+  function progressionHtml(progression, compact = false) {
+    const rank = progression?.rank || {};
+    const streaks = progression?.streaks || {};
+    const seasonal = progression?.seasonal || {};
+    const badges = (progression?.badges || []);
+    const topBadges = badges.filter((badge) => badge.earned).slice(0, compact ? 3 : 6);
+    const badgeRows = topBadges
+      .map((badge) => `<span class="badge-pill">${escapeHtml(badge.label)}</span>`)
+      .join("");
+
+    const challengeRows = compact
+      ? ""
+      : (seasonal.challenges || [])
+          .map(
+            (challenge) => `
+              <div class="profile-row profile-score-row">
+                <span>${escapeHtml(challenge.label)}</span>
+                <span>${Number(challenge.progress || 0)}/${Number(challenge.target || 0)}</span>
+              </div>
+            `
+          )
+          .join("");
+
+    return `
+      <div class="profile-mini-heading">Progression</div>
+      <div class="profile-copy">Rank: ${escapeHtml(rank.name || "Rookie")} (${Number(rank.xp || 0)} XP)</div>
+      <div class="profile-copy">Visit Streak: ${Number(streaks.current || 0)} day(s) | Best: ${Number(streaks.longest || 0)}</div>
+      <div class="profile-copy">Seasonal: ${Number(seasonal.completed || 0)}/${Number(seasonal.total || 0)} complete</div>
+      ${badgeRows ? `<div class="badge-grid">${badgeRows}</div>` : '<div class="profile-copy">No badges yet.</div>'}
+      ${challengeRows ? `<div class="profile-list profile-score-list">${challengeRows}</div>` : ""}
+    `;
+  }
+
   function profileHtml(profile) {
     const incoming = (profile.incoming_requests || [])
       .map(
@@ -528,6 +561,7 @@
               <div class="profile-name">${escapeHtml(friend.username)}</div>
               <div class="profile-copy">Drains: ${friend.stats.total}</div>
               <div class="profile-copy">Visited: ${friend.stats.visited}</div>
+              ${progressionHtml(friend.progression, true)}
               <div class="profile-mini-heading">High Scores</div>
               <div class="profile-list profile-score-list">${highScoreEntries(friend.high_scores) || "<div class=\"profile-copy\">No scores yet.</div>"}</div>
             </div>
@@ -542,6 +576,10 @@
         <div class="profile-name">${escapeHtml(profile.username)}</div>
         <div class="profile-copy">Drains: ${profile.stats.total}</div>
         <div class="profile-copy">Visited: ${profile.stats.visited}</div>
+      </div>
+      <div class="profile-section">
+        <div class="profile-heading">Badges & Progression</div>
+        ${progressionHtml(profile.progression)}
       </div>
       <div class="profile-section">
         <div class="profile-heading">Friends</div>
