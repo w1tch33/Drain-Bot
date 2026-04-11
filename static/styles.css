@@ -6,7 +6,48 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "ZapfinoCustom";
+  src: url("/static/fonts/zapfino/Zapfino.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "CanterburyCustom";
+  src: url("/static/fonts/canterbury/Canterbury.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "MagnificChaosCustom";
+  src: url("/static/fonts/magnific-caos/MagnificChaosPersonalUseRegular-x3J88.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "RealVhsCustom";
+  src: url("/static/fonts/real-vhs/RealVhsFontRegular-WyV0z.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "FunkyHolidayCustom";
+  src: url("/static/fonts/funky-holiday/FunkyHolidayDemo.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
+  --theme-font: "ChicagoCustom";
   --desktop-bg: #cfcfcf;
   --window-fill: #dcdcdc;
   --line: #000;
@@ -47,6 +88,7 @@ html[data-theme="crt-green"] {
 }
 
 html[data-theme="pink-noir"] {
+  --theme-font: "ZapfinoCustom";
   --desktop-bg: #ff4fc2;
   --window-fill: #ff9edc;
   --line: #2f001c;
@@ -68,6 +110,7 @@ html[data-theme="pink-noir"] {
 }
 
 html[data-theme="blood-red"] {
+  --theme-font: "CanterburyCustom";
   --desktop-bg: #190104;
   --window-fill: #520913;
   --line: #ff1b3f;
@@ -128,6 +171,7 @@ html[data-theme="icy-blue"] {
 }
 
 html[data-theme="ancient-scripts"] {
+  --theme-font: "MagnificChaosCustom";
   --desktop-bg: #c9b382;
   --window-fill: #dbc79e;
   --line: #3e3528;
@@ -147,6 +191,7 @@ html[data-theme="ancient-scripts"] {
 }
 
 html[data-theme="camcorder-vhs"] {
+  --theme-font: "RealVhsCustom";
   --desktop-bg: #1e1b26;
   --window-fill: #534460;
   --line: #f2d7ea;
@@ -167,6 +212,7 @@ html[data-theme="camcorder-vhs"] {
 }
 
 html[data-theme="special-chaos"] {
+  --theme-font: "FunkyHolidayCustom";
   --desktop-bg: #2a0038;
   --window-fill: #1a335f;
   --line: #ffe65a;
@@ -195,7 +241,7 @@ html, body {
   width: 100%;
   height: 100%;
   color: var(--text);
-  font-family: "ChicagoCustom", "Chicago", "Fixedsys", "MS Sans Serif", "Charcoal", "Geneva", sans-serif;
+  font-family: var(--theme-font), "ChicagoCustom", "Chicago", "Fixedsys", "MS Sans Serif", "Charcoal", "Geneva", sans-serif;
   font-size: 14px;
   -webkit-font-smoothing: none;
   font-smooth: never;
