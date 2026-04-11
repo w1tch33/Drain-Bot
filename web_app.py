@@ -223,6 +223,18 @@ def profile():
     return jsonify(drain_service.profile_summary(current_username(), current_username()))
 
 
+@app.get("/api/activity")
+@login_required
+def activity_feed():
+    try:
+        limit = int(request.args.get("limit", 80))
+    except (TypeError, ValueError):
+        limit = 80
+    payload = drain_service.get_activity_feed(current_username(), limit=limit)
+    payload["viewer"] = current_username()
+    return jsonify(payload)
+
+
 @app.get("/api/notifications")
 @login_required
 def notifications():
@@ -265,6 +277,11 @@ def save_high_score():
         drain_service.add_notification(
             current_username(),
             f"New high score in {label}: {new_score}",
+            "game",
+        )
+        drain_service.add_activity(
+            current_username(),
+            f"Beat {label} high score ({new_score})",
             "game",
         )
     return jsonify({"ok": True, "high_scores": scores})
@@ -421,8 +438,10 @@ def update_drain(name: str):
     drain = drain_service.get_drain(name, current_username())
     if not drain:
         return jsonify({"error": "Drain not found."}), 404
+    was_visited = bool(drain.get("visited"))
 
     payload = request.get_json(silent=True) or request.form
+    visited_flag = str(payload.get("visited", "")).lower() in {"1", "true", "on", "yes"}
     rating_raw = request.form.get("rating", "").strip()
     rating = None
     if hasattr(payload, "get"):
@@ -436,7 +455,7 @@ def update_drain(name: str):
     drain_service.update_drain(
         name,
         current_username(),
-        visited=str(payload.get("visited", "")).lower() in {"1", "true", "on", "yes"},
+        visited=visited_flag,
         favorite=str(payload.get("favorite", "")).lower() in {"1", "true", "on", "yes"},
         description=str(payload.get("description", "")),
         difficulty=str(payload.get("difficulty", "")).strip(),
@@ -445,6 +464,8 @@ def update_drain(name: str):
         notes=str(payload.get("notes", "")),
         features=payload.get("features") if hasattr(payload, "get") else None,
     )
+    if visited_flag and not was_visited:
+        drain_service.add_activity(current_username(), f"Visited {name}", "visit")
     return jsonify({"ok": True, "stats": drain_service.stats_summary(current_username())})
 
 
@@ -508,6 +529,7 @@ def upload_photo(name: str):
     file.save(absolute_path)
     relative_path = f"uploads/{drain_service.normalize_username(username)}/{final_name}"
     drain_service.add_uploaded_photo(name, username, relative_path)
+    drain_service.add_activity(username, f"Uploaded a photo to {name}", "photo")
     return jsonify({"ok": True, "photos": drain_service.list_photos(name, username)})
 
 

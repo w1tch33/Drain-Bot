@@ -246,6 +246,7 @@ def save_user_metadata(username: str, data: dict[str, Any]) -> None:
 
 
 NOTIFICATION_MAX = 120
+ACTIVITY_MAX = 250
 
 
 def _normalize_notifications(value: Any) -> list[dict[str, Any]]:
@@ -326,6 +327,90 @@ def mark_notifications_read(username: str, ids: list[str] | None = None) -> dict
     metadata["_notifications"] = notifications
     save_user_metadata(username, metadata)
     return get_notifications(username)
+
+
+def _normalize_activity(value: Any) -> list[dict[str, Any]]:
+    if not isinstance(value, list):
+        return []
+    normalized: list[dict[str, Any]] = []
+    for item in value:
+        if not isinstance(item, dict):
+            continue
+        message = str(item.get("message", "")).strip()
+        if not message:
+            continue
+        activity_id = str(item.get("id", "")).strip() or str(uuid.uuid4())
+        actor = normalize_username(item.get("actor", ""))
+        kind = str(item.get("kind", "")).strip() or "info"
+        try:
+            timestamp = float(item.get("ts", time.time()))
+        except (TypeError, ValueError):
+            timestamp = time.time()
+        normalized.append(
+            {
+                "id": activity_id,
+                "actor": actor,
+                "message": message,
+                "kind": kind,
+                "ts": timestamp,
+            }
+        )
+    normalized.sort(key=lambda entry: entry["ts"], reverse=True)
+    return normalized[:ACTIVITY_MAX]
+
+
+def add_activity(username: str, message: str, kind: str = "info") -> dict[str, Any]:
+    normalized = normalize_username(username)
+    if not normalized:
+        raise ValueError("Account not found.")
+    clean_message = str(message or "").strip()
+    if not clean_message:
+        raise ValueError("Activity message is required.")
+    metadata = load_user_metadata(normalized)
+    activity = _normalize_activity(metadata.get("_activity"))
+    entry = {
+        "id": str(uuid.uuid4()),
+        "actor": normalized,
+        "message": clean_message,
+        "kind": str(kind or "info").strip() or "info",
+        "ts": time.time(),
+    }
+    activity.insert(0, entry)
+    metadata["_activity"] = activity[:ACTIVITY_MAX]
+    save_user_metadata(normalized, metadata)
+    return entry
+
+
+def get_activity_feed(username: str | None, limit: int = 80) -> dict[str, Any]:
+    normalized = normalize_username(username)
+    if not normalized:
+        return {"items": []}
+
+    try:
+        account = _account_record(normalized)
+        friends = account.get("friends", [])
+    except ValueError:
+        friends = []
+
+    sources = [normalized, *friends]
+    merged: list[dict[str, Any]] = []
+    seen_ids: set[str] = set()
+    for source in sources:
+        metadata = load_user_metadata(source)
+        for entry in _normalize_activity(metadata.get("_activity")):
+            actor = normalize_username(entry.get("actor", "")) or source
+            item = dict(entry)
+            item["actor"] = actor
+            entry_id = str(item.get("id", ""))
+            if entry_id and entry_id in seen_ids:
+                continue
+            if entry_id:
+                seen_ids.add(entry_id)
+            merged.append(item)
+
+    merged.sort(key=lambda item: float(item.get("ts", 0)), reverse=True)
+    safe_limit = max(1, min(200, int(limit or 80)))
+    return {"items": merged[:safe_limit]}
 
 
 GAME_SCORE_LABELS = {

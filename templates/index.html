@@ -14,6 +14,7 @@
         Notifications
         <span class="notify-badge hidden" id="notificationsBadge">0</span>
       </button>
+      <button class="retro-button session-button" id="activityButton" type="button">Activity</button>
       <button class="session-user session-user-button" id="profileButton" type="button">{{ current_username }}</button>
       <form class="session-form" method="post" action="{{ url_for('logout') }}">
         <button class="retro-button session-button" type="submit">Log Out</button>

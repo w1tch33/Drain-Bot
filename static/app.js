@@ -388,6 +388,28 @@
     `;
   }
 
+  function activityHtml(payload) {
+    const viewer = String(payload.viewer || "");
+    const rows = (payload.items || [])
+      .map((item) => {
+        const actor = String(item.actor || "").trim();
+        const actorLabel = actor && actor === viewer ? "You" : actor || "Someone";
+        return `
+          <div class="notification-item">
+            <div class="notification-text"><strong>${escapeHtml(actorLabel)}</strong>: ${escapeHtml(item.message || "")}</div>
+            <div class="notification-meta">${escapeHtml(notificationTimeLabel(item.ts))}</div>
+          </div>
+        `;
+      })
+      .join("");
+    return `
+      <div class="profile-section">
+        <div class="profile-heading">Friend Activity</div>
+      </div>
+      <div class="notifications-list">${rows || '<div class="notification-item"><div class="notification-text">No activity yet.</div></div>'}</div>
+    `;
+  }
+
   async function refreshNotifications() {
     try {
       const payload = await fetchJson("/api/notifications");
@@ -416,6 +438,18 @@
           openModal("Notifications", notificationsHtml(updated));
         });
       }
+    } catch (error) {
+      drawMessage(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function openActivity() {
+    setLoading(true);
+    try {
+      const payload = await fetchJson("/api/activity?limit=100");
+      openModal("Activity Feed", activityHtml(payload));
     } catch (error) {
       drawMessage(error.message);
     } finally {
@@ -2096,6 +2130,7 @@
   qs("#linksButton").addEventListener("click", openLinks);
   qs("#tutorialButton").addEventListener("click", openTutorial);
   qs("#notificationsButton").addEventListener("click", openNotifications);
+  if (qs("#activityButton")) qs("#activityButton").addEventListener("click", openActivity);
   qs("#addDrainButton").addEventListener("click", openAddDrain);
   qs("#profileButton").addEventListener("click", openProfile);
   if (qs("#syncMapButton")) qs("#syncMapButton").addEventListener("click", syncMap);
