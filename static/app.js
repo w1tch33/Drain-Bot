@@ -1314,6 +1314,7 @@
     const challengeForm = qs("#gameChallengeForm");
     const challengeHint = qs("#gameChallengeHint");
     const menu = modalBody.querySelector(".game-menu-list");
+    const sidePanel = modalBody.querySelector(".game-side-panel");
     canvas.tabIndex = 0;
     const cleanupControls = bindGameControls(controls);
     canvas.classList.add("hidden");
@@ -1332,7 +1333,8 @@
       canvas.classList.remove("hidden");
       help.classList.remove("hidden");
       controls.classList.remove("hidden");
-      if (window.innerWidth <= 980 && menu) menu.classList.add("hidden");
+      if (menu) menu.classList.add("hidden");
+      if (sidePanel) sidePanel.classList.add("hidden");
       canvas.focus();
       if (state.gameLoopCleanup) {
         state.gameLoopCleanup();
@@ -1781,7 +1783,7 @@
     const torches = [];
     let score = 0;
     let distance = 0;
-    let speed = 2.6;
+    let speed = 1.0;
     let spawnTimer = 0;
     let gameRunning = false;
     let gameOver = false;
@@ -1951,23 +1953,23 @@
         player.lane = Math.min(2, player.lane + laneShift);
         keys.right = false;
       }
-      const moveSpeed = speed * frameScale;
+      const moveSpeed = (2.8 + speed * 1.7) * frameScale;
       for (let i = obstacles.length - 1; i >= 0; i -= 1) {
-        obstacles[i].y += moveSpeed * 10;
+        obstacles[i].y += moveSpeed;
         if (obstacles[i].y > canvas.height + 50) obstacles.splice(i, 1);
       }
       for (let i = torches.length - 1; i >= 0; i -= 1) {
-        torches[i].y += moveSpeed * 10;
+        torches[i].y += moveSpeed;
         if (torches[i].y > canvas.height + 30) torches.splice(i, 1);
       }
       spawnTimer -= deltaMs;
       if (spawnTimer <= 0) {
         spawnObject();
-        spawnTimer = Math.max(260, 780 - speed * 80);
+        spawnTimer = Math.max(620, 1400 - speed * 120);
       }
-      speed = Math.min(7.2, speed + 0.0016 * deltaMs);
-      distance += Math.max(1, Math.floor(speed * 0.36));
-      score += Math.max(1, Math.floor(speed * 0.22));
+      speed = Math.min(3.2, speed + 0.00035 * deltaMs);
+      distance += Math.max(1, Math.floor((1.2 + speed) * (deltaMs / 45)));
+      score += Math.max(1, Math.floor((1.6 + speed * 0.7) * (deltaMs / 35)));
 
       for (let i = torches.length - 1; i >= 0; i -= 1) {
         const torch = torches[i];
@@ -2021,8 +2023,8 @@
       player.lane = 1;
       score = 0;
       distance = 0;
-      speed = 2.6;
-      spawnTimer = 360;
+      speed = 1.0;
+      spawnTimer = 950;
       gameRunning = false;
       gameOver = false;
       countdown = 3;

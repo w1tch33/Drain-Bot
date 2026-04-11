@@ -1472,15 +1472,15 @@ html[data-theme="special-chaos"] .desktop::after {
   width: auto;
   max-width: 100%;
   height: auto;
-  max-height: calc(100vh - 330px);
+  max-height: min(76vh, 560px);
   display: block;
   margin-top: 12px;
   border: 2px solid #000;
   background: #000;
-  flex: 1 1 360px;
+  flex: 0 0 auto;
 }
-.game-canvas.climber-canvas { max-height: calc(100vh - 330px); }
-.game-canvas.runner-canvas { max-width: min(100%, 620px); max-height: calc(100vh - 350px); }
+.game-canvas.climber-canvas { max-height: min(78vh, 600px); }
+.game-canvas.runner-canvas { max-width: min(100%, 620px); max-height: min(72vh, 520px); }
 .game-canvas.hidden { display: none !important; }
 .game-help { margin-top: 8px; min-height: 20px; font-size: 14px; font-weight: 700; }
 .game-controls {
@@ -1740,9 +1740,9 @@ html[data-theme="special-chaos"] .desktop::after {
   .image-preview-window { width: min(95vw, 960px); }
   .volume-wrap { display: none; }
   .game-controls { display: grid; }
-  .game-canvas { max-height: calc(100vh - 390px); margin-top: 6px; }
-  .game-canvas.climber-canvas { max-height: calc(100vh - 400px); }
-  .game-canvas.runner-canvas { max-height: calc(100vh - 390px); }
+  .game-canvas { max-height: calc(100vh - 360px); margin-top: 6px; }
+  .game-canvas.climber-canvas { max-height: calc(100vh - 360px); }
+  .game-canvas.runner-canvas { max-height: calc(100vh - 360px); }
   .game-menu-list,
   .game-side-panel {
     width: 100%;
