@@ -1783,7 +1783,7 @@
     const torches = [];
     let score = 0;
     let distance = 0;
-    let speed = 1.0;
+    let speed = 2.1;
     let spawnTimer = 0;
     let gameRunning = false;
     let gameOver = false;
@@ -1968,7 +1968,7 @@
         if (distance > 320 && Math.random() < 0.36) spawnObject();
         spawnTimer = Math.max(320, 980 - speed * 120 - distance * 0.35);
       }
-      const targetSpeed = Math.min(7.6, 1.0 + distance / 520);
+      const targetSpeed = Math.min(7.6, 2.1 + distance / 520);
       speed += (targetSpeed - speed) * Math.min(0.12, 0.06 * frameScale);
       distance += Math.max(1, Math.floor((1.2 + speed) * (deltaMs / 45)));
       score += Math.max(1, Math.floor((1.9 + speed * 0.85) * (deltaMs / 35)));
@@ -2025,8 +2025,8 @@
       player.lane = 1;
       score = 0;
       distance = 0;
-      speed = 1.0;
-      spawnTimer = 950;
+      speed = 2.1;
+      spawnTimer = 740;
       gameRunning = false;
       gameOver = false;
       countdown = 3;
