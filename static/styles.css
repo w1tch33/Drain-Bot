@@ -235,7 +235,7 @@ html[data-theme="pink-noir"] body {
 
 html[data-theme="blood-red"] body {
   background:
-    url("/static/themes/blood-moon-castle.png"),
+    url("/static/themes/blood-moon-castle.webp"),
     radial-gradient(circle, var(--dot-color) 0 1.3px, transparent 1.3px 100%),
     radial-gradient(circle at 15% 15%, rgba(255, 56, 90, 0.22), transparent 30%),
     radial-gradient(circle at 76% 66%, rgba(55, 0, 8, 0.4), transparent 42%),

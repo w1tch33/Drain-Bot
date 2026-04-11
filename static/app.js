@@ -114,7 +114,9 @@
 
   function setupThemes() {
     const castleImage = new Image();
-    castleImage.src = "/static/themes/blood-moon-castle.png";
+    castleImage.src = "/static/themes/blood-moon-castle.webp";
+    castleImage.fetchPriority = "high";
+    castleImage.decoding = "async";
     let storedTheme = "mac-system-1";
     try {
       storedTheme = localStorage.getItem(THEME_STORAGE_KEY) || "mac-system-1";
