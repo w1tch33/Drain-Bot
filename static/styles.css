@@ -1346,7 +1346,7 @@ html[data-theme="special-chaos"] .desktop::after {
 .game-modal-window { width: min(96vw, 820px); max-height: min(92vh, 760px); }
 .game-modal-body {
   max-height: calc(min(92vh, 760px) - 32px);
-  overflow: hidden;
+  overflow: auto;
   padding-top: 36px;
   display: flex;
   flex-wrap: wrap;
@@ -1480,7 +1480,7 @@ html[data-theme="special-chaos"] .desktop::after {
   flex: 0 0 auto;
 }
 .game-canvas.climber-canvas { max-height: min(78vh, 600px); }
-.game-canvas.runner-canvas { max-width: min(100%, 620px); max-height: min(72vh, 520px); }
+.game-canvas.runner-canvas { max-width: min(100%, 560px); max-height: min(66vh, 460px); }
 .game-canvas.hidden { display: none !important; }
 .game-help { margin-top: 8px; min-height: 20px; font-size: 14px; font-weight: 700; }
 .game-controls {

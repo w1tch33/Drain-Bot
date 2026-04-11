@@ -1772,8 +1772,8 @@
   function runTorchSprint(canvas, help, onScoreUpdate) {
     const ctx = canvas.getContext("2d");
     const isMobile = window.innerWidth <= 980;
-    canvas.width = isMobile ? 360 : 560;
-    canvas.height = isMobile ? 420 : 440;
+    canvas.width = isMobile ? 340 : 520;
+    canvas.height = isMobile ? 380 : 420;
     canvas.classList.remove("climber-canvas");
     canvas.classList.add("runner-canvas");
     const lanes = [canvas.width * 0.28, canvas.width * 0.5, canvas.width * 0.72];
@@ -1967,7 +1967,8 @@
         spawnObject();
         spawnTimer = Math.max(620, 1400 - speed * 120);
       }
-      speed = Math.min(3.2, speed + 0.00035 * deltaMs);
+      const targetSpeed = Math.min(5.0, 1.0 + distance / 900);
+      speed += (targetSpeed - speed) * Math.min(0.12, 0.06 * frameScale);
       distance += Math.max(1, Math.floor((1.2 + speed) * (deltaMs / 45)));
       score += Math.max(1, Math.floor((1.6 + speed * 0.7) * (deltaMs / 35)));
 
