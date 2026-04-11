@@ -248,6 +248,7 @@ def save_user_metadata(username: str, data: dict[str, Any]) -> None:
 
 NOTIFICATION_MAX = 120
 ACTIVITY_MAX = 250
+CHALLENGE_MAX = 180
 
 
 def _normalize_notifications(value: Any) -> list[dict[str, Any]]:
@@ -600,8 +601,8 @@ def progression_summary(username: str | None) -> dict[str, Any]:
 
 
 GAME_SCORE_LABELS = {
-    "ladderclimb": "Drain Climber",
-    "drainrunner": "Drain Runner",
+    "ladderclimb": "Drain Climber Turbo",
+    "torchsprint": "Torch Sprint",
 }
 
 
@@ -619,6 +620,79 @@ def _normalize_high_scores(value: Any) -> dict[str, int]:
             continue
         normalized[game_key] = max(0, score)
     return normalized
+
+
+def _normalize_game_challenges(value: Any) -> list[dict[str, Any]]:
+    if not isinstance(value, list):
+        return []
+    normalized: list[dict[str, Any]] = []
+    for item in value:
+        if not isinstance(item, dict):
+            continue
+        challenge_id = str(item.get("id", "")).strip() or str(uuid.uuid4())
+        sender = normalize_username(item.get("from", ""))
+        recipient = normalize_username(item.get("to", ""))
+        game_key = str(item.get("game", "")).strip().lower()
+        status = str(item.get("status", "pending")).strip().lower()
+        try:
+            target = int(item.get("target", 0))
+        except (TypeError, ValueError):
+            target = 0
+        try:
+            created_ts = float(item.get("created_ts", time.time()))
+        except (TypeError, ValueError):
+            created_ts = time.time()
+        try:
+            resolved_ts = float(item.get("resolved_ts", 0) or 0)
+        except (TypeError, ValueError):
+            resolved_ts = 0.0
+        if not sender or not recipient:
+            continue
+        if game_key not in GAME_SCORE_LABELS:
+            continue
+        if target <= 0:
+            continue
+        if status not in {"pending", "completed"}:
+            status = "pending"
+        normalized.append(
+            {
+                "id": challenge_id,
+                "from": sender,
+                "to": recipient,
+                "game": game_key,
+                "target": int(target),
+                "status": status,
+                "created_ts": created_ts,
+                "resolved_ts": resolved_ts if status == "completed" else 0.0,
+            }
+        )
+    normalized.sort(key=lambda entry: float(entry.get("created_ts", 0)), reverse=True)
+    return normalized[:CHALLENGE_MAX]
+
+
+def _challenge_payload(entry: dict[str, Any], viewer: str) -> dict[str, Any]:
+    sender = normalize_username(entry.get("from", ""))
+    recipient = normalize_username(entry.get("to", ""))
+    game = str(entry.get("game", "")).lower()
+    target = int(entry.get("target", 0))
+    status = str(entry.get("status", "pending")).lower()
+    return {
+        "id": str(entry.get("id", "")),
+        "from": sender,
+        "to": recipient,
+        "opponent": recipient if viewer == sender else sender,
+        "game": game,
+        "label": GAME_SCORE_LABELS.get(game, game),
+        "target": target,
+        "status": status,
+        "created_ts": float(entry.get("created_ts", 0) or 0),
+        "resolved_ts": float(entry.get("resolved_ts", 0) or 0),
+    }
+
+
+def _high_score_for_game(username: str | None, game: str) -> int:
+    scores = get_user_high_scores(username)
+    return int(scores.get(game, {}).get("score", 0))
 
 
 def get_user_high_scores(username: str | None) -> dict[str, dict[str, Any]]:
@@ -647,6 +721,170 @@ def save_high_score(username: str, game: str, score: int) -> dict[str, dict[str,
         metadata["_high_scores"] = scores
         save_user_metadata(normalized, metadata)
     return get_user_high_scores(normalized)
+
+
+def leaderboard_for_game(game: str, limit: int = 15, viewer: str | None = None) -> dict[str, Any]:
+    game_key = str(game or "").strip().lower()
+    if game_key not in GAME_SCORE_LABELS:
+        raise ValueError("Unknown game.")
+    safe_limit = max(1, min(50, int(limit or 15)))
+    viewer_name = normalize_username(viewer or "")
+    rows: list[dict[str, Any]] = []
+    for username, account in load_accounts().items():
+        if not isinstance(account, dict) or not bool(account.get("approved")):
+            continue
+        score = _high_score_for_game(username, game_key)
+        if score <= 0:
+            continue
+        rows.append({"username": username, "score": score})
+    rows.sort(key=lambda entry: (-int(entry["score"]), str(entry["username"])))
+    top = [{"rank": idx + 1, **entry} for idx, entry in enumerate(rows[:safe_limit])]
+    viewer_rank = None
+    if viewer_name:
+        for idx, entry in enumerate(rows):
+            if entry["username"] == viewer_name:
+                viewer_rank = {"rank": idx + 1, "username": viewer_name, "score": int(entry["score"])}
+                break
+    return {
+        "game": game_key,
+        "label": GAME_SCORE_LABELS[game_key],
+        "items": top,
+        "viewer_rank": viewer_rank,
+    }
+
+
+def send_game_challenge(from_username: str, to_username: str, game: str, target: int) -> dict[str, Any]:
+    sender = normalize_username(from_username)
+    recipient = normalize_username(to_username)
+    game_key = str(game or "").strip().lower()
+    if sender == recipient:
+        raise ValueError("Pick a friend to challenge.")
+    if game_key not in GAME_SCORE_LABELS:
+        raise ValueError("Unknown game.")
+    try:
+        target_score = max(1, int(target))
+    except (TypeError, ValueError) as exc:
+        raise ValueError("Target score must be a number.") from exc
+    if target_score > 2_000_000:
+        raise ValueError("Target score is too high.")
+
+    sender_account = _account_record(sender)
+    if recipient not in sender_account.get("friends", []):
+        raise ValueError("You can only challenge people in your friends list.")
+    if not account_exists(recipient):
+        raise ValueError("Friend account not found.")
+    if _high_score_for_game(recipient, game_key) >= target_score:
+        raise ValueError("That friend already beat this target. Raise the score and try again.")
+
+    recipient_metadata = load_user_metadata(recipient)
+    challenges = _normalize_game_challenges(recipient_metadata.get("_game_challenges"))
+    for entry in challenges:
+        if (
+            entry.get("status") == "pending"
+            and normalize_username(entry.get("from", "")) == sender
+            and str(entry.get("game", "")).lower() == game_key
+        ):
+            raise ValueError("You already have a pending challenge for this game.")
+
+    challenge = {
+        "id": str(uuid.uuid4()),
+        "from": sender,
+        "to": recipient,
+        "game": game_key,
+        "target": target_score,
+        "status": "pending",
+        "created_ts": time.time(),
+        "resolved_ts": 0,
+    }
+    challenges.insert(0, challenge)
+    recipient_metadata["_game_challenges"] = challenges[:CHALLENGE_MAX]
+    save_user_metadata(recipient, recipient_metadata)
+    add_notification(recipient, f"{sender} challenged you in {GAME_SCORE_LABELS[game_key]}: beat {target_score}.", "game")
+    add_activity(sender, f"Sent {recipient} a {GAME_SCORE_LABELS[game_key]} challenge ({target_score})", "game")
+    return _challenge_payload(challenge, sender)
+
+
+def _pending_outgoing_game_challenges(username: str) -> list[dict[str, Any]]:
+    current = normalize_username(username)
+    account = _account_record(current)
+    outgoing: list[dict[str, Any]] = []
+    for friend in account.get("friends", []):
+        metadata = load_user_metadata(friend)
+        for challenge in _normalize_game_challenges(metadata.get("_game_challenges")):
+            if challenge.get("from") != current:
+                continue
+            if challenge.get("status") != "pending":
+                continue
+            outgoing.append(_challenge_payload(challenge, current))
+    outgoing.sort(key=lambda entry: float(entry.get("created_ts", 0)), reverse=True)
+    return outgoing
+
+
+def get_game_challenges(username: str) -> dict[str, Any]:
+    current = normalize_username(username)
+    metadata = load_user_metadata(current)
+    challenges = _normalize_game_challenges(metadata.get("_game_challenges"))
+    incoming = [
+        _challenge_payload(entry, current)
+        for entry in challenges
+        if entry.get("status") == "pending" and entry.get("to") == current
+    ]
+    completed = [
+        _challenge_payload(entry, current)
+        for entry in challenges
+        if entry.get("status") == "completed" and entry.get("to") == current
+    ][:12]
+    return {
+        "incoming": incoming,
+        "outgoing": _pending_outgoing_game_challenges(current),
+        "completed": completed,
+    }
+
+
+def complete_game_challenges(username: str, game: str, score: int) -> list[dict[str, Any]]:
+    current = normalize_username(username)
+    game_key = str(game or "").strip().lower()
+    if game_key not in GAME_SCORE_LABELS:
+        return []
+    try:
+        safe_score = max(0, int(score))
+    except (TypeError, ValueError):
+        return []
+
+    metadata = load_user_metadata(current)
+    challenges = _normalize_game_challenges(metadata.get("_game_challenges"))
+    completed: list[dict[str, Any]] = []
+    changed = False
+    now = time.time()
+    for challenge in challenges:
+        if challenge.get("status") != "pending":
+            continue
+        if challenge.get("to") != current:
+            continue
+        if challenge.get("game") != game_key:
+            continue
+        if safe_score < int(challenge.get("target", 0)):
+            continue
+        challenge["status"] = "completed"
+        challenge["resolved_ts"] = now
+        completed.append(dict(challenge))
+        changed = True
+
+    if not changed:
+        return []
+
+    metadata["_game_challenges"] = challenges[:CHALLENGE_MAX]
+    save_user_metadata(current, metadata)
+    for challenge in completed:
+        sender = normalize_username(challenge.get("from", ""))
+        label = GAME_SCORE_LABELS.get(game_key, game_key)
+        target = int(challenge.get("target", 0))
+        add_notification(current, f"Challenge complete: beat {target} in {label}.", "game")
+        if sender and account_exists(sender):
+            add_notification(sender, f"{current} completed your {label} challenge ({target}).", "game")
+            add_activity(sender, f"{current} completed your {label} challenge ({target})", "game")
+        add_activity(current, f"Completed {label} challenge from {sender} ({target})", "game")
+    return [_challenge_payload(entry, current) for entry in completed]
 
 
 def create_account(username: str, password: str) -> dict[str, Any]:
@@ -875,6 +1113,7 @@ def profile_summary(username: str, viewer_username: str | None = None) -> dict[s
             for recipient in account.get("outgoing_requests", [])
             if account_exists(recipient)
         ]
+        payload["game_challenges"] = get_game_challenges(normalized)
 
     return payload
 

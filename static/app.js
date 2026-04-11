@@ -42,6 +42,15 @@
   const BASE_HEIGHT = 768;
   const DRAIN_MAN_HIGH_SCORE_KEY = "draintool-drainman-high-score";
   const CLIMBER_HIGH_SCORE_KEY = "draintool-drainclimber-high-score";
+  const TORCH_SPRINT_HIGH_SCORE_KEY = "draintool-torchsprint-high-score";
+  const GAME_LABELS = {
+    ladderclimb: "Drain Climber Turbo",
+    torchsprint: "Torch Sprint",
+  };
+  const GAME_STORAGE_KEYS = {
+    ladderclimb: CLIMBER_HIGH_SCORE_KEY,
+    torchsprint: TORCH_SPRINT_HIGH_SCORE_KEY,
+  };
   const THEME_STORAGE_KEY = "draintool-theme";
   const THEMES = new Set([
     "mac-system-1",
@@ -459,7 +468,6 @@
 
   function highScoreEntries(highScores) {
     return Object.values(highScores || {})
-      .filter((entry) => (entry?.label || "") !== "Drain Runner")
       .sort((left, right) => left.label.localeCompare(right.label))
       .map(
         (entry) => `
@@ -474,30 +482,42 @@
 
   async function syncHighScore(game, score) {
     try {
-      await fetchJson("/api/high-scores", {
+      const payload = await fetchJson("/api/high-scores", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ game, score }),
       });
+      const completed = payload.completed_challenges || [];
+      if (completed.length) {
+        const first = completed[0];
+        showPopupMessage(`Challenge complete: ${first.label} ${first.target}`);
+      }
+      return payload;
     } catch (_error) {
       // Keep local scores even if account sync fails.
+      return null;
     }
   }
 
   async function syncStoredHighScores() {
     try {
       const profile = await fetchJson("/api/profile");
-      const localScores = {
-        ladderclimb: readStoredNumber(CLIMBER_HIGH_SCORE_KEY),
-      };
-      const remoteScores = {
-        ladderclimb: Number(profile.high_scores?.ladderclimb?.score || 0),
-      };
-
-      writeStoredNumber(CLIMBER_HIGH_SCORE_KEY, Math.max(localScores.ladderclimb, remoteScores.ladderclimb));
+      const localScores = Object.fromEntries(
+        Object.entries(GAME_STORAGE_KEYS).map(([gameKey, storageKey]) => [gameKey, readStoredNumber(storageKey)])
+      );
+      const remoteScores = Object.fromEntries(
+        Object.keys(GAME_STORAGE_KEYS).map((gameKey) => [gameKey, Number(profile.high_scores?.[gameKey]?.score || 0)])
+      );
+      Object.entries(GAME_STORAGE_KEYS).forEach(([gameKey, storageKey]) => {
+        writeStoredNumber(storageKey, Math.max(localScores[gameKey], remoteScores[gameKey]));
+      });
 
       const uploads = [];
-      if (localScores.ladderclimb > remoteScores.ladderclimb) uploads.push(syncHighScore("ladderclimb", localScores.ladderclimb));
+      Object.keys(GAME_STORAGE_KEYS).forEach((gameKey) => {
+        if (localScores[gameKey] > remoteScores[gameKey]) {
+          uploads.push(syncHighScore(gameKey, localScores[gameKey]));
+        }
+      });
       await Promise.all(uploads);
     } catch (_error) {
       // Keep local score fallback if account score sync fails.
@@ -601,6 +621,25 @@
         <div class="profile-heading">High Scores</div>
         <div class="profile-list profile-score-list">${highScoreEntries(profile.high_scores) || "<div class=\"profile-copy\">No scores yet.</div>"}</div>
       </div>
+      <div class="profile-section">
+        <div class="profile-heading">Friend Challenges</div>
+        <form class="modal-form" id="profileChallengeForm">
+          <input class="retro-input" name="username" placeholder="friend username" required>
+          <select class="retro-input" name="game">
+            ${Object.entries(GAME_LABELS).map(([key, label]) => `<option value="${escapeHtml(key)}">${escapeHtml(label)}</option>`).join("")}
+          </select>
+          <input class="retro-input" name="target" type="number" min="1" step="1" placeholder="target score" required>
+          <button class="retro-button" type="submit">Send Challenge</button>
+        </form>
+        <div class="profile-mini-heading">Incoming</div>
+        <div class="profile-list profile-score-list">
+          ${(profile.game_challenges?.incoming || []).map((item) => `<div class="profile-row profile-score-row"><span>${escapeHtml(item.from)} • ${escapeHtml(item.label)}</span><span>${Number(item.target)}</span></div>`).join("") || "<div class=\"profile-copy\">No incoming challenges.</div>"}
+        </div>
+        <div class="profile-mini-heading">Outgoing</div>
+        <div class="profile-list profile-score-list">
+          ${(profile.game_challenges?.outgoing || []).map((item) => `<div class="profile-row profile-score-row"><span>To ${escapeHtml(item.to)} • ${escapeHtml(item.label)}</span><span>${Number(item.target)}</span></div>`).join("") || "<div class=\"profile-copy\">No outgoing challenges.</div>"}
+        </div>
+      </div>
     `;
   }
 
@@ -648,6 +687,29 @@
           await openProfile();
         });
       });
+
+      const profileChallengeForm = modalBody.querySelector("#profileChallengeForm");
+      if (profileChallengeForm) {
+        profileChallengeForm.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const formData = new FormData(event.currentTarget);
+          try {
+            await fetchJson("/api/challenges/request", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                username: formData.get("username"),
+                game: formData.get("game"),
+                target: Number(formData.get("target") || 0),
+              }),
+            });
+            showPopupMessage(`Challenge sent to ${formData.get("username")}.`);
+            await openProfile();
+          } catch (error) {
+            showPopupMessage(error.message, true);
+          }
+        });
+      }
     } catch (error) {
       drawMessage(error.message);
     } finally {
@@ -1210,6 +1272,37 @@
     });
   }
 
+  function leaderboardHtml(payload = {}) {
+    const rows = (payload.items || [])
+      .map(
+        (row) => `
+          <div class="profile-row profile-score-row">
+            <span>#${Number(row.rank)} ${escapeHtml(row.username)}</span>
+            <span>${Number(row.score)}</span>
+          </div>
+        `
+      )
+      .join("");
+    const viewer = payload.viewer_rank
+      ? `<div class="profile-copy">You: #${Number(payload.viewer_rank.rank)} (${Number(payload.viewer_rank.score)})</div>`
+      : '<div class="profile-copy">You are unranked. Beat a score to appear.</div>';
+    return `
+      ${rows || '<div class="profile-copy">No scores yet.</div>'}
+      ${viewer}
+    `;
+  }
+
+  async function loadGameLeaderboard(gameKey, leaderboardEl) {
+    if (!leaderboardEl || !gameKey) return;
+    leaderboardEl.innerHTML = '<div class="profile-copy">Loading leaderboard...</div>';
+    try {
+      const payload = await fetchJson(`/api/leaderboard?game=${encodeURIComponent(gameKey)}&limit=12`);
+      leaderboardEl.innerHTML = leaderboardHtml(payload);
+    } catch (error) {
+      leaderboardEl.innerHTML = `<div class="profile-copy">${escapeHtml(error.message)}</div>`;
+    }
+  }
+
   function openGames() {
     openModal("Mini Games", qs("#miniGamesTemplate").content.cloneNode(true));
     modalWindow.classList.add("game-modal-window");
@@ -1217,33 +1310,88 @@
     const canvas = qs("#gameCanvas");
     const help = qs("#gameHelp");
     const controls = qs("#gameControls");
-    const menu = modalBody.querySelector(".stack-list");
+    const leaderboard = qs("#gameLeaderboard");
+    const challengeForm = qs("#gameChallengeForm");
+    const challengeHint = qs("#gameChallengeHint");
+    const menu = modalBody.querySelector(".game-menu-list");
     canvas.tabIndex = 0;
     const cleanupControls = bindGameControls(controls);
     canvas.classList.add("hidden");
     help.classList.add("hidden");
     controls.classList.add("hidden");
     help.textContent = "Pick a game.";
-    modalBody.querySelectorAll(".game-button").forEach((button) => {
-      button.addEventListener("click", () => {
-        button.blur();
-        canvas.classList.remove("hidden");
-        help.classList.remove("hidden");
-        controls.classList.remove("hidden");
-        if (window.innerWidth <= 980 && menu) menu.classList.add("hidden");
-        canvas.focus();
-        if (state.gameLoopCleanup) {
-          state.gameLoopCleanup();
-          state.gameLoopCleanup = null;
-        }
+    let activeGame = "";
+    const challengeTargetInput = challengeForm?.querySelector('input[name="target"]');
+    const setDefaultTarget = (gameKey) => {
+      if (!challengeTargetInput) return;
+      challengeTargetInput.value = gameKey === "ladderclimb" ? "500" : "120";
+    };
+
+    const launchGame = (gameKey) => {
+      activeGame = gameKey;
+      canvas.classList.remove("hidden");
+      help.classList.remove("hidden");
+      controls.classList.remove("hidden");
+      if (window.innerWidth <= 980 && menu) menu.classList.add("hidden");
+      canvas.focus();
+      if (state.gameLoopCleanup) {
+        state.gameLoopCleanup();
+        state.gameLoopCleanup = null;
+      }
+      if (gameKey === "ladderclimb") {
         configureGameControls(controls, {
           left: { label: "LEFT", key: "ArrowLeft" },
           action: { label: "JUMP", key: "Space", code: "Space" },
           right: { label: "RIGHT", key: "ArrowRight" },
         });
-        runLadderClimb(canvas, help);
+        runLadderClimb(canvas, help, () => loadGameLeaderboard(gameKey, leaderboard));
+      } else {
+        configureGameControls(controls, {
+          left: { label: "LEFT", key: "ArrowLeft" },
+          action: { label: "BOOST", key: "ArrowUp" },
+          right: { label: "RIGHT", key: "ArrowRight" },
+        });
+        runTorchSprint(canvas, help, () => loadGameLeaderboard(gameKey, leaderboard));
+      }
+      loadGameLeaderboard(gameKey, leaderboard);
+      if (challengeHint) {
+        challengeHint.textContent = `Send a ${GAME_LABELS[gameKey]} challenge to a friend.`;
+      }
+      setDefaultTarget(gameKey);
+    };
+
+    modalBody.querySelectorAll(".game-button").forEach((button) => {
+      button.addEventListener("click", () => {
+        button.blur();
+        launchGame(button.dataset.game || "");
       });
     });
+
+    if (challengeForm) {
+      challengeForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (!activeGame) {
+          showPopupMessage("Pick a game before sending a challenge.", true);
+          return;
+        }
+        const formData = new FormData(event.currentTarget);
+        try {
+          await fetchJson("/api/challenges/request", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              username: formData.get("username"),
+              game: activeGame,
+              target: Number(formData.get("target") || 0),
+            }),
+          });
+          showPopupMessage(`Challenge sent to ${formData.get("username")}.`);
+        } catch (error) {
+          showPopupMessage(error.message, true);
+        }
+      });
+    }
+
     const previousCleanup = state.gameCleanup;
     state.gameCleanup = () => {
       cleanupControls();
@@ -1255,7 +1403,7 @@
     };
   }
 
-  function runLadderClimb(canvas, help) {
+  function runLadderClimb(canvas, help, onScoreUpdate) {
     const ctx = canvas.getContext("2d");
     const isMobile = window.innerWidth <= 980;
     const WIDTH = 12;
@@ -1442,6 +1590,7 @@
         highScore = score;
         writeStoredNumber(CLIMBER_HIGH_SCORE_KEY, highScore);
         syncHighScore("ladderclimb", highScore);
+        if (onScoreUpdate) onScoreUpdate();
       }
     }
 
@@ -1611,6 +1760,302 @@
       if (countdownTimer) clearInterval(countdownTimer);
       canvas.removeEventListener("click", restartRound);
       canvas.removeEventListener("touchstart", restartRound);
+    });
+    canvas.addEventListener("click", restartRound);
+    canvas.addEventListener("touchstart", restartRound, { passive: true });
+    draw();
+    startRound();
+  }
+
+  function runTorchSprint(canvas, help, onScoreUpdate) {
+    const ctx = canvas.getContext("2d");
+    const isMobile = window.innerWidth <= 980;
+    canvas.width = isMobile ? 360 : 560;
+    canvas.height = isMobile ? 420 : 440;
+    canvas.classList.remove("climber-canvas");
+    canvas.classList.add("runner-canvas");
+    const lanes = [canvas.width * 0.28, canvas.width * 0.5, canvas.width * 0.72];
+    const player = { lane: 1, y: canvas.height - 78, size: isMobile ? 36 : 40 };
+    const keys = { left: false, right: false, boost: false };
+    const obstacles = [];
+    const torches = [];
+    let score = 0;
+    let distance = 0;
+    let speed = 2.6;
+    let spawnTimer = 0;
+    let gameRunning = false;
+    let gameOver = false;
+    let countdown = 3;
+    let rafId = null;
+    let countdownTimer = null;
+    let lastFrameMs = null;
+    let highScore = readStoredNumber(TORCH_SPRINT_HIGH_SCORE_KEY);
+    let bestUpdated = false;
+
+    function drawHud() {
+      ctx.fillStyle = "rgba(0,0,0,0.46)";
+      ctx.fillRect(10, 10, canvas.width - 20, 40);
+      ctx.fillStyle = "#fff";
+      ctx.font = 'bold 15px "ChicagoCustom", "Chicago", "Fixedsys", sans-serif';
+      ctx.fillText(`Score: ${score}  Dist: ${distance}m  High: ${highScore}`, 18, 36);
+    }
+
+    function drawRoad() {
+      const horizonY = canvas.height * 0.18;
+      ctx.fillStyle = "#111";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const gradient = ctx.createLinearGradient(0, horizonY, 0, canvas.height);
+      gradient.addColorStop(0, "#4a4a4a");
+      gradient.addColorStop(1, "#121212");
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.moveTo(canvas.width * 0.24, horizonY);
+      ctx.lineTo(canvas.width * 0.76, horizonY);
+      ctx.lineTo(canvas.width, canvas.height);
+      ctx.lineTo(0, canvas.height);
+      ctx.closePath();
+      ctx.fill();
+
+      const laneColor = "#e0e0e0";
+      ctx.strokeStyle = laneColor;
+      ctx.lineWidth = 3;
+      [0.37, 0.63].forEach((ratio) => {
+        ctx.setLineDash([14, 16]);
+        ctx.beginPath();
+        ctx.moveTo(canvas.width * ratio, horizonY + 16);
+        ctx.lineTo(canvas.width * ratio, canvas.height);
+        ctx.stroke();
+      });
+      ctx.setLineDash([]);
+    }
+
+    function drawPlayer() {
+      const x = lanes[player.lane];
+      const y = player.y;
+      ctx.fillStyle = "#ffd54f";
+      ctx.fillRect(x - player.size / 2, y - player.size / 2, player.size, player.size);
+      ctx.strokeStyle = "#000";
+      ctx.strokeRect(x - player.size / 2, y - player.size / 2, player.size, player.size);
+      ctx.fillStyle = "#000";
+      ctx.fillRect(x - 6, y - 5, 4, 4);
+      ctx.fillRect(x + 2, y - 5, 4, 4);
+    }
+
+    function drawObjects() {
+      obstacles.forEach((obstacle) => {
+        const x = lanes[obstacle.lane];
+        const size = obstacle.size;
+        ctx.fillStyle = obstacle.kind === "cop" ? "#c62828" : "#424242";
+        ctx.fillRect(x - size / 2, obstacle.y - size / 2, size, size);
+        ctx.strokeStyle = "#000";
+        ctx.strokeRect(x - size / 2, obstacle.y - size / 2, size, size);
+      });
+      torches.forEach((torch) => {
+        const x = lanes[torch.lane];
+        ctx.fillStyle = "#ffeb3b";
+        ctx.beginPath();
+        ctx.arc(x, torch.y, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#000";
+        ctx.stroke();
+      });
+    }
+
+    function drawCountdown() {
+      ctx.fillStyle = "rgba(0,0,0,0.62)";
+      ctx.fillRect(canvas.width / 2 - 84, canvas.height / 2 - 70, 168, 130);
+      ctx.strokeStyle = "#fff";
+      ctx.strokeRect(canvas.width / 2 - 84, canvas.height / 2 - 70, 168, 130);
+      ctx.fillStyle = "#fff";
+      ctx.font = 'bold 62px "ChicagoCustom", "Chicago", "Fixedsys", sans-serif';
+      ctx.textAlign = "center";
+      ctx.fillText(String(countdown), canvas.width / 2, canvas.height / 2 + 22);
+      ctx.textAlign = "start";
+    }
+
+    function drawGameOver() {
+      ctx.fillStyle = "rgba(0,0,0,0.76)";
+      ctx.fillRect(canvas.width / 2 - 170, canvas.height / 2 - 96, 340, 192);
+      ctx.strokeStyle = "#fff";
+      ctx.strokeRect(canvas.width / 2 - 170, canvas.height / 2 - 96, 340, 192);
+      ctx.fillStyle = "#fff";
+      ctx.textAlign = "center";
+      ctx.font = 'bold 34px "ChicagoCustom", "Chicago", "Fixedsys", sans-serif';
+      ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 42);
+      ctx.font = '20px "ChicagoCustom", "Chicago", "Fixedsys", sans-serif';
+      ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 - 8);
+      ctx.fillText(`High: ${highScore}`, canvas.width / 2, canvas.height / 2 + 18);
+      ctx.font = '16px "ChicagoCustom", "Chicago", "Fixedsys", sans-serif';
+      ctx.fillText("Tap or click to retry", canvas.width / 2, canvas.height / 2 + 52);
+      ctx.textAlign = "start";
+    }
+
+    function updateHelp() {
+      if (gameOver) {
+        help.textContent = `TORCH SPRINT | GAME OVER | Score: ${score} | High: ${highScore}`;
+        return;
+      }
+      if (!gameRunning) {
+        help.textContent = `TORCH SPRINT | ${countdown > 0 ? countdown : ""} | High: ${highScore}`;
+        return;
+      }
+      help.textContent = `Torch Sprint | Score: ${score} | Dist: ${distance}m | High: ${highScore}`;
+    }
+
+    function maybeUpdateHighScore() {
+      if (score <= highScore) return;
+      highScore = score;
+      bestUpdated = true;
+      writeStoredNumber(TORCH_SPRINT_HIGH_SCORE_KEY, highScore);
+      syncHighScore("torchsprint", highScore);
+      if (onScoreUpdate) onScoreUpdate();
+    }
+
+    function draw() {
+      drawRoad();
+      drawObjects();
+      drawPlayer();
+      drawHud();
+      if (!gameRunning && !gameOver && countdown > 0) drawCountdown();
+      if (gameOver) drawGameOver();
+      updateHelp();
+    }
+
+    function spawnObject() {
+      const lane = Math.floor(Math.random() * 3);
+      const y = -40;
+      if (Math.random() < 0.2) {
+        torches.push({ lane, y });
+        return;
+      }
+      obstacles.push({
+        lane,
+        y,
+        size: 26 + Math.random() * 10,
+        kind: Math.random() < 0.45 ? "cop" : "pipe",
+      });
+    }
+
+    function step(timestamp) {
+      if (!gameRunning) return;
+      const now = typeof timestamp === "number" ? timestamp : performance.now();
+      const deltaMs = lastFrameMs == null ? 16.67 : Math.max(12, Math.min(40, now - lastFrameMs));
+      lastFrameMs = now;
+      const frameScale = deltaMs / 16.67;
+      const laneShift = keys.boost ? 2 : 1;
+      if (keys.left && player.lane > 0) {
+        player.lane = Math.max(0, player.lane - laneShift);
+        keys.left = false;
+      }
+      if (keys.right && player.lane < 2) {
+        player.lane = Math.min(2, player.lane + laneShift);
+        keys.right = false;
+      }
+      const moveSpeed = speed * frameScale;
+      for (let i = obstacles.length - 1; i >= 0; i -= 1) {
+        obstacles[i].y += moveSpeed * 10;
+        if (obstacles[i].y > canvas.height + 50) obstacles.splice(i, 1);
+      }
+      for (let i = torches.length - 1; i >= 0; i -= 1) {
+        torches[i].y += moveSpeed * 10;
+        if (torches[i].y > canvas.height + 30) torches.splice(i, 1);
+      }
+      spawnTimer -= deltaMs;
+      if (spawnTimer <= 0) {
+        spawnObject();
+        spawnTimer = Math.max(260, 780 - speed * 80);
+      }
+      speed = Math.min(7.2, speed + 0.0016 * deltaMs);
+      distance += Math.max(1, Math.floor(speed * 0.36));
+      score += Math.max(1, Math.floor(speed * 0.22));
+
+      for (let i = torches.length - 1; i >= 0; i -= 1) {
+        const torch = torches[i];
+        if (torch.lane === player.lane && Math.abs(torch.y - player.y) < 24) {
+          score += 25;
+          torches.splice(i, 1);
+        }
+      }
+
+      for (let i = 0; i < obstacles.length; i += 1) {
+        const obstacle = obstacles[i];
+        if (obstacle.lane !== player.lane) continue;
+        if (Math.abs(obstacle.y - player.y) > 24) continue;
+        gameRunning = false;
+        gameOver = true;
+        maybeUpdateHighScore();
+        draw();
+        return;
+      }
+      maybeUpdateHighScore();
+      draw();
+      rafId = requestAnimationFrame(step);
+    }
+
+    function onKey(event) {
+      if (event.type === "game-control") {
+        const detail = event.detail || {};
+        const isDown = detail.phase === "down";
+        if (detail.slot === "left" && isDown) keys.left = true;
+        if (detail.slot === "right" && isDown) keys.right = true;
+        if (detail.slot === "action") keys.boost = isDown;
+        return;
+      }
+      if (event.type === "keydown" && event.key.startsWith("Arrow")) event.preventDefault();
+      if (gameOver && event.type === "keydown" && (event.key === " " || event.code === "Space" || event.key === "Enter")) {
+        startRound();
+        return;
+      }
+      if (event.type === "keydown") {
+        if (event.key === "ArrowLeft" || event.key === "a") keys.left = true;
+        if (event.key === "ArrowRight" || event.key === "d") keys.right = true;
+        if (event.key === "ArrowUp" || event.key === "w" || event.code === "Space") keys.boost = true;
+      } else {
+        if (event.key === "ArrowUp" || event.key === "w" || event.code === "Space") keys.boost = false;
+      }
+    }
+
+    function startRound() {
+      obstacles.length = 0;
+      torches.length = 0;
+      player.lane = 1;
+      score = 0;
+      distance = 0;
+      speed = 2.6;
+      spawnTimer = 360;
+      gameRunning = false;
+      gameOver = false;
+      countdown = 3;
+      lastFrameMs = null;
+      keys.left = false;
+      keys.right = false;
+      keys.boost = false;
+      draw();
+      if (countdownTimer) clearInterval(countdownTimer);
+      countdownTimer = setInterval(() => {
+        countdown -= 1;
+        if (countdown <= 0) {
+          clearInterval(countdownTimer);
+          countdownTimer = null;
+          gameRunning = true;
+          rafId = requestAnimationFrame(step);
+        } else {
+          draw();
+        }
+      }, 1000);
+    }
+
+    const restartRound = () => {
+      if (!gameOver) return;
+      startRound();
+    };
+
+    bindGameCleanup(onKey, () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      if (countdownTimer) clearInterval(countdownTimer);
+      canvas.removeEventListener("click", restartRound);
+      canvas.removeEventListener("touchstart", restartRound);
+      if (bestUpdated && onScoreUpdate) onScoreUpdate();
     });
     canvas.addEventListener("click", restartRound);
     canvas.addEventListener("touchstart", restartRound, { passive: true });

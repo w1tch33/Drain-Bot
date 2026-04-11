@@ -1348,8 +1348,11 @@ html[data-theme="special-chaos"] .desktop::after {
   max-height: calc(min(92vh, 760px) - 32px);
   overflow: hidden;
   padding-top: 36px;
-  display: grid;
-  justify-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 10px;
   align-content: start;
 }
 .image-preview-body {
@@ -1386,6 +1389,25 @@ html[data-theme="special-chaos"] .desktop::after {
   opacity: 0.82;
 }
 .list-button { text-align: center; min-width: 160px; }
+.game-menu-list {
+  min-width: 190px;
+  max-width: 220px;
+}
+.game-side-panel {
+  min-width: 220px;
+  max-width: 240px;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+.game-leaderboard {
+  max-height: 160px;
+  overflow: auto;
+}
+.game-challenge-form input,
+.game-challenge-form button {
+  width: 100%;
+}
 .profile-section { display: grid; gap: 8px; margin-bottom: 14px; }
 .profile-heading, .profile-name { font-weight: 700; font-size: 15px; }
 .profile-mini-heading { font-weight: 700; font-size: 13px; margin-top: 4px; }
@@ -1455,6 +1477,7 @@ html[data-theme="special-chaos"] .desktop::after {
   margin-top: 12px;
   border: 2px solid #000;
   background: #000;
+  flex: 1 1 360px;
 }
 .game-canvas.climber-canvas { max-height: calc(100vh - 330px); }
 .game-canvas.runner-canvas { max-width: min(100%, 620px); max-height: calc(100vh - 350px); }
@@ -1711,6 +1734,7 @@ html[data-theme="special-chaos"] .desktop::after {
     max-height: calc(min(90vh, 720px) - 32px);
     padding-top: 28px;
     gap: 6px;
+    overflow: auto;
   }
   .game-help { font-size: 12px; min-height: 16px; margin-top: 6px; }
   .image-preview-window { width: min(95vw, 960px); }
@@ -1719,6 +1743,11 @@ html[data-theme="special-chaos"] .desktop::after {
   .game-canvas { max-height: calc(100vh - 390px); margin-top: 6px; }
   .game-canvas.climber-canvas { max-height: calc(100vh - 400px); }
   .game-canvas.runner-canvas { max-height: calc(100vh - 390px); }
+  .game-menu-list,
+  .game-side-panel {
+    width: 100%;
+    max-width: none;
+  }
   .game-control {
     min-width: 80px;
     min-height: 38px;

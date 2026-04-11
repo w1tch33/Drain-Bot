@@ -272,6 +272,7 @@ def save_high_score():
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
     new_score = int(scores.get(game, {}).get("score", 0))
+    completed_challenges = []
     if new_score > previous_score:
         label = scores.get(game, {}).get("label", game)
         drain_service.add_notification(
@@ -284,7 +285,23 @@ def save_high_score():
             f"Beat {label} high score ({new_score})",
             "game",
         )
-    return jsonify({"ok": True, "high_scores": scores})
+        completed_challenges = drain_service.complete_game_challenges(current_username(), game, new_score)
+    return jsonify({"ok": True, "high_scores": scores, "completed_challenges": completed_challenges})
+
+
+@app.get("/api/leaderboard")
+@login_required
+def game_leaderboard():
+    game = request.args.get("game", "")
+    try:
+        limit = int(request.args.get("limit", 12))
+    except (TypeError, ValueError):
+        limit = 12
+    try:
+        payload = drain_service.leaderboard_for_game(game, limit=limit, viewer=current_username())
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
+    return jsonify(payload)
 
 
 @app.post("/api/friends/request")
@@ -316,6 +333,22 @@ def remove_friend(username: str):
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
     return jsonify({"ok": True, "profile": drain_service.profile_summary(current_username(), current_username())})
+
+
+@app.post("/api/challenges/request")
+@login_required
+def send_game_challenge():
+    payload = request.get_json(silent=True) or request.form
+    try:
+        challenge = drain_service.send_game_challenge(
+            current_username(),
+            str(payload.get("username", "")),
+            str(payload.get("game", "")),
+            int(payload.get("target", 0)),
+        )
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
+    return jsonify({"ok": True, "challenge": challenge, "profile": drain_service.profile_summary(current_username(), current_username())})
 
 
 @app.get("/api/run")
