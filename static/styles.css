@@ -43,6 +43,7 @@ html[data-theme="crt-green"] {
   --field-bg: #0b2013;
   --window-drop: 0 0 18px rgba(63, 255, 130, 0.12);
   --button-extra: 0 0 0 1px rgba(91, 255, 154, 0.26) inset;
+  --ui-filter: contrast(1.12) saturate(1.08);
 }
 
 html[data-theme="pink-noir"] {
@@ -68,21 +69,22 @@ html[data-theme="pink-noir"] {
 
 html[data-theme="blood-red"] {
   --desktop-bg: #190104;
-  --window-fill: #4a0b14;
+  --window-fill: #520913;
   --line: #ff1b3f;
-  --button-face: #6a1320;
+  --button-face: #761126;
   --button-shadow: #25080b;
   --button-highlight: #a22238;
   --text: #fff;
   --dot-color: rgba(255, 27, 63, 0.35);
   --title-stripe-light: #b01f39;
   --title-stripe-dark: #3d0812;
-  --title-fill: #7c1328;
+  --title-fill: #8e1430;
   --field-bg: #2d0810;
   --window-radius: 2px;
   --button-radius: 2px;
-  --window-drop: 0 0 0 1px rgba(255, 60, 60, 0.22), 0 0 12px rgba(130, 0, 0, 0.25);
-  --button-extra: 0 0 0 1px rgba(255, 120, 120, 0.15) inset;
+  --window-drop: 0 0 0 1px rgba(255, 32, 71, 0.28), 0 0 16px rgba(130, 0, 0, 0.35);
+  --button-extra: 0 0 0 1px rgba(255, 120, 120, 0.22) inset;
+  --ui-filter: contrast(1.1) saturate(1.1);
 }
 
 html[data-theme="emo-night"] {
@@ -183,6 +185,7 @@ html[data-theme="special-chaos"] {
   --window-drop: 0 10px 24px rgba(13, 0, 41, 0.44);
   --button-extra: 0 0 0 1px rgba(255, 230, 90, 0.28) inset;
   --title-shape: rotate(1.2deg);
+  --ui-filter: saturate(1.18) contrast(1.08);
 }
 
 * { box-sizing: border-box; }
@@ -350,6 +353,32 @@ html[data-theme="blood-red"] .desktop::before {
     repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.18) 0 2px, transparent 2px 8px),
     radial-gradient(circle at 50% 40%, transparent 50%, rgba(0, 0, 0, 0.45) 100%);
   animation: bloodFog 4.5s ease-in-out infinite;
+}
+
+html[data-theme="blood-red"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8;
+  opacity: 0.36;
+  background:
+    radial-gradient(circle at 8% 16%, rgba(255, 30, 75, 0.32), transparent 18%),
+    radial-gradient(circle at 88% 76%, rgba(255, 30, 75, 0.22), transparent 16%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.45), transparent 20%, rgba(0, 0, 0, 0.52) 100%);
+}
+
+html[data-theme="blood-red"] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9;
+  opacity: 0.22;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 80, 95, 0.14) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.12) 0 2px, transparent 2px 12px);
+  animation: bloodScan 3.2s linear infinite;
 }
 
 html[data-theme="emo-night"] .window-title > span,
@@ -560,6 +589,31 @@ html[data-theme="crt-green"] body::before {
     repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0 1px, transparent 1px 4px);
 }
 
+html[data-theme="crt-green"] .window-title > span,
+html[data-theme="crt-green"] .title-pill {
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+}
+
+html[data-theme="crt-green"] .title-pill::after {
+  content: " >_";
+  font-size: 0.55em;
+  vertical-align: middle;
+}
+
+html[data-theme="crt-green"] .desktop::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(91, 255, 154, 0.85), transparent);
+  box-shadow: 0 0 10px rgba(91, 255, 154, 0.7);
+  animation: terminalSweep 3.4s linear infinite;
+}
+
 html[data-theme="special-chaos"] .retro-button {
   text-shadow: 1px 0 #00d5ff, -1px 0 #ff3f8e;
   animation: chaosButton 0.7s steps(2, end) infinite;
@@ -585,6 +639,19 @@ html[data-theme="special-chaos"] body::after {
   animation: chaosStrobe 0.32s steps(2, end) infinite;
 }
 
+html[data-theme="special-chaos"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 7;
+  opacity: 0.28;
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 63, 142, 0.16) 0 2px, transparent 2px 10px),
+    repeating-linear-gradient(45deg, rgba(0, 213, 255, 0.14) 0 1px, transparent 1px 8px),
+    radial-gradient(circle at 15% 85%, rgba(255, 230, 90, 0.26), transparent 20%);
+}
+
 html[data-theme="special-chaos"] .desktop {
   animation: bootIn 420ms ease-out;
 }
@@ -607,6 +674,11 @@ html[data-theme="special-chaos"] .retro-button:nth-child(even) {
 html[data-theme="special-chaos"] .window-title > span {
   letter-spacing: 1.9px;
   text-transform: uppercase;
+}
+
+html[data-theme="special-chaos"] .window-title > span,
+html[data-theme="special-chaos"] .title-pill {
+  text-shadow: 2px 0 #00d5ff, -2px 0 #ff3f8e;
 }
 
 html[data-theme="special-chaos"] .retro-window,
@@ -1403,6 +1475,18 @@ html[data-theme="special-chaos"] .title-shell {
 @keyframes crtRoll {
   0% { background-position: 0 0, 0 0; }
   100% { background-position: 0 90px, 0 0; }
+}
+
+@keyframes terminalSweep {
+  0% { transform: translateY(0); opacity: 0.1; }
+  10% { opacity: 0.7; }
+  90% { opacity: 0.6; }
+  100% { transform: translateY(760px); opacity: 0.08; }
+}
+
+@keyframes bloodScan {
+  0% { background-position: 0 0, 0 0; }
+  100% { background-position: 0 120px, 120px 0; }
 }
 
 @keyframes bloodPulse {

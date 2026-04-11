@@ -49,7 +49,6 @@
     "crt-green",
     "pink-noir",
     "blood-red",
-    "emo-night",
     "icy-blue",
     "sunset-haze",
     "camcorder-vhs",
