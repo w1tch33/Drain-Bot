@@ -224,7 +224,7 @@ html[data-theme="crt-green"] body {
 
 html[data-theme="pink-noir"] body {
   background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='800' viewBox='0 0 1200 800'%3E%3Cg fill='%23170010' fill-opacity='0.34'%3E%3Cpath d='M86 120c12-24 48-14 48 13 0 20-20 34-48 54-28-20-48-34-48-54 0-27 36-37 48-13z'/%3E%3Cpath d='M268 204c10-20 40-12 40 10 0 17-16 28-40 44-24-16-40-27-40-44 0-22 30-30 40-10z'/%3E%3Cpath d='M1014 188c11-22 43-13 43 11 0 18-17 30-43 48-26-18-43-30-43-48 0-24 32-33 43-11z'/%3E%3Cpath d='M898 558c12-24 48-14 48 13 0 20-20 34-48 54-28-20-48-34-48-54 0-27 36-37 48-13z'/%3E%3Cpath d='M222 612c10-20 40-12 40 10 0 17-16 28-40 44-24-16-40-27-40-44 0-22 30-30 40-10z'/%3E%3Cpolygon points='470,90 478,112 502,112 482,126 490,148 470,134 450,148 458,126 438,112 462,112'/%3E%3Cpolygon points='760,146 768,168 792,168 772,182 780,204 760,190 740,204 748,182 728,168 752,168'/%3E%3Cpolygon points='1060,332 1068,354 1092,354 1072,368 1080,390 1060,376 1040,390 1048,368 1028,354 1052,354'/%3E%3Cpolygon points='612,622 620,644 644,644 624,658 632,680 612,666 592,680 600,658 580,644 604,644'/%3E%3Cpolygon points='340,500 348,522 372,522 352,536 360,558 340,544 320,558 328,536 308,522 332,522'/%3E%3C/g%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='900' viewBox='0 0 1400 900'%3E%3Cg fill='%230f000a' fill-opacity='0.46'%3E%3Cpath d='M86 120c12-24 48-14 48 13 0 20-20 34-48 54-28-20-48-34-48-54 0-27 36-37 48-13z'/%3E%3Cpath d='M268 204c10-20 40-12 40 10 0 17-16 28-40 44-24-16-40-27-40-44 0-22 30-30 40-10z'/%3E%3Cpath d='M1014 188c11-22 43-13 43 11 0 18-17 30-43 48-26-18-43-30-43-48 0-24 32-33 43-11z'/%3E%3Cpath d='M898 558c12-24 48-14 48 13 0 20-20 34-48 54-28-20-48-34-48-54 0-27 36-37 48-13z'/%3E%3Cpath d='M222 612c10-20 40-12 40 10 0 17-16 28-40 44-24-16-40-27-40-44 0-22 30-30 40-10z'/%3E%3Cpath d='M1234 470c9-18 36-11 36 9 0 15-14 25-36 40-22-15-36-25-36-40 0-20 27-27 36-9z'/%3E%3Cpath d='M620 356c8-16 33-10 33 8 0 14-13 23-33 36-20-13-33-22-33-36 0-18 25-24 33-8z'/%3E%3Cpath d='M470 756c8-16 33-10 33 8 0 14-13 23-33 36-20-13-33-22-33-36 0-18 25-24 33-8z'/%3E%3Cpolygon points='470,90 478,112 502,112 482,126 490,148 470,134 450,148 458,126 438,112 462,112'/%3E%3Cpolygon points='760,146 768,168 792,168 772,182 780,204 760,190 740,204 748,182 728,168 752,168'/%3E%3Cpolygon points='1060,332 1068,354 1092,354 1072,368 1080,390 1060,376 1040,390 1048,368 1028,354 1052,354'/%3E%3Cpolygon points='612,622 620,644 644,644 624,658 632,680 612,666 592,680 600,658 580,644 604,644'/%3E%3Cpolygon points='340,500 348,522 372,522 352,536 360,558 340,544 320,558 328,536 308,522 332,522'/%3E%3Cpolygon points='1322,172 1330,194 1354,194 1334,208 1342,230 1322,216 1302,230 1310,208 1290,194 1314,194'/%3E%3Cpolygon points='148,420 156,442 180,442 160,456 168,478 148,464 128,478 136,456 116,442 140,442'/%3E%3Cpolygon points='844,742 852,764 876,764 856,778 864,800 844,786 824,800 832,778 812,764 836,764'/%3E%3Cpolygon points='520,250 528,272 552,272 532,286 540,308 520,294 500,308 508,286 488,272 512,272'/%3E%3C/g%3E%3C/svg%3E"),
     radial-gradient(circle, var(--dot-color) 0 1px, transparent 1px 100%),
     radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.22), transparent 26%),
     radial-gradient(circle at 82% 72%, rgba(255, 128, 214, 0.24), transparent 30%),
@@ -395,20 +395,13 @@ html[data-theme="blood-red"] body::before {
   inset: 0;
   pointer-events: none;
   z-index: 8;
-  opacity: 0.44;
+  opacity: 0.66;
   background:
-    linear-gradient(to top, rgba(0, 0, 0, 0.8) 0 21%, transparent 21%),
-    linear-gradient(to top, rgba(36, 36, 40, 0.9) 0 52%, transparent 52%) left 4% bottom / 42px 144px no-repeat,
-    linear-gradient(to top, rgba(26, 26, 29, 0.9) 0 62%, transparent 62%) left 12% bottom / 28px 168px no-repeat,
-    linear-gradient(to top, rgba(44, 44, 48, 0.92) 0 48%, transparent 48%) left 20% bottom / 56px 132px no-repeat,
-    linear-gradient(to top, rgba(31, 31, 34, 0.9) 0 58%, transparent 58%) left 34% bottom / 34px 158px no-repeat,
-    linear-gradient(to top, rgba(45, 45, 50, 0.94) 0 50%, transparent 50%) left 48% bottom / 62px 140px no-repeat,
-    linear-gradient(to top, rgba(29, 29, 32, 0.9) 0 60%, transparent 60%) left 62% bottom / 30px 170px no-repeat,
-    linear-gradient(to top, rgba(39, 39, 43, 0.92) 0 46%, transparent 46%) left 74% bottom / 58px 128px no-repeat,
-    linear-gradient(to top, rgba(27, 27, 31, 0.9) 0 57%, transparent 57%) left 88% bottom / 36px 156px no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1600' height='900' viewBox='0 0 1600 900'%3E%3Cpath fill='%23070609' d='M0 900V752l20-58 18 54 14-37 22 41 26-84 18-36 20 8 16 22 18-26 14-62 18-95 12-84 10 112 16-28 16-136 10 94 14 26 14-18 18 22 18-46 22-74 16 82 22-15 12-55 10 50 10-30 16 24 12-16 22 18 22-34 12 18 14-20 14 24 24-206 16 218 26-144 16 168 20-48 14-110 12 90 14 14 16-18 18 26 24-66 18-106 14 156 20-86 14 102 24-34 14-172 16 180 18-44 14-120 12 110 18-26 16 18 22-38 20 62 16-8 18 24 20-34 16 136 20-152 16 112 20-34 24 48 24-62 14 88 16-14 20 26 22-34 18 90 16-70 20 40 24-14 18 24 18-16 26 30 22-54 16 62 30-10 22 24 26-16 24 48 26-42 22 78 24-20 28 30 30 88 24-34 28 48V900z'/%3E%3C/svg%3E"),
     radial-gradient(circle at 8% 16%, rgba(255, 30, 75, 0.32), transparent 18%),
     radial-gradient(circle at 88% 76%, rgba(255, 30, 75, 0.22), transparent 16%),
     linear-gradient(180deg, rgba(0, 0, 0, 0.45), transparent 20%, rgba(0, 0, 0, 0.52) 100%);
+  background-size: cover, auto, auto, auto;
 }
 
 html[data-theme="blood-red"] body::after {
@@ -523,7 +516,7 @@ html[data-theme="camcorder-vhs"] body::after {
     repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.26) 0 1px, rgba(0, 0, 0, 0.12) 1px 5px),
     radial-gradient(circle at 50% 50%, transparent 56%, rgba(0, 0, 0, 0.75) 100%),
     linear-gradient(90deg, rgba(255, 0, 102, 0.16), transparent 32%, transparent 68%, rgba(0, 220, 255, 0.16));
-  animation: vhsFlicker 42ms steps(2, end) infinite;
+  animation: vhsFlicker 80ms steps(2, end) infinite;
 }
 
 html[data-theme="camcorder-vhs"] body::before {
@@ -537,7 +530,7 @@ html[data-theme="camcorder-vhs"] body::before {
     repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 2px),
     repeating-radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.1) 0 1px, transparent 1px 3px),
     linear-gradient(180deg, rgba(255, 0, 140, 0.1), rgba(120, 160, 255, 0.08) 60%, rgba(255, 120, 190, 0.1));
-  animation: vhsNoise 32ms steps(3, end) infinite;
+  animation: vhsNoise 65ms steps(3, end) infinite;
 }
 
 html[data-theme="camcorder-vhs"] .desktop::before {
@@ -1476,9 +1469,9 @@ html[data-theme="special-chaos"] .desktop::after {
 }
 
 @keyframes vhsFlicker {
-  0% { opacity: 0.24; filter: brightness(1.05); background-position: 0 0, 0 0, 0 0; }
-  50% { opacity: 0.72; filter: brightness(1.18); background-position: 0 2px, 0 0, 1px 0; }
-  100% { opacity: 0.28; filter: brightness(0.96); background-position: 0 -1px, 0 0, -1px 0; }
+  0% { opacity: 0.44; filter: brightness(1.02); background-position: 0 0, 0 0, 0 0; }
+  50% { opacity: 0.6; filter: brightness(1.1); background-position: 0 1px, 0 0, 1px 0; }
+  100% { opacity: 0.46; filter: brightness(0.98); background-position: 0 -1px, 0 0, -1px 0; }
 }
 
 @keyframes vhsNoise {
