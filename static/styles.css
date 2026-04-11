@@ -213,6 +213,15 @@ body {
   align-items: flex-start;
 }
 
+html[data-theme="crt-green"] body {
+  background:
+    linear-gradient(180deg, rgba(8, 34, 18, 0.95), rgba(4, 16, 9, 0.98)),
+    linear-gradient(to right, rgba(91, 255, 154, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(91, 255, 154, 0.08) 1px, transparent 1px),
+    radial-gradient(circle at 20% 14%, rgba(91, 255, 154, 0.12), transparent 26%);
+  background-size: auto, 20px 20px, 20px 20px, auto;
+}
+
 html[data-theme="pink-noir"] body {
   background:
     radial-gradient(circle, var(--dot-color) 0 1px, transparent 1px 100%),
@@ -221,6 +230,21 @@ html[data-theme="pink-noir"] body {
     linear-gradient(155deg, rgba(255, 230, 246, 0.35), rgba(255, 72, 188, 0.2) 45%, rgba(255, 170, 225, 0.2) 80%),
     var(--desktop-bg);
   background-size: 6px 6px, auto, auto, auto, auto;
+}
+
+html[data-theme="pink-noir"] body::before {
+  content: "★  ♥  ★  ♥  ★  ♥  ★  ♥  ★  ♥\A♥  ★  ♥  ★  ♥  ★  ♥  ★  ♥  ★\A★  ♥  ★  ♥  ★  ♥  ★  ♥  ★  ♥\A♥  ★  ♥  ★  ♥  ★  ♥  ★  ♥  ★";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+  white-space: pre;
+  line-height: 2.2;
+  letter-spacing: 7px;
+  font-size: clamp(16px, 2.2vw, 28px);
+  color: rgba(20, 0, 14, 0.32);
+  padding: 34px 24px;
+  animation: sparkleDrift 2.2s ease-in-out infinite;
 }
 
 html[data-theme="blood-red"] body {
@@ -254,6 +278,19 @@ html[data-theme="icy-blue"] body {
   background-size: 6px 6px, 24px 24px, 36px 36px, 36px 36px, auto, auto;
 }
 
+html[data-theme="icy-blue"] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8;
+  opacity: 0.26;
+  background:
+    repeating-linear-gradient(22deg, rgba(216, 247, 255, 0.16) 0 1px, transparent 1px 16px),
+    repeating-linear-gradient(-34deg, rgba(171, 228, 251, 0.14) 0 1px, transparent 1px 14px),
+    radial-gradient(circle at 78% 12%, rgba(230, 250, 255, 0.28), transparent 22%);
+}
+
 html[data-theme="sunset-haze"] body {
   background:
     radial-gradient(circle, var(--dot-color) 0 1px, transparent 1px 100%),
@@ -264,6 +301,19 @@ html[data-theme="sunset-haze"] body {
   background-size: 6px 6px, auto, auto, 32px 32px, auto;
 }
 
+html[data-theme="sunset-haze"] .desktop::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  border: none;
+  background:
+    radial-gradient(circle at 76% 12%, rgba(255, 247, 180, 0.6), transparent 20%),
+    linear-gradient(180deg, rgba(255, 200, 101, 0.2), rgba(255, 111, 60, 0.12) 45%, transparent 70%);
+}
+
 html[data-theme="camcorder-vhs"] body {
   background:
     radial-gradient(circle, var(--dot-color) 0 1px, transparent 1px 100%),
@@ -272,6 +322,17 @@ html[data-theme="camcorder-vhs"] body {
     linear-gradient(90deg, rgba(23, 9, 27, 0.38), transparent 12%, transparent 88%, rgba(23, 9, 27, 0.38)),
     var(--desktop-bg);
   background-size: 6px 6px, auto, 100% 4px, 100% 100%, auto;
+}
+
+html[data-theme="camcorder-vhs"] .desktop > .title-shell::before {
+  content: "PLAY  \25B6  LP";
+  position: absolute;
+  right: -4px;
+  top: -18px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: rgba(255, 231, 246, 0.88);
+  text-shadow: 0 0 3px rgba(255, 170, 220, 0.7);
 }
 
 html[data-theme="special-chaos"] body {
@@ -361,8 +422,17 @@ html[data-theme="blood-red"] body::before {
   inset: 0;
   pointer-events: none;
   z-index: 8;
-  opacity: 0.36;
+  opacity: 0.44;
   background:
+    linear-gradient(to top, rgba(0, 0, 0, 0.8) 0 21%, transparent 21%),
+    linear-gradient(to top, rgba(36, 36, 40, 0.9) 0 52%, transparent 52%) left 4% bottom / 42px 144px no-repeat,
+    linear-gradient(to top, rgba(26, 26, 29, 0.9) 0 62%, transparent 62%) left 12% bottom / 28px 168px no-repeat,
+    linear-gradient(to top, rgba(44, 44, 48, 0.92) 0 48%, transparent 48%) left 20% bottom / 56px 132px no-repeat,
+    linear-gradient(to top, rgba(31, 31, 34, 0.9) 0 58%, transparent 58%) left 34% bottom / 34px 158px no-repeat,
+    linear-gradient(to top, rgba(45, 45, 50, 0.94) 0 50%, transparent 50%) left 48% bottom / 62px 140px no-repeat,
+    linear-gradient(to top, rgba(29, 29, 32, 0.9) 0 60%, transparent 60%) left 62% bottom / 30px 170px no-repeat,
+    linear-gradient(to top, rgba(39, 39, 43, 0.92) 0 46%, transparent 46%) left 74% bottom / 58px 128px no-repeat,
+    linear-gradient(to top, rgba(27, 27, 31, 0.9) 0 57%, transparent 57%) left 88% bottom / 36px 156px no-repeat,
     radial-gradient(circle at 8% 16%, rgba(255, 30, 75, 0.32), transparent 18%),
     radial-gradient(circle at 88% 76%, rgba(255, 30, 75, 0.22), transparent 16%),
     linear-gradient(180deg, rgba(0, 0, 0, 0.45), transparent 20%, rgba(0, 0, 0, 0.52) 100%);
@@ -687,6 +757,18 @@ html[data-theme="special-chaos"] .title-shell {
   background:
     linear-gradient(135deg, rgba(255, 63, 142, 0.16), rgba(0, 213, 255, 0.14)),
     var(--window-fill);
+}
+
+html[data-theme="special-chaos"] .desktop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 230, 90, 0.24) 0 2px, transparent 2px 10px),
+    repeating-linear-gradient(0deg, rgba(255, 63, 142, 0.2) 0 1px, transparent 1px 6px);
+  mix-blend-mode: hard-light;
+  animation: chaosStrobe 0.22s steps(2, end) infinite;
 }
 
 .flash-stack {
