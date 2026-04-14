@@ -65,6 +65,9 @@
   let audioUnlocked = false;
   let pendingAutoplay = false;
   let fadeToken = 0;
+  let meowPrimed = false;
+  let searchTimer = null;
+  let searchAbortController = null;
 
   function requestLocation() {
     if (!navigator.geolocation) return;
@@ -380,6 +383,7 @@
   function notificationsHtml(payload) {
     const rows = (payload.items || [])
       .filter((item) => !item.read)
+      .filter((item) => !String(item.message || "").toLowerCase().startsWith("new high score in "))
       .map(
         (item) => `
           <div class="notification-item ${item.read ? "" : "unread"}" data-id="${escapeHtml(item.id)}">
@@ -395,6 +399,13 @@
       </div>
       <div class="notifications-list">${rows || '<div class="notification-item"><div class="notification-text">No notifications yet.</div></div>'}</div>
     `;
+  }
+
+  function visibleNotificationCount(payload) {
+    return (payload.items || [])
+      .filter((item) => !item.read)
+      .filter((item) => !String(item.message || "").toLowerCase().startsWith("new high score in "))
+      .length;
   }
 
   function activityHtml(payload) {
@@ -422,7 +433,7 @@
   async function refreshNotifications() {
     try {
       const payload = await fetchJson("/api/notifications");
-      setNotificationsBadge(payload.unread || 0);
+      setNotificationsBadge(visibleNotificationCount(payload));
       return payload;
     } catch (_error) {
       return null;
@@ -433,7 +444,7 @@
     setLoading(true);
     try {
       const payload = await fetchJson("/api/notifications");
-      setNotificationsBadge(payload.unread || 0);
+      setNotificationsBadge(visibleNotificationCount(payload));
       openModal("Notifications", notificationsHtml(payload));
       const markReadButton = qs("#markAllNotificationsRead");
       if (markReadButton) {
@@ -443,7 +454,7 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ ids: [] }),
           });
-          setNotificationsBadge(updated.unread || 0);
+          setNotificationsBadge(visibleNotificationCount(updated));
           openModal("Notifications", notificationsHtml(updated));
         });
       }
@@ -717,19 +728,28 @@
     }
   }
 
-  async function searchDrains() {
-    const query = searchInput.value.trim();
+  async function searchDrains(queryText = searchInput.value.trim()) {
+    const query = String(queryText || "").trim();
     if (!query) {
       searchPanel.innerHTML = "";
       return;
     }
+    if (query.length < 2) {
+      searchPanel.innerHTML = "<div>Type at least 2 letters.</div>";
+      return;
+    }
+    if (searchAbortController) searchAbortController.abort();
+    searchAbortController = new AbortController();
+    searchPanel.innerHTML = "<div>Searching...</div>";
     try {
       const rows = await fetchJson(
-        `/api/search?q=${encodeURIComponent(query)}&only_unvisited=${onlyUnvisitedToggle.checked ? "1" : "0"}&only_visited=${onlyVisitedToggle.checked ? "1" : "0"}`
+        `/api/search?q=${encodeURIComponent(query)}&only_unvisited=${onlyUnvisitedToggle.checked ? "1" : "0"}&only_visited=${onlyVisitedToggle.checked ? "1" : "0"}`,
+        { signal: searchAbortController.signal }
       );
       searchPanel.innerHTML = "";
       rows.forEach((row) => searchPanel.appendChild(resultButton(row)));
     } catch (error) {
+      if (error.name === "AbortError") return;
       searchPanel.textContent = error.message;
     }
   }
@@ -832,6 +852,14 @@
       pendingAutoplay = false;
       startPlaybackAt(state.playlistIndex, true, false, false);
     }
+    primeMeowAudio();
+  }
+
+  function primeMeowAudio() {
+    if (meowPrimed || !meowPlayer) return;
+    meowPrimed = true;
+    meowPlayer.preload = "auto";
+    meowPlayer.load();
   }
 
   function readStoredNumber(key) {
@@ -867,6 +895,30 @@
     };
     element.addEventListener("touchend", onTouchEnd, { passive: false });
     element.addEventListener("click", onClick);
+  }
+
+  async function compressImageUpload(file) {
+    if (!(file instanceof File)) return null;
+    if (!file.type.startsWith("image/")) return null;
+    if (file.size <= 1_300_000) return null;
+    if (typeof createImageBitmap !== "function") return null;
+    try {
+      const bitmap = await createImageBitmap(file);
+      const maxSide = 1600;
+      const ratio = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(bitmap.width * ratio));
+      canvas.height = Math.max(1, Math.round(bitmap.height * ratio));
+      const ctx = canvas.getContext("2d", { alpha: false });
+      ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      bitmap.close();
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.78));
+      if (!blob || blob.size >= file.size) return null;
+      const safeName = (file.name || "photo").replace(/\.[^.]+$/, "");
+      return { file: blob, name: `${safeName}.jpg` };
+    } catch (_error) {
+      return null;
+    }
   }
 
   function detailHtml(drain) {
@@ -928,7 +980,7 @@
         )
         .join("")}</div></div>
       <div class="detail-section"><div class="photo-grid">${photos}</div><form id="photoUploadForm" enctype="multipart/form-data"><input class="retro-input" type="file" name="photo" accept="image/*"><button class="retro-button" type="submit">Add Photo</button></form></div>
-      <div class="detail-section"><button class="retro-button" type="button" id="saveDrainButton">Save</button></div>
+      <div class="detail-section"><button class="retro-button" type="button" id="saveDrainButton">Save</button><div class="profile-copy" id="drainSaveStatus"></div></div>
     `;
   }
 
@@ -946,9 +998,12 @@
   }
 
   function bindDetail(name) {
-    let difficulty = state.currentDrain.difficulty || "";
-    let value = state.currentDrain.value || "";
-    let rating = state.currentDrain.rating || "";
+    const selectedValue = (selector) => {
+      const active = modalBody.querySelector(`${selector}.active`);
+      if (!active) return "";
+      return active.dataset.value || "";
+    };
+    const saveStatus = modalBody.querySelector("#drainSaveStatus");
     const nearbyMarkup = (state.currentDrain.nearby || [])
       .map(
         (item) =>
@@ -979,31 +1034,69 @@
 
     modalBody.querySelectorAll(".difficulty-button").forEach((button) => {
       bindPress(button, () => {
-        difficulty = button.dataset.value;
         modalBody.querySelectorAll(".difficulty-button").forEach((item) => item.classList.toggle("active", item === button));
       });
     });
 
     modalBody.querySelectorAll(".value-button").forEach((button) => {
       bindPress(button, () => {
-        value = button.dataset.value;
         modalBody.querySelectorAll(".value-button").forEach((item) => item.classList.toggle("active", item === button));
       });
     });
 
     modalBody.querySelectorAll(".rating-button").forEach((button) => {
       bindPress(button, () => {
-        rating = Number(button.dataset.value);
         modalBody.querySelectorAll(".rating-button").forEach((item) => item.classList.toggle("active", item === button));
       });
     });
 
+    function captureDraft() {
+      return {
+        favorite: modalBody.querySelector("#favoriteField")?.checked || false,
+        visited: modalBody.querySelector("#visitedField")?.checked || false,
+        description: modalBody.querySelector("#descriptionField")?.value || "",
+        notes: modalBody.querySelector("#notesField")?.value || "",
+        difficulty: selectedValue(".difficulty-button"),
+        value: selectedValue(".value-button"),
+        rating: selectedValue(".rating-button"),
+        features: Array.from(modalBody.querySelectorAll(".featureField")).reduce((acc, field) => {
+          acc[field.value] = field.checked;
+          return acc;
+        }, {}),
+      };
+    }
+
+    function restoreDraft(draft) {
+      if (!draft) return;
+      const favoriteField = modalBody.querySelector("#favoriteField");
+      const visitedField = modalBody.querySelector("#visitedField");
+      const descriptionField = modalBody.querySelector("#descriptionField");
+      const notesField = modalBody.querySelector("#notesField");
+      if (favoriteField) favoriteField.checked = !!draft.favorite;
+      if (visitedField) visitedField.checked = !!draft.visited;
+      if (descriptionField) descriptionField.value = draft.description || "";
+      if (notesField) notesField.value = draft.notes || "";
+      modalBody.querySelectorAll(".difficulty-button").forEach((button) => button.classList.toggle("active", button.dataset.value === draft.difficulty));
+      modalBody.querySelectorAll(".value-button").forEach((button) => button.classList.toggle("active", button.dataset.value === draft.value));
+      modalBody.querySelectorAll(".rating-button").forEach((button) => button.classList.toggle("active", button.dataset.value === String(draft.rating || "")));
+      modalBody.querySelectorAll(".featureField").forEach((field) => {
+        field.checked = !!draft.features?.[field.value];
+      });
+    }
+
     modalBody.querySelectorAll(".delete-photo").forEach((button) => {
       bindPress(button, async () => {
-        const formData = new FormData();
-        formData.append("path", button.dataset.path);
-        await fetchJson(`/api/drains/${encodeURIComponent(name)}/photos/delete`, { method: "POST", body: formData });
-        await openDrain(name);
+        const draft = captureDraft();
+        setLoading(true);
+        try {
+          const formData = new FormData();
+          formData.append("path", button.dataset.path);
+          await fetchJson(`/api/drains/${encodeURIComponent(name)}/photos/delete`, { method: "POST", body: formData });
+          await openDrain(name);
+          restoreDraft(draft);
+        } finally {
+          setLoading(false);
+        }
       });
     });
 
@@ -1013,16 +1106,35 @@
 
     modalBody.querySelector("#photoUploadForm").addEventListener("submit", async (event) => {
       event.preventDefault();
-      await fetchJson(`/api/drains/${encodeURIComponent(name)}/photos`, {
-        method: "POST",
-        body: new FormData(event.currentTarget),
-      });
-      await openDrain(name);
+      const draft = captureDraft();
+      setLoading(true);
+      try {
+        const uploadFormData = new FormData(event.currentTarget);
+        const sourceFile = uploadFormData.get("photo");
+        if (!(sourceFile instanceof File) || !sourceFile.name) {
+          showPopupMessage("Choose a photo first.", true);
+          return;
+        }
+        const compressed = await compressImageUpload(sourceFile);
+        const sendForm = new FormData();
+        if (compressed) sendForm.append("photo", compressed.file, compressed.name);
+        else sendForm.append("photo", sourceFile);
+        await fetchJson(`/api/drains/${encodeURIComponent(name)}/photos`, {
+          method: "POST",
+          body: sendForm,
+        });
+        await openDrain(name);
+        restoreDraft(draft);
+      } finally {
+        setLoading(false);
+      }
     });
 
     bindPress(modalBody.querySelector("#saveDrainButton"), async () => {
       const saveButton = modalBody.querySelector("#saveDrainButton");
       saveButton.disabled = true;
+      if (saveStatus) saveStatus.textContent = "Saving...";
+      setLoading(true);
       try {
         await fetchJson(`/api/drains/${encodeURIComponent(name)}/update`, {
           method: "POST",
@@ -1032,9 +1144,9 @@
             visited: modalBody.querySelector("#visitedField").checked,
             description: modalBody.querySelector("#descriptionField").value,
             notes: modalBody.querySelector("#notesField").value,
-            difficulty,
-            value,
-            rating,
+            difficulty: selectedValue(".difficulty-button"),
+            value: selectedValue(".value-button"),
+            rating: Number(selectedValue(".rating-button") || 0) || "",
             features: Array.from(modalBody.querySelectorAll(".featureField")).reduce((acc, field) => {
               acc[field.value] = field.checked;
               return acc;
@@ -1042,8 +1154,14 @@
           }),
         });
         await refreshStats();
-        drawMessage(`Saved ${name}.`);
+        if (saveStatus) {
+          saveStatus.textContent = "Saved!";
+          setTimeout(() => {
+            if (saveStatus.textContent === "Saved!") saveStatus.textContent = "";
+          }, 1500);
+        }
       } finally {
+        setLoading(false);
         saveButton.disabled = false;
       }
     });
@@ -1064,6 +1182,7 @@
     }, 70);
 
     qs("#smileyImage").addEventListener("click", () => {
+      unlockAudio();
       frame.animate(
         [
           { transform: frame.style.transform || "translate(0,0)" },
@@ -1076,6 +1195,7 @@
       meowPlayer.play().catch(() => {});
       showMeow();
     });
+    window.setTimeout(primeMeowAudio, 120);
   }
 
   function setupMusic() {
@@ -2640,8 +2760,16 @@
   maxDistance.addEventListener("input", syncSliders);
   onlyUnvisitedToggle.addEventListener("change", () => syncVisitFilters("unvisited"));
   onlyVisitedToggle.addEventListener("change", () => syncVisitFilters("visited"));
-  searchInput.addEventListener("input", searchDrains);
+  searchInput.addEventListener("input", () => {
+    if (searchTimer) clearTimeout(searchTimer);
+    const nextQuery = searchInput.value;
+    searchTimer = setTimeout(() => {
+      searchDrains(nextQuery);
+    }, 140);
+  });
   searchInput.addEventListener("blur", () => {
+    if (searchAbortController) searchAbortController.abort();
+    if (searchTimer) clearTimeout(searchTimer);
     setTimeout(() => {
       searchInput.value = "";
       searchPanel.innerHTML = "";

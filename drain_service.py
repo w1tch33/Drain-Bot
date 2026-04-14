@@ -1986,8 +1986,39 @@ def session_results(
 
 
 def search_results(username: str | None, query: str, only_unvisited: bool = False, only_visited: bool = False) -> list[dict[str, Any]]:
-    drains = filter_drains(username, 0, 9999, only_unvisited, query, only_visited)
-    return result_rows(drains)
+    term = str(query or "").strip().casefold()
+    if len(term) < 2:
+        return []
+    words = [piece for piece in re.split(r"\s+", term) if piece]
+    ranked: list[tuple[int, dict[str, Any]]] = []
+    for drain in get_all_drains(username):
+        if only_unvisited and drain.get("visited"):
+            continue
+        if only_visited and not drain.get("visited"):
+            continue
+        name_text = str(drain.get("name", "")).casefold()
+        score = 0
+        if term == name_text:
+            score = 200
+        elif name_text.startswith(term):
+            score = 150
+        elif words and all(word in name_text for word in words):
+            score = 120
+        elif term in name_text:
+            score = 90
+        elif len(term) >= 5:
+            description_text = str(drain.get("description", "")).casefold()
+            notes_text = str(drain.get("notes", "")).casefold()
+            if term in description_text:
+                score = 40
+            elif term in notes_text:
+                score = 24
+        if score <= 0:
+            continue
+        ranked.append((score, drain))
+    ranked.sort(key=lambda item: (-item[0], float(item[1].get("distance_km", 99999)), str(item[1].get("name", ""))))
+    top = [item[1] for item in ranked[:40]]
+    return result_rows(top)
 
 
 def google_earth_url(lat: float, lon: float, name: str) -> str:

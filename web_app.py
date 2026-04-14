@@ -275,11 +275,6 @@ def save_high_score():
     completed_challenges = []
     if new_score > previous_score:
         label = scores.get(game, {}).get("label", game)
-        drain_service.add_notification(
-            current_username(),
-            f"New high score in {label}: {new_score}",
-            "game",
-        )
         drain_service.add_activity(
             current_username(),
             f"Beat {label} high score ({new_score})",
