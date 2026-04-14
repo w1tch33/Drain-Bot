@@ -477,6 +477,46 @@
     }
   }
 
+  function visitedListHtml(rows) {
+    if (!rows || !rows.length) {
+      return '<div class="profile-copy">No visited drains yet.</div>';
+    }
+    return `
+      <div class="profile-section">
+        <div class="profile-heading">Visited Drains</div>
+        <div class="profile-list">
+          ${rows
+            .map(
+              (row) => `
+                <button class="retro-button result-item visited-open" type="button" data-name="${escapeHtml(row.name)}">
+                  <span class="result-line">${escapeHtml(row.name)} (${Number(row.distance_km).toFixed(1)} km)</span>
+                </button>
+              `
+            )
+            .join("")}
+        </div>
+      </div>
+    `;
+  }
+
+  async function openVisitedDrains() {
+    setLoading(true);
+    try {
+      const rows = await fetchJson("/api/visited");
+      openModal("Drains Completed", visitedListHtml(rows));
+      modalBody.querySelectorAll(".visited-open").forEach((button) => {
+        bindPress(button, async () => {
+          const targetName = button.dataset.name;
+          await openDrain(targetName);
+        });
+      });
+    } catch (error) {
+      drawMessage(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   function highScoreEntries(highScores) {
     return Object.values(highScores || {})
       .sort((left, right) => left.label.localeCompare(right.label))
@@ -938,7 +978,20 @@
       )
       .join("");
 
-    const features = ["Junction", "Split", "Slide", "Grille Room", "Chamber", "Waterfall", "Side-Pipe"];
+    const features = [
+      "Junction",
+      "Split",
+      "Slide",
+      "Grille Room",
+      "Chamber",
+      "Waterfall",
+      "Side-Pipe",
+      "Size Change",
+      "Steps",
+      "Overflow",
+      "Redbrick",
+      "Bluestone",
+    ];
     const showDelete = drain.source === "custom" || drain.source === "synced";
 
     return `
@@ -2740,6 +2793,7 @@
   if (qs("#activityButton")) qs("#activityButton").addEventListener("click", openActivity);
   qs("#addDrainButton").addEventListener("click", openAddDrain);
   qs("#profileButton").addEventListener("click", openProfile);
+  if (visitedCount) visitedCount.addEventListener("click", openVisitedDrains);
   if (qs("#syncMapButton")) qs("#syncMapButton").addEventListener("click", syncMap);
   qs("#miniGamesButton").addEventListener("click", openGames);
   qs("#closeModal").addEventListener("click", closeModal);

@@ -217,6 +217,12 @@ def stats():
     return jsonify(drain_service.stats_summary(current_username()))
 
 
+@app.get("/api/visited")
+@login_required
+def visited():
+    return jsonify(drain_service.visited_results(current_username()))
+
+
 @app.get("/api/profile")
 @login_required
 def profile():

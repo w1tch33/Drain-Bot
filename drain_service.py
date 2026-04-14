@@ -2021,5 +2021,11 @@ def search_results(username: str | None, query: str, only_unvisited: bool = Fals
     return result_rows(top)
 
 
+def visited_results(username: str | None) -> list[dict[str, Any]]:
+    visited = [drain for drain in get_all_drains(username) if bool(drain.get("visited"))]
+    visited.sort(key=lambda item: str(item.get("name", "")).casefold())
+    return result_rows(visited)
+
+
 def google_earth_url(lat: float, lon: float, name: str) -> str:
     return f"https://earth.google.com/web/search/{lat},{lon}"
