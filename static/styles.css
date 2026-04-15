@@ -1522,7 +1522,8 @@ html[data-theme="special-chaos"] .desktop::after {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  transform: translateY(-4px);
+  margin: 0 auto;
+  transform: translateY(-1px);
 }
 .map-pin-marker {
   width: 18px;
