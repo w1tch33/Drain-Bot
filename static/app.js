@@ -542,7 +542,6 @@
               <span>${rows.length} drains</span>
               <button class="retro-button" id="mapLocateButton" type="button">My Location</button>
               <button class="retro-button" id="mapStyleToggleButton" type="button">Satellite</button>
-              <button class="retro-button" id="map3dButton" type="button">3D Earth</button>
             </div>
             <div class="map-view" id="drainMapView"></div>
             <div class="profile-copy" id="mapStatusText"></div>
@@ -558,7 +557,6 @@
       if (!mapEl) return;
       const locateButton = modalBody.querySelector("#mapLocateButton");
       const styleButton = modalBody.querySelector("#mapStyleToggleButton");
-      const map3dButton = modalBody.querySelector("#map3dButton");
       const mapStatus = modalBody.querySelector("#mapStatusText");
 
       const map = L.map(mapEl, { zoomControl: true, preferCanvas: true });
@@ -572,18 +570,23 @@
       });
       let usingSatellite = false;
       streetLayer.addTo(map);
+      map.setView([-37.8136, 144.9631], 11);
 
       const markers = [];
       const markerByName = new Map();
       rows.forEach((row) => {
         if (!Number.isFinite(row.lat) || !Number.isFinite(row.lon)) return;
-        const marker = L.circleMarker([row.lat, row.lon], {
-          radius: row.visited ? 6 : 5,
-          color: "#000",
-          weight: 1,
-          fillOpacity: 0.95,
-          fillColor: row.visited ? "#2e7d32" : "#c62828",
+        const markerIcon = L.divIcon({
+          className: "map-pin-wrap",
+          html: `
+            <div class="map-pin-label">${escapeHtml(row.name)}</div>
+            <div class="map-pin-marker ${row.visited ? "visited" : "unvisited"}"></div>
+          `,
+          iconSize: [160, 54],
+          iconAnchor: [80, 50],
+          popupAnchor: [0, -42],
         });
+        const marker = L.marker([row.lat, row.lon], { icon: markerIcon });
         marker.bindPopup(mapPopupHtml(row));
         marker.addTo(map);
         markerByName.set(String(row.name || ""), marker);
@@ -597,18 +600,11 @@
         markers.push(marker);
       });
 
-      if (markers.length) {
-        const group = L.featureGroup(markers);
-        map.fitBounds(group.getBounds().pad(0.12));
-      } else {
-        map.setView([-37.8136, 144.9631], 10);
-      }
-
       if (focusDrainName) {
         const targetMarker = markerByName.get(String(focusDrainName));
         if (targetMarker) {
           const latLng = targetMarker.getLatLng();
-          map.setView(latLng, Math.max(map.getZoom(), 15));
+          map.setView(latLng, 15);
           setTimeout(() => targetMarker.openPopup(), 80);
         }
       }
@@ -661,14 +657,6 @@
             },
             { enableHighAccuracy: true, timeout: 9000, maximumAge: 120000 }
           );
-        });
-      }
-
-      if (map3dButton) {
-        bindPress(map3dButton, () => {
-          const center = map.getCenter();
-          const earthUrl = `https://earth.google.com/web/search/${center.lat},${center.lng}`;
-          window.open(earthUrl, "_blank", "noopener");
         });
       }
 
