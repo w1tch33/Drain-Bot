@@ -2840,13 +2840,13 @@ html[data-theme="blood-red"] body {
   background:
     linear-gradient(180deg, rgba(20, 0, 0, 0.14), rgba(10, 0, 0, 0.3)),
     url("/static/themes/blood-moon-assets/Background.png") center center / cover no-repeat,
-    #130003;
+    #130003 !important;
 }
 html[data-theme="blood-red"] body::before {
   inset: 0;
   opacity: 0.96;
   background:
-    url("/static/themes/blood-moon-assets/Frame.png") center center / cover no-repeat;
+    url("/static/themes/blood-moon-assets/Frame.png") center center / cover no-repeat !important;
 }
 html[data-theme="blood-red"] body::after {
   opacity: 0.14;
