@@ -563,7 +563,7 @@
       const labelsButton = modalBody.querySelector("#mapLabelsToggleButton");
       const mapStatus = modalBody.querySelector("#mapStatusText");
 
-      const map = L.map(mapEl, { zoomControl: true, preferCanvas: true });
+      const map = L.map(mapEl, { zoomControl: true, preferCanvas: true, maxZoom: 22 });
       const streetLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         maxNativeZoom: 19,
@@ -571,13 +571,13 @@
         attribution: "&copy; OpenStreetMap",
       });
       const satelliteLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-        maxZoom: 19,
+        maxZoom: 22,
         maxNativeZoom: 19,
         detectRetina: true,
         attribution: "Tiles &copy; Esri",
       });
       const labelsLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png", {
-        maxZoom: 20,
+        maxZoom: 22,
         detectRetina: true,
         subdomains: "abcd",
         attribution: "&copy; OpenStreetMap &copy; CARTO",
