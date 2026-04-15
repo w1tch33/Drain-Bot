@@ -1030,6 +1030,59 @@ html[data-theme="dr41n"] .title-shell {
   box-shadow: 0 0 0 1px rgba(199, 187, 157, 0.24), 0 0 0 3px rgba(34, 33, 30, 0.86), var(--window-inset), var(--window-drop);
 }
 
+html[data-theme="dr41n"] .retro-window,
+html[data-theme="dr41n"] .speech-bubble,
+html[data-theme="dr41n"] .title-shell {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.34'/%3E%3C/svg%3E"),
+    radial-gradient(circle at 14% 18%, rgba(255, 248, 226, 0.15), transparent 30%),
+    radial-gradient(circle at 78% 76%, rgba(15, 14, 12, 0.22), transparent 36%),
+    radial-gradient(circle at 48% 52%, rgba(0, 0, 0, 0.14), transparent 44%),
+    repeating-linear-gradient(42deg, rgba(255, 252, 238, 0.05) 0 1px, rgba(0, 0, 0, 0.06) 1px 4px),
+    linear-gradient(162deg, rgba(224, 213, 186, 0.2), rgba(28, 26, 24, 0.32)),
+    var(--window-fill);
+  background-size: 200px 200px, auto, auto, auto, 8px 8px, auto, auto;
+  background-blend-mode: overlay, screen, multiply, multiply, soft-light, normal, normal;
+}
+
+html[data-theme="dr41n"] .window-body {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='210' height='210' viewBox='0 0 210 210'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.86' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='210' height='210' filter='url(%23n)' opacity='0.32'/%3E%3C/svg%3E"),
+    radial-gradient(circle at 20% 16%, rgba(251, 244, 225, 0.1), transparent 32%),
+    radial-gradient(circle at 76% 78%, rgba(12, 11, 10, 0.18), transparent 34%),
+    repeating-linear-gradient(-38deg, rgba(255, 249, 231, 0.04) 0 1px, rgba(0, 0, 0, 0.04) 1px 5px),
+    linear-gradient(180deg, rgba(255, 251, 236, 0.08), rgba(22, 21, 20, 0.18)),
+    rgba(84, 82, 75, 0.36);
+  background-size: 190px 190px, auto, auto, 9px 9px, auto, auto;
+  background-blend-mode: overlay, screen, multiply, soft-light, normal, normal;
+}
+
+html[data-theme="dr41n"] .retro-button,
+html[data-theme="dr41n"] .session-button,
+html[data-theme="dr41n"] .session-user {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.34'/%3E%3C/svg%3E"),
+    radial-gradient(circle at 18% 20%, rgba(252, 245, 226, 0.14), transparent 35%),
+    radial-gradient(circle at 84% 80%, rgba(14, 13, 12, 0.24), transparent 38%),
+    repeating-linear-gradient(35deg, rgba(255, 249, 230, 0.06) 0 1px, rgba(0, 0, 0, 0.06) 1px 4px),
+    linear-gradient(180deg, rgba(96, 93, 84, 0.92), rgba(44, 43, 39, 0.96)),
+    var(--button-face);
+  background-size: 130px 130px, auto, auto, 7px 7px, auto, auto;
+  background-blend-mode: overlay, screen, multiply, soft-light, normal, normal;
+}
+
+html[data-theme="dr41n"] .retro-input,
+html[data-theme="dr41n"] .theme-select,
+html[data-theme="dr41n"] .search-input {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.05' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23n)' opacity='0.28'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(37deg, rgba(255, 247, 220, 0.04) 0 1px, rgba(0, 0, 0, 0.05) 1px 4px),
+    radial-gradient(circle at 16% 20%, rgba(243, 232, 202, 0.12), transparent 30%),
+    rgba(25, 24, 21, 0.84);
+  background-size: 120px 120px, 8px 8px, auto, auto;
+  background-blend-mode: overlay, soft-light, screen, normal;
+}
+
 .flash-stack {
   position: fixed;
   top: 10px;
