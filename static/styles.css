@@ -2841,8 +2841,9 @@ html[data-theme="dr41n"] .results-window::after {
 
 html[data-theme="camcorder-vhs"] body {
   background:
+    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0 1px, rgba(0, 0, 0, 0.06) 1px 3px),
+    radial-gradient(circle at 50% 32%, rgba(176, 166, 206, 0.18), transparent 58%),
     linear-gradient(180deg, rgba(10, 7, 11, 0.34), rgba(6, 5, 8, 0.5)),
-    url("/static/themes/reference%20pics/VHS%20Ghost%20Reference.webp") center center / cover no-repeat,
     #100d15;
 }
 html[data-theme="camcorder-vhs"] body::before {
@@ -2857,8 +2858,8 @@ html[data-theme="camcorder-vhs"] body::after {
 
 html[data-theme="icy-blue"] body {
   background:
+    radial-gradient(circle at 52% 36%, rgba(215, 243, 255, 0.26), transparent 60%),
     linear-gradient(180deg, rgba(9, 23, 37, 0.18), rgba(6, 16, 28, 0.3)),
-    url("/static/themes/reference%20pics/Frostbyte%20Reference.webp") center center / cover no-repeat,
     #091f34;
 }
 html[data-theme="icy-blue"] body::before {
