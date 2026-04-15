@@ -2839,7 +2839,7 @@ html[data-theme="icy-blue"] body::after {
 html[data-theme="blood-red"] body {
   background:
     linear-gradient(180deg, rgba(20, 0, 0, 0.14), rgba(10, 0, 0, 0.3)),
-    url("/static/themes/blood-moon-assets/Background.png") center center / cover no-repeat,
+    url("/static/themes/blood-moon-assets/Background.webp") center center / cover no-repeat,
     #130003 !important;
 }
 html[data-theme="blood-red"] body::before {
@@ -2872,7 +2872,7 @@ html[data-theme="blood-red"] .desktop::before {
   pointer-events: none;
   z-index: 30;
   opacity: 0.98;
-  background: url("/static/themes/blood-moon-assets/Frame.png") center center / 100% 100% no-repeat !important;
+  background: url("/static/themes/blood-moon-assets/Frame.webp") center center / 100% 100% no-repeat !important;
 }
 
 @media (max-width: 980px) {
