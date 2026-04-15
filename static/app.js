@@ -1032,7 +1032,7 @@
             `<button class="retro-button rating-button ${Number(drain.rating) === rating ? "active" : ""}" type="button" data-value="${rating}">${rating}</button>`
         )
         .join("")}</div></div>
-      <div class="detail-section"><div class="photo-grid">${photos}</div><form id="photoUploadForm" enctype="multipart/form-data"><input class="retro-input" type="file" name="photo" accept="image/*"><button class="retro-button" type="submit">Add Photo</button></form></div>
+      <div class="detail-section"><div class="photo-grid">${photos}</div><form id="photoUploadForm" enctype="multipart/form-data"><input class="retro-input" id="photoUploadInput" type="file" name="photo" accept="image/*" multiple><button class="retro-button" type="submit">Add Photos</button></form></div>
       <div class="detail-section"><button class="retro-button" type="button" id="saveDrainButton">Save</button><div class="profile-copy" id="drainSaveStatus"></div></div>
     `;
   }
@@ -1162,16 +1162,18 @@
       const draft = captureDraft();
       setLoading(true);
       try {
-        const uploadFormData = new FormData(event.currentTarget);
-        const sourceFile = uploadFormData.get("photo");
-        if (!(sourceFile instanceof File) || !sourceFile.name) {
-          showPopupMessage("Choose a photo first.", true);
+        const input = modalBody.querySelector("#photoUploadInput");
+        const files = Array.from(input?.files || []);
+        if (!files.length) {
+          showPopupMessage("Choose at least one photo first.", true);
           return;
         }
-        const compressed = await compressImageUpload(sourceFile);
         const sendForm = new FormData();
-        if (compressed) sendForm.append("photo", compressed.file, compressed.name);
-        else sendForm.append("photo", sourceFile);
+        for (const sourceFile of files) {
+          const compressed = await compressImageUpload(sourceFile);
+          if (compressed) sendForm.append("photo", compressed.file, compressed.name);
+          else sendForm.append("photo", sourceFile);
+        }
         await fetchJson(`/api/drains/${encodeURIComponent(name)}/photos`, {
           method: "POST",
           body: sendForm,

@@ -544,27 +544,32 @@ def upload_photo(name: str):
     if not drain_service.get_drain(name, username):
         return jsonify({"error": "Drain not found."}), 404
 
-    file = request.files.get("photo")
-    if not file or not file.filename:
-        return jsonify({"error": "Choose a photo first."}), 400
+    files = [file for file in request.files.getlist("photo") if file and file.filename]
+    if not files:
+        return jsonify({"error": "Choose at least one photo first."}), 400
 
     drain_service.ensure_user_dirs(username)
-    filename = secure_filename(file.filename)
-    root, ext = os.path.splitext(filename)
-    counter = 1
-    final_name = filename
     upload_dir = drain_service.user_upload_dir(username)
-    absolute_path = os.path.join(upload_dir, final_name)
-    while os.path.exists(absolute_path):
-        final_name = f"{root}-{counter}{ext}"
+    added = 0
+    for file in files:
+        filename = secure_filename(file.filename)
+        root, ext = os.path.splitext(filename)
+        counter = 1
+        final_name = filename
         absolute_path = os.path.join(upload_dir, final_name)
-        counter += 1
-
-    file.save(absolute_path)
-    relative_path = f"uploads/{drain_service.normalize_username(username)}/{final_name}"
-    drain_service.add_uploaded_photo(name, username, relative_path)
-    drain_service.add_activity(username, f"Uploaded a photo to {name}", "photo")
-    return jsonify({"ok": True, "photos": drain_service.list_photos(name, username)})
+        while os.path.exists(absolute_path):
+            final_name = f"{root}-{counter}{ext}"
+            absolute_path = os.path.join(upload_dir, final_name)
+            counter += 1
+        file.save(absolute_path)
+        relative_path = f"uploads/{drain_service.normalize_username(username)}/{final_name}"
+        drain_service.add_uploaded_photo(name, username, relative_path)
+        added += 1
+    if added == 1:
+        drain_service.add_activity(username, f"Uploaded a photo to {name}", "photo")
+    else:
+        drain_service.add_activity(username, f"Uploaded {added} photos to {name}", "photo")
+    return jsonify({"ok": True, "added": added, "photos": drain_service.list_photos(name, username)})
 
 
 @app.post("/api/drains/<path:name>/photos/delete")
