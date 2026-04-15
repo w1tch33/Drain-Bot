@@ -2810,7 +2810,7 @@ html[data-theme="blood-red"] .tutorial-button {
 html[data-theme="dr41n"] body {
   background:
     linear-gradient(180deg, rgba(14, 14, 12, 0.16), rgba(8, 8, 7, 0.26)),
-    url("/static/themes/dr41n-assets/Background.webp") center center / cover no-repeat,
+    url("/static/themes/Dr41n-assets/Background.webp") center center / cover no-repeat,
     var(--desktop-bg);
 }
 
@@ -2823,7 +2823,7 @@ html[data-theme="dr41n"] .desktop::before {
   pointer-events: none;
   z-index: 18;
   opacity: 0.84;
-  background: url("/static/themes/dr41n-assets/Dr41n%20Frame%20Overlay.webp") center center / 100% 100% no-repeat;
+  background: url("/static/themes/Dr41n-assets/Dr41n%20Frame%20Overlay.webp") center center / 100% 100% no-repeat;
 }
 
 html[data-theme="dr41n"] .results-window::after {
@@ -2836,7 +2836,7 @@ html[data-theme="dr41n"] .results-window::after {
   transform: translateX(-50%);
   pointer-events: none;
   z-index: 14;
-  background: url("/static/themes/dr41n-assets/Dr41n%20Foreground%20Mound.webp") center bottom / contain no-repeat;
+  background: url("/static/themes/Dr41n-assets/Dr41n%20Foreground%20Mound.webp") center bottom / contain no-repeat;
 }
 
 html[data-theme="camcorder-vhs"] body {

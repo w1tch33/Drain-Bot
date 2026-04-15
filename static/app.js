@@ -138,10 +138,10 @@
     dr41nBackground.fetchPriority = "high";
     dr41nBackground.decoding = "async";
     const referenceImages = [
-      "/static/themes/dr41n-assets/Background.webp",
-      "/static/themes/dr41n-assets/Dr41n%20Frame%20Overlay.webp",
-      "/static/themes/dr41n-assets/Dr41n%20Foreground%20Mound.webp",
-      "/static/themes/reference%20pics/Dr41n%20Reference.webp",
+      "/static/themes/Dr41n-assets/Background.webp",
+      "/static/themes/Dr41n-assets/Dr41n%20Frame%20Overlay.webp",
+      "/static/themes/Dr41n-assets/Dr41n%20Foreground%20Mound.webp",
+      "/static/themes/Dr41n-assets/Dr41n%20Reference.webp",
       "/static/themes/reference%20pics/VHS%20Ghost%20Reference.webp",
       "/static/themes/reference%20pics/Frostbyte%20Reference.webp",
       "/static/themes/blood-moon-assets/Blood%20Moon%20Reference.webp",
