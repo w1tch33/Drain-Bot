@@ -868,7 +868,6 @@ html[data-theme="special-chaos"] .desktop::after {
 html[data-theme="dr41n"] .retro-window,
 html[data-theme="dr41n"] .speech-bubble,
 html[data-theme="dr41n"] .title-shell {
-  position: relative;
   border-color: #272624;
   border-width: 3px;
   box-shadow: 0 0 0 1px rgba(197, 187, 163, 0.2), 0 0 0 3px rgba(33, 32, 29, 0.86), var(--window-inset), var(--window-drop);
@@ -884,31 +883,8 @@ html[data-theme="dr41n"] .desktop::before {
 }
 
 html[data-theme="dr41n"] .retro-window::before,
-html[data-theme="dr41n"] .speech-bubble::before,
 html[data-theme="dr41n"] .title-shell::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 10px 10px, #201f1b 0 2px, #8e8877 2px 4px, transparent 5px),
-    radial-gradient(circle at calc(100% - 10px) 10px, #201f1b 0 2px, #8e8877 2px 4px, transparent 5px),
-    radial-gradient(circle at 10px calc(100% - 10px), #201f1b 0 2px, #8e8877 2px 4px, transparent 5px),
-    radial-gradient(circle at calc(100% - 10px) calc(100% - 10px), #201f1b 0 2px, #8e8877 2px 4px, transparent 5px),
-    repeating-linear-gradient(0deg, rgba(255, 248, 219, 0.02) 0 1px, transparent 1px 3px);
-  opacity: 0.86;
-}
-
-html[data-theme="dr41n"] .speech-bubble::before {
-  left: -13px;
-  top: 13px;
-  inset: auto;
-  width: 0;
-  height: 0;
-  border-top: 10px solid transparent;
-  border-bottom: 10px solid transparent;
-  border-right: 13px solid #272624;
-  background: none;
+  content: none;
 }
 
 html[data-theme="dr41n"] .speech-bubble {
