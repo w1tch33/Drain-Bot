@@ -701,6 +701,177 @@ html[data-theme="camcorder-vhs"] .desktop > .title-shell::after {
   animation: vhsTracking 1.6s linear infinite;
 }
 
+/* VHS Ghost fidelity pass: CRT bezel + curved glass + heavy VHS artifacts */
+html[data-theme="camcorder-vhs"] body {
+  background:
+    radial-gradient(circle at 50% 12%, rgba(230, 220, 230, 0.15), transparent 42%),
+    linear-gradient(180deg, #211d24 0%, #16151c 46%, #131219 100%);
+}
+
+html[data-theme="camcorder-vhs"] body::before {
+  content: "";
+  position: fixed;
+  inset: 10px;
+  border-radius: 34px;
+  pointer-events: none;
+  z-index: 28;
+  background:
+    radial-gradient(140% 130% at 50% -16%, rgba(255, 255, 255, 0.22), transparent 42%),
+    radial-gradient(120% 100% at 50% 120%, rgba(0, 0, 0, 0.46), transparent 56%),
+    linear-gradient(135deg, rgba(164, 154, 161, 0.3), rgba(30, 27, 36, 0.38) 48%, rgba(140, 130, 138, 0.22) 100%);
+  box-shadow:
+    inset 0 0 0 8px #58525b,
+    inset 0 0 0 22px #2a262e,
+    inset 0 0 0 36px #13121a,
+    inset 0 0 40px rgba(0, 0, 0, 0.68),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+html[data-theme="camcorder-vhs"] body::after {
+  content: "";
+  position: fixed;
+  inset: 44px 56px 92px 56px;
+  border-radius: 24px;
+  pointer-events: none;
+  z-index: 27;
+  opacity: 0.88;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.11) 0 1px, rgba(0, 0, 0, 0.15) 1px 4px),
+    linear-gradient(90deg, rgba(255, 30, 124, 0.12), transparent 18%, transparent 82%, rgba(40, 206, 255, 0.14)),
+    radial-gradient(130% 95% at 50% 8%, rgba(255, 244, 252, 0.2), transparent 55%),
+    radial-gradient(130% 95% at 50% 118%, rgba(0, 0, 0, 0.54), transparent 52%);
+  mix-blend-mode: screen;
+  animation: vhsFlicker 120ms steps(2, end) infinite;
+}
+
+html[data-theme="camcorder-vhs"] .desktop {
+  filter: contrast(1.1) saturate(0.76) sepia(0.18) hue-rotate(6deg);
+  animation: bootIn 460ms ease-out;
+}
+
+html[data-theme="camcorder-vhs"] .desktop::before {
+  content: "REC  SP  00:13:27  JAN 11 2019";
+  position: absolute;
+  left: 18px;
+  top: 10px;
+  width: auto;
+  height: auto;
+  border: none;
+  background: transparent;
+  color: #f2d8e8;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-shadow: 1px 0 rgba(255, 74, 162, 0.45), -1px 0 rgba(74, 206, 255, 0.45);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+html[data-theme="camcorder-vhs"] .desktop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.08) 0 1px, rgba(0, 0, 0, 0.1) 1px 3px),
+    radial-gradient(circle at 12% 94%, rgba(255, 75, 133, 0.2), transparent 20%),
+    radial-gradient(circle at 82% 94%, rgba(45, 196, 255, 0.2), transparent 20%),
+    radial-gradient(circle at 50% 50%, transparent 62%, rgba(0, 0, 0, 0.45) 100%);
+  opacity: 0.62;
+  mix-blend-mode: screen;
+}
+
+html[data-theme="camcorder-vhs"] .desktop .credit::before {
+  content: "AUTO  Hi8  TRACKING";
+  position: absolute;
+  right: calc(100% + 14px);
+  top: -2px;
+  color: rgba(255, 226, 244, 0.86);
+  font-size: 10px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  text-shadow: 0 0 4px rgba(255, 161, 214, 0.7);
+}
+
+html[data-theme="camcorder-vhs"] .retro-window,
+html[data-theme="camcorder-vhs"] .title-shell,
+html[data-theme="camcorder-vhs"] .speech-bubble {
+  border-color: #dfd8d0;
+  border-width: 3px;
+  background:
+    radial-gradient(circle at 16% 18%, rgba(255, 255, 255, 0.12), transparent 28%),
+    repeating-linear-gradient(34deg, rgba(255, 255, 255, 0.04) 0 1px, rgba(0, 0, 0, 0.05) 1px 4px),
+    linear-gradient(180deg, rgba(104, 95, 109, 0.84), rgba(53, 48, 58, 0.92));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 240, 245, 0.28),
+    inset 0 0 18px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(25, 19, 28, 0.68),
+    0 0 12px rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme="camcorder-vhs"] .window-title > span,
+html[data-theme="camcorder-vhs"] .title-pill {
+  border-color: #2a2730;
+  color: #ece7dd;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0 2px, rgba(0, 0, 0, 0.08) 2px 4px),
+    linear-gradient(180deg, rgba(84, 78, 87, 0.94), rgba(39, 35, 43, 0.98));
+  text-shadow: 0 0 3px rgba(162, 255, 179, 0.28);
+}
+
+html[data-theme="camcorder-vhs"] .title-pill {
+  color: #c9f3bd;
+}
+
+html[data-theme="camcorder-vhs"] .retro-button,
+html[data-theme="camcorder-vhs"] .session-button,
+html[data-theme="camcorder-vhs"] .session-user {
+  border-color: #1f1c25;
+  border-top-color: #8c8392;
+  border-left-color: #8c8392;
+  border-right-color: #17151d;
+  border-bottom-color: #17151d;
+  color: #ebe5d7;
+  background:
+    radial-gradient(circle at 22% 22%, rgba(255, 255, 255, 0.11), transparent 36%),
+    repeating-linear-gradient(35deg, rgba(255, 255, 255, 0.04) 0 1px, rgba(0, 0, 0, 0.05) 1px 5px),
+    linear-gradient(180deg, rgba(94, 87, 100, 0.92), rgba(46, 41, 52, 0.96));
+  box-shadow: inset 0 0 0 1px rgba(241, 228, 239, 0.2), 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme="camcorder-vhs"] .session-controls .session-button:first-child {
+  box-shadow: inset 0 0 0 1px rgba(255, 144, 144, 0.34), 0 0 8px rgba(120, 26, 35, 0.44);
+}
+
+html[data-theme="camcorder-vhs"] #notificationsButton {
+  box-shadow: inset 0 0 0 1px rgba(179, 241, 190, 0.34), 0 0 8px rgba(42, 94, 58, 0.36);
+}
+
+html[data-theme="camcorder-vhs"] #activityButton {
+  box-shadow: inset 0 0 0 1px rgba(154, 194, 255, 0.34), 0 0 8px rgba(42, 66, 94, 0.36);
+}
+
+html[data-theme="camcorder-vhs"] .retro-input,
+html[data-theme="camcorder-vhs"] .theme-select,
+html[data-theme="camcorder-vhs"] .search-input {
+  border-color: #cbc3b6;
+  border-top-color: #f0e9dd;
+  border-left-color: #f0e9dd;
+  border-right-color: #5e5764;
+  border-bottom-color: #5e5764;
+  background:
+    repeating-linear-gradient(36deg, rgba(255, 255, 255, 0.03) 0 1px, rgba(0, 0, 0, 0.03) 1px 5px),
+    rgba(240, 233, 223, 0.88);
+  color: #232028;
+}
+
+html[data-theme="camcorder-vhs"] .volume-range::-webkit-slider-runnable-track {
+  background: linear-gradient(90deg, #ff4a4a, #ff9d42, #ffee57, #5ff27f, #5fc7ff, #8a74ff, #ff64d8);
+}
+
+html[data-theme="camcorder-vhs"] .volume-range::-moz-range-track {
+  background: linear-gradient(90deg, #ff4a4a, #ff9d42, #ffee57, #5ff27f, #5fc7ff, #8a74ff, #ff64d8);
+}
+
 html[data-theme="crt-green"] body::after {
   content: "";
   position: fixed;

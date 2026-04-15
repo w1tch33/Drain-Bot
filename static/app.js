@@ -103,7 +103,9 @@
       desktop.style.transform = "none";
       return;
     }
-    const scale = Math.min(window.innerWidth / BASE_WIDTH, window.innerHeight / BASE_HEIGHT, 1);
+    const activeTheme = document.documentElement.getAttribute("data-theme") || "mac-system-1";
+    const themeScale = activeTheme === "camcorder-vhs" ? 0.95 : 1;
+    const scale = Math.min(window.innerWidth / BASE_WIDTH, window.innerHeight / BASE_HEIGHT, 1) * themeScale;
     desktop.style.transform = `scale(${scale})`;
   }
 
@@ -123,6 +125,7 @@
     } catch (_error) {
       // Ignore storage failures (private mode, blocked storage).
     }
+    fitDesktop();
   }
 
   function setupThemes() {
