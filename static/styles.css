@@ -1483,6 +1483,10 @@ html[data-theme="special-chaos"] .desktop::after {
   gap: 6px;
   align-items: center;
 }
+.map-toolbar .retro-button {
+  min-height: 30px;
+  padding: 4px 8px;
+}
 .map-dot {
   width: 12px;
   height: 12px;
@@ -1806,6 +1810,7 @@ html[data-theme="special-chaos"] .desktop::after {
   }
   .game-controls-row { gap: 6px; }
   .map-view { height: min(58vh, 420px); }
+  .map-toolbar .retro-button { min-height: 34px; }
   .themes-wrap {
     position: static;
     width: auto;

@@ -540,8 +540,12 @@
               <span><span class="map-dot visited"></span>Visited</span>
               <span><span class="map-dot unvisited"></span>Unvisited</span>
               <span>${rows.length} drains</span>
+              <button class="retro-button" id="mapLocateButton" type="button">My Location</button>
+              <button class="retro-button" id="mapStyleToggleButton" type="button">Satellite</button>
+              <button class="retro-button" id="map3dButton" type="button">3D Earth</button>
             </div>
             <div class="map-view" id="drainMapView"></div>
+            <div class="profile-copy" id="mapStatusText"></div>
           </div>
         `
       );
@@ -552,12 +556,22 @@
       }
       const mapEl = modalBody.querySelector("#drainMapView");
       if (!mapEl) return;
+      const locateButton = modalBody.querySelector("#mapLocateButton");
+      const styleButton = modalBody.querySelector("#mapStyleToggleButton");
+      const map3dButton = modalBody.querySelector("#map3dButton");
+      const mapStatus = modalBody.querySelector("#mapStatusText");
 
       const map = L.map(mapEl, { zoomControl: true, preferCanvas: true });
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      const streetLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         attribution: "&copy; OpenStreetMap",
-      }).addTo(map);
+      });
+      const satelliteLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+        maxZoom: 19,
+        attribution: "Tiles &copy; Esri",
+      });
+      let usingSatellite = false;
+      streetLayer.addTo(map);
 
       const markers = [];
       rows.forEach((row) => {
@@ -587,6 +601,66 @@
       } else {
         map.setView([-37.8136, 144.9631], 10);
       }
+
+      if (styleButton) {
+        bindPress(styleButton, () => {
+          usingSatellite = !usingSatellite;
+          if (usingSatellite) {
+            if (map.hasLayer(streetLayer)) map.removeLayer(streetLayer);
+            satelliteLayer.addTo(map);
+            styleButton.textContent = "Street";
+            if (mapStatus) mapStatus.textContent = "Satellite view on.";
+          } else {
+            if (map.hasLayer(satelliteLayer)) map.removeLayer(satelliteLayer);
+            streetLayer.addTo(map);
+            styleButton.textContent = "Satellite";
+            if (mapStatus) mapStatus.textContent = "Street map view on.";
+          }
+        });
+      }
+
+      let locationMarker = null;
+      if (locateButton) {
+        bindPress(locateButton, () => {
+          if (!navigator.geolocation) {
+            if (mapStatus) mapStatus.textContent = "Location not supported on this device/browser.";
+            return;
+          }
+          if (mapStatus) mapStatus.textContent = "Finding your location...";
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const lat = position.coords.latitude;
+              const lon = position.coords.longitude;
+              map.flyTo([lat, lon], Math.max(map.getZoom(), 14));
+              if (locationMarker) {
+                locationMarker.setLatLng([lat, lon]);
+              } else {
+                locationMarker = L.circleMarker([lat, lon], {
+                  radius: 7,
+                  color: "#0d47a1",
+                  weight: 2,
+                  fillColor: "#42a5f5",
+                  fillOpacity: 0.95,
+                }).addTo(map);
+              }
+              if (mapStatus) mapStatus.textContent = "Centered on your location.";
+            },
+            () => {
+              if (mapStatus) mapStatus.textContent = "Couldn't access your location.";
+            },
+            { enableHighAccuracy: true, timeout: 9000, maximumAge: 120000 }
+          );
+        });
+      }
+
+      if (map3dButton) {
+        bindPress(map3dButton, () => {
+          const center = map.getCenter();
+          const earthUrl = `https://earth.google.com/web/search/${center.lat},${center.lng}`;
+          window.open(earthUrl, "_blank", "noopener");
+        });
+      }
+
       setTimeout(() => map.invalidateSize(), 40);
       state.mapCleanup = () => {
         map.remove();
