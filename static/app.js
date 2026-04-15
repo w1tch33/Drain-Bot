@@ -133,6 +133,10 @@
     castleImage.src = "/static/themes/blood-moon-castle.webp";
     castleImage.fetchPriority = "high";
     castleImage.decoding = "async";
+    const dr41nBackground = new Image();
+    dr41nBackground.src = "/static/themes/Drain_Theme_Background.png?v=20260415b";
+    dr41nBackground.fetchPriority = "high";
+    dr41nBackground.decoding = "async";
     let storedTheme = "mac-system-1";
     try {
       storedTheme = localStorage.getItem(THEME_STORAGE_KEY) || "mac-system-1";

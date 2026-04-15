@@ -2,6 +2,7 @@
 {% block title %}DrainTool Desktop Web{% endblock %}
 {% block head %}
   {{ super() }}
+  <link rel="preload" as="image" href="{{ url_for('static', filename='themes/Drain_Theme_Background.png') }}">
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
