@@ -543,6 +543,7 @@
               <span>${rows.length} drains</span>
               <button class="retro-button" id="mapLocateButton" type="button">My Location</button>
               <button class="retro-button" id="mapStyleToggleButton" type="button">Satellite</button>
+              <button class="retro-button" id="mapLabelsToggleButton" type="button">Labels On</button>
             </div>
             <div class="map-view" id="drainMapView"></div>
             <div class="profile-copy" id="mapStatusText"></div>
@@ -558,19 +559,32 @@
       if (!mapEl) return;
       const locateButton = modalBody.querySelector("#mapLocateButton");
       const styleButton = modalBody.querySelector("#mapStyleToggleButton");
+      const labelsButton = modalBody.querySelector("#mapLabelsToggleButton");
       const mapStatus = modalBody.querySelector("#mapStatusText");
 
       const map = L.map(mapEl, { zoomControl: true, preferCanvas: true });
       const streetLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
+        maxNativeZoom: 19,
+        detectRetina: true,
         attribution: "&copy; OpenStreetMap",
       });
       const satelliteLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
         maxZoom: 19,
+        maxNativeZoom: 19,
+        detectRetina: true,
         attribution: "Tiles &copy; Esri",
       });
+      const labelsLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png", {
+        maxZoom: 20,
+        detectRetina: true,
+        subdomains: "abcd",
+        attribution: "&copy; OpenStreetMap &copy; CARTO",
+      });
       let usingSatellite = false;
+      let labelsEnabled = true;
       streetLayer.addTo(map);
+      labelsLayer.addTo(map);
       map.setView([-37.8136, 144.9631], 11);
 
       const markers = [];
@@ -623,6 +637,21 @@
             streetLayer.addTo(map);
             styleButton.textContent = "Satellite";
             if (mapStatus) mapStatus.textContent = "Street map view on.";
+          }
+        });
+      }
+
+      if (labelsButton) {
+        bindPress(labelsButton, () => {
+          labelsEnabled = !labelsEnabled;
+          if (labelsEnabled) {
+            labelsLayer.addTo(map);
+            labelsButton.textContent = "Labels On";
+            if (mapStatus) mapStatus.textContent = usingSatellite ? "Satellite + labels." : "Street + labels.";
+          } else {
+            if (map.hasLayer(labelsLayer)) map.removeLayer(labelsLayer);
+            labelsButton.textContent = "Labels Off";
+            if (mapStatus) mapStatus.textContent = usingSatellite ? "Satellite without labels." : "Street without labels.";
           }
         });
       }
