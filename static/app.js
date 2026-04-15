@@ -528,7 +528,7 @@
     `;
   }
 
-  async function openMapPanel() {
+  async function openMapPanel(focusDrainName = "") {
     setLoading(true);
     try {
       const rows = await fetchJson("/api/map-drains");
@@ -574,6 +574,7 @@
       streetLayer.addTo(map);
 
       const markers = [];
+      const markerByName = new Map();
       rows.forEach((row) => {
         if (!Number.isFinite(row.lat) || !Number.isFinite(row.lon)) return;
         const marker = L.circleMarker([row.lat, row.lon], {
@@ -585,6 +586,7 @@
         });
         marker.bindPopup(mapPopupHtml(row));
         marker.addTo(map);
+        markerByName.set(String(row.name || ""), marker);
         marker.on("popupopen", (event) => {
           const button = event.popup.getElement()?.querySelector(".map-open-drain");
           if (!button) return;
@@ -600,6 +602,15 @@
         map.fitBounds(group.getBounds().pad(0.12));
       } else {
         map.setView([-37.8136, 144.9631], 10);
+      }
+
+      if (focusDrainName) {
+        const targetMarker = markerByName.get(String(focusDrainName));
+        if (targetMarker) {
+          const latLng = targetMarker.getLatLng();
+          map.setView(latLng, Math.max(map.getZoom(), 15));
+          setTimeout(() => targetMarker.openPopup(), 80);
+        }
       }
 
       if (styleButton) {
@@ -1189,7 +1200,7 @@
       <div class="detail-section detail-actions">
         <button class="retro-button" type="button" id="nearbyButton">Nearby</button>
         <button class="retro-button" type="button" id="routeFromHereButton">Build Route</button>
-        <a class="retro-button" href="${escapeHtml(drain.maps_url)}" target="_blank" rel="noreferrer">Google Earth</a>
+        <button class="retro-button" type="button" id="showOnMapButton">Show On Map</button>
         ${showDelete ? '<button class="retro-button" type="button" id="deleteDrainButton">Delete Drain</button>' : ""}
       </div>
       <div class="detail-section nearby-list" id="nearbyArea"></div>
@@ -1271,6 +1282,9 @@
     bindPress(modalBody.querySelector("#routeFromHereButton"), async () => {
       renderRoute(await fetchJson(`/api/drains/${encodeURIComponent(name)}/route`));
       closeModal();
+    });
+    bindPress(modalBody.querySelector("#showOnMapButton"), async () => {
+      await openMapPanel(name);
     });
     const deleteDrainButton = modalBody.querySelector("#deleteDrainButton");
     if (deleteDrainButton) {
