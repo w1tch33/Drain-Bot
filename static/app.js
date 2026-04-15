@@ -137,6 +137,18 @@
     dr41nBackground.src = "/static/themes/Drain_Theme_Background.png?v=20260415b";
     dr41nBackground.fetchPriority = "high";
     dr41nBackground.decoding = "async";
+    const referenceImages = [
+      "/static/themes/reference%20pics/Dr41n%20Reference.png",
+      "/static/themes/reference%20pics/VHS%20Ghost%20Reference.png",
+      "/static/themes/reference%20pics/Frostbyte%20Reference.png",
+      "/static/themes/reference%20pics/Blood%20Moon%20Reference.png",
+    ];
+    for (const src of referenceImages) {
+      const img = new Image();
+      img.src = src;
+      img.fetchPriority = "high";
+      img.decoding = "async";
+    }
     let storedTheme = "mac-system-1";
     try {
       storedTheme = localStorage.getItem(THEME_STORAGE_KEY) || "mac-system-1";
