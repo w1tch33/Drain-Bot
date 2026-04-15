@@ -364,15 +364,15 @@ html[data-theme="special-chaos"] body {
 
 html[data-theme="dr41n"] body {
   background:
-    linear-gradient(180deg, rgba(18, 18, 16, 0.3), rgba(14, 14, 12, 0.58)),
-    radial-gradient(circle at 50% 68%, rgba(245, 236, 213, 0.12), rgba(6, 7, 7, 0.64) 70%),
-    radial-gradient(circle at 22% 8%, rgba(255, 251, 230, 0.16), transparent 24%),
-    radial-gradient(circle at 81% 74%, rgba(196, 191, 178, 0.1), transparent 26%),
+    linear-gradient(180deg, rgba(18, 18, 16, 0.16), rgba(14, 14, 12, 0.3)),
+    radial-gradient(circle at 50% 66%, rgba(255, 247, 226, 0.2), rgba(7, 8, 7, 0.32) 72%),
+    radial-gradient(circle at 22% 8%, rgba(255, 251, 230, 0.26), transparent 28%),
+    radial-gradient(circle at 81% 74%, rgba(216, 208, 188, 0.15), transparent 30%),
     url("/static/themes/Drain_Theme_Background.png?v=20260415b"),
     var(--desktop-bg);
   background-position: 0 0, center center, 0 0, 0 0, center 56%, 0 0;
   background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
-  background-size: auto, auto, auto, auto, 114% auto, auto;
+  background-size: auto, auto, auto, auto, 110% auto, auto;
 }
 
 html[data-theme="dr41n"] body::before {
@@ -381,12 +381,12 @@ html[data-theme="dr41n"] body::before {
   inset: 0;
   pointer-events: none;
   z-index: 8;
-  opacity: 0.46;
+  opacity: 0.24;
   background:
-    radial-gradient(130% 82% at 50% 112%, rgba(232, 219, 188, 0.28) 0 30%, rgba(18, 18, 16, 0.02) 50%, transparent 68%),
-    radial-gradient(64% 112% at -6% 50%, rgba(0, 0, 0, 0.52), transparent 74%),
-    radial-gradient(64% 112% at 106% 50%, rgba(0, 0, 0, 0.5), transparent 74%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.16), transparent 18%, rgba(0, 0, 0, 0.28));
+    radial-gradient(130% 82% at 50% 112%, rgba(244, 233, 201, 0.3) 0 30%, rgba(18, 18, 16, 0.01) 50%, transparent 70%),
+    radial-gradient(64% 112% at -6% 50%, rgba(0, 0, 0, 0.28), transparent 76%),
+    radial-gradient(64% 112% at 106% 50%, rgba(0, 0, 0, 0.26), transparent 76%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.06), transparent 22%, rgba(0, 0, 0, 0.12));
 }
 
 html[data-theme="dr41n"] body::after {
@@ -395,12 +395,12 @@ html[data-theme="dr41n"] body::after {
   inset: 0;
   pointer-events: none;
   z-index: 9;
-  opacity: 0.38;
+  opacity: 0.2;
   background:
-    repeating-linear-gradient(0deg, rgba(255, 247, 223, 0.05) 0 1px, transparent 1px 5px),
-    radial-gradient(circle at 16% 92%, rgba(238, 224, 187, 0.22), transparent 24%),
-    radial-gradient(circle at 82% 92%, rgba(226, 213, 179, 0.2), transparent 22%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.18), transparent 14%, rgba(0, 0, 0, 0.24));
+    repeating-linear-gradient(0deg, rgba(255, 247, 223, 0.04) 0 1px, transparent 1px 6px),
+    radial-gradient(circle at 16% 92%, rgba(246, 231, 191, 0.24), transparent 26%),
+    radial-gradient(circle at 82% 92%, rgba(238, 224, 187, 0.22), transparent 24%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.08), transparent 16%, rgba(0, 0, 0, 0.12));
   mix-blend-mode: soft-light;
   animation: drainFlow 20s linear infinite;
 }
