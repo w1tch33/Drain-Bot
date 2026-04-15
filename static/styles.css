@@ -2810,7 +2810,7 @@ html[data-theme="blood-red"] .tutorial-button {
 html[data-theme="camcorder-vhs"] body {
   background:
     linear-gradient(180deg, rgba(10, 7, 11, 0.34), rgba(6, 5, 8, 0.5)),
-    url("/static/themes/reference%20pics/VHS%20Ghost%20Reference.png") center center / cover no-repeat,
+    url("/static/themes/reference%20pics/VHS%20Ghost%20Reference.webp") center center / cover no-repeat,
     #100d15;
 }
 html[data-theme="camcorder-vhs"] body::before {
@@ -2826,7 +2826,7 @@ html[data-theme="camcorder-vhs"] body::after {
 html[data-theme="icy-blue"] body {
   background:
     linear-gradient(180deg, rgba(9, 23, 37, 0.18), rgba(6, 16, 28, 0.3)),
-    url("/static/themes/reference%20pics/Frostbyte%20Reference.png") center center / cover no-repeat,
+    url("/static/themes/reference%20pics/Frostbyte%20Reference.webp") center center / cover no-repeat,
     #091f34;
 }
 html[data-theme="icy-blue"] body::before {
