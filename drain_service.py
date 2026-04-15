@@ -56,6 +56,10 @@ BASE_LAT = -37.7672
 BASE_LON = 145.1182
 
 _LOCK = threading.Lock()
+_CACHE_LOCK = threading.Lock()
+_METADATA_CACHE: dict[str, Any] = {"stamp": None, "value": {}}
+_USER_METADATA_CACHE: dict[str, tuple[float | None, dict[str, Any]]] = {}
+_KML_DRAINS_CACHE: dict[str, Any] = {"stamp": None, "value": []}
 
 
 def ensure_runtime_dirs() -> None:
@@ -235,15 +239,35 @@ def load_user_metadata(username: str | None) -> dict[str, Any]:
     path = user_metadata_path(username)
     if not os.path.exists(path):
         return {}
+    try:
+        stamp = os.path.getmtime(path)
+    except OSError:
+        return {}
+    with _CACHE_LOCK:
+        cached = _USER_METADATA_CACHE.get(path)
+        if cached and cached[0] == stamp:
+            return dict(cached[1])
     with open(path, "r", encoding="utf-8") as handle:
-        return json.load(handle)
+        loaded = json.load(handle)
+    if not isinstance(loaded, dict):
+        loaded = {}
+    with _CACHE_LOCK:
+        _USER_METADATA_CACHE[path] = (stamp, dict(loaded))
+    return loaded
 
 
 def save_user_metadata(username: str, data: dict[str, Any]) -> None:
     ensure_user_dirs(username)
+    path = user_metadata_path(username)
     with _LOCK:
-        with open(user_metadata_path(username), "w", encoding="utf-8") as handle:
+        with open(path, "w", encoding="utf-8") as handle:
             json.dump(data, handle, indent=2, ensure_ascii=False)
+    try:
+        stamp = os.path.getmtime(path)
+    except OSError:
+        stamp = None
+    with _CACHE_LOCK:
+        _USER_METADATA_CACHE[path] = (stamp, dict(data))
 
 
 NOTIFICATION_MAX = 120
@@ -1243,8 +1267,23 @@ def format_minutes(minutes: float) -> str:
 
 def load_metadata() -> dict[str, Any]:
     bootstrap_metadata_file()
+    try:
+        stamp = os.path.getmtime(DATA_FILE)
+    except OSError:
+        stamp = None
+    with _CACHE_LOCK:
+        if _METADATA_CACHE.get("stamp") == stamp:
+            cached = _METADATA_CACHE.get("value", {})
+            if isinstance(cached, dict):
+                return dict(cached)
     with open(DATA_FILE, "r", encoding="utf-8") as handle:
-        return json.load(handle)
+        loaded = json.load(handle)
+    if not isinstance(loaded, dict):
+        loaded = {}
+    with _CACHE_LOCK:
+        _METADATA_CACHE["stamp"] = stamp
+        _METADATA_CACHE["value"] = dict(loaded)
+    return loaded
 
 
 def save_metadata(data: dict[str, Any]) -> None:
@@ -1252,6 +1291,13 @@ def save_metadata(data: dict[str, Any]) -> None:
         ensure_runtime_dirs()
         with open(DATA_FILE, "w", encoding="utf-8") as handle:
             json.dump(data, handle, indent=2, ensure_ascii=False)
+    try:
+        stamp = os.path.getmtime(DATA_FILE)
+    except OSError:
+        stamp = None
+    with _CACHE_LOCK:
+        _METADATA_CACHE["stamp"] = stamp
+        _METADATA_CACHE["value"] = dict(data)
 
 
 def clean_description(description: str | None) -> str:
@@ -1295,10 +1341,22 @@ def _parse_kml_drains() -> list[dict[str, Any]]:
     bootstrap_kml_file()
     if not os.path.exists(KML_FILE):
         return []
+    try:
+        stamp = os.path.getmtime(KML_FILE)
+    except OSError:
+        stamp = None
+    with _CACHE_LOCK:
+        if _KML_DRAINS_CACHE.get("stamp") == stamp:
+            cached = _KML_DRAINS_CACHE.get("value", [])
+            return [dict(item) for item in cached]
 
     tree = ET.parse(KML_FILE)
     root = tree.getroot()
-    return _parse_kml_root(root)
+    drains = _parse_kml_root(root)
+    with _CACHE_LOCK:
+        _KML_DRAINS_CACHE["stamp"] = stamp
+        _KML_DRAINS_CACHE["value"] = [dict(item) for item in drains]
+    return drains
 
 
 def _parse_kml_root(root: ET.Element) -> list[dict[str, Any]]:
@@ -1522,9 +1580,8 @@ def _merge_metadata(base: dict[str, Any], item: dict[str, Any] | None) -> dict[s
     return merged
 
 
-def _apply_origin(drain: dict[str, Any], username: str | None) -> dict[str, Any]:
+def _apply_origin(drain: dict[str, Any], origin_lat: float, origin_lon: float) -> dict[str, Any]:
     merged = dict(drain)
-    origin_lat, origin_lon = get_user_origin(username)
     dist = distance_km(origin_lat, origin_lon, float(merged["lat"]), float(merged["lon"]))
     merged["distance_km"] = round(dist, 2)
     merged["drive_minutes"] = km_to_drive_minutes(dist)
@@ -1538,13 +1595,31 @@ def _source_rank(source: str) -> int:
 def get_all_drains(username: str | None = None) -> list[dict[str, Any]]:
     metadata = load_metadata()
     user_metadata = load_user_metadata(username)
+    origin = user_metadata.get("_origin", {}) if isinstance(user_metadata, dict) else {}
+    try:
+        origin_lat = float(origin.get("lat"))
+        origin_lon = float(origin.get("lon"))
+    except (TypeError, ValueError):
+        origin_lat, origin_lon = BASE_LAT, BASE_LON
+    if not username:
+        shared_map_enabled = True
+    elif isinstance(user_metadata, dict) and "_map_uploaded" in user_metadata:
+        shared_map_enabled = False
+    else:
+        account = load_accounts().get(normalize_username(username))
+        if not isinstance(account, dict):
+            shared_map_enabled = False
+        elif "map_uploaded" not in account:
+            shared_map_enabled = True
+        else:
+            shared_map_enabled = False
     combined: dict[str, dict[str, Any]] = {}
 
-    if include_shared_map(username):
+    if shared_map_enabled:
         for drain in _parse_kml_drains():
             combined[drain["name"]] = drain
 
-    if include_shared_map(username):
+    if shared_map_enabled:
         for drain in _custom_drains(metadata):
             combined[drain["name"]] = drain
 
@@ -1555,7 +1630,7 @@ def get_all_drains(username: str | None = None) -> list[dict[str, Any]]:
     for drain in combined.values():
         merged_item = _merge_metadata(drain, metadata.get(drain["name"]))
         merged_item = _merge_metadata(merged_item, user_metadata.get(drain["name"]))
-        merged_raw.append(_apply_origin(merged_item, username))
+        merged_raw.append(_apply_origin(merged_item, origin_lat, origin_lon))
 
     deduped_by_coords: dict[tuple[float, float], dict[str, Any]] = {}
     for drain in merged_raw:
