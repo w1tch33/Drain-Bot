@@ -872,8 +872,11 @@ html[data-theme="dr41n"] .title-shell {
   border-width: 3px;
   box-shadow: 0 0 0 1px rgba(197, 187, 163, 0.2), 0 0 0 3px rgba(33, 32, 29, 0.86), var(--window-inset), var(--window-drop);
   background:
-    linear-gradient(154deg, rgba(216, 206, 178, 0.15), rgba(21, 20, 19, 0.24)),
-    repeating-linear-gradient(45deg, rgba(255, 250, 234, 0.02) 0 2px, rgba(0, 0, 0, 0.03) 2px 6px),
+    radial-gradient(circle at 18% 14%, rgba(242, 236, 220, 0.1), transparent 26%),
+    radial-gradient(circle at 78% 76%, rgba(20, 19, 18, 0.14), transparent 30%),
+    repeating-linear-gradient(48deg, rgba(250, 244, 226, 0.04) 0 1px, rgba(0, 0, 0, 0.04) 1px 4px),
+    repeating-linear-gradient(-32deg, rgba(0, 0, 0, 0.03) 0 1px, transparent 1px 6px),
+    linear-gradient(154deg, rgba(216, 206, 178, 0.16), rgba(21, 20, 19, 0.28)),
     var(--window-fill);
   backdrop-filter: blur(0.9px) saturate(0.8);
 }
@@ -900,8 +903,11 @@ html[data-theme="dr41n"] .speech-bubble::after {
 
 html[data-theme="dr41n"] .window-body {
   background:
-    linear-gradient(180deg, rgba(255, 249, 227, 0.06), rgba(22, 21, 20, 0.12)),
-    repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.025) 0 2px, transparent 2px 6px),
+    radial-gradient(circle at 22% 18%, rgba(251, 243, 220, 0.08), transparent 28%),
+    radial-gradient(circle at 76% 80%, rgba(20, 18, 17, 0.14), transparent 30%),
+    repeating-linear-gradient(43deg, rgba(255, 248, 225, 0.03) 0 1px, rgba(0, 0, 0, 0.03) 1px 5px),
+    repeating-linear-gradient(-41deg, rgba(0, 0, 0, 0.02) 0 1px, transparent 1px 7px),
+    linear-gradient(180deg, rgba(255, 249, 227, 0.07), rgba(22, 21, 20, 0.15)),
     rgba(84, 82, 75, 0.36);
 }
 
@@ -910,7 +916,10 @@ html[data-theme="dr41n"] .title-pill {
   color: #ece5d2;
   border-color: #272624;
   background:
-    repeating-linear-gradient(90deg, rgba(255, 244, 214, 0.08) 0 2px, rgba(21, 20, 18, 0.1) 2px 4px),
+    radial-gradient(circle at 16% 24%, rgba(248, 241, 221, 0.14), transparent 24%),
+    radial-gradient(circle at 84% 82%, rgba(18, 17, 16, 0.2), transparent 30%),
+    repeating-linear-gradient(90deg, rgba(255, 244, 214, 0.08) 0 2px, rgba(21, 20, 18, 0.11) 2px 4px),
+    repeating-linear-gradient(36deg, rgba(0, 0, 0, 0.03) 0 1px, transparent 1px 6px),
     linear-gradient(180deg, rgba(103, 99, 90, 0.9), rgba(56, 54, 49, 0.95));
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.9);
   letter-spacing: 0.8px;
@@ -920,6 +929,9 @@ html[data-theme="dr41n"] .title-pill {
 html[data-theme="dr41n"] .retro-button {
   color: #e7e0cb;
   background:
+    radial-gradient(circle at 18% 24%, rgba(250, 244, 226, 0.14), transparent 30%),
+    radial-gradient(circle at 84% 76%, rgba(17, 16, 15, 0.22), transparent 36%),
+    repeating-linear-gradient(40deg, rgba(255, 249, 230, 0.04) 0 1px, rgba(0, 0, 0, 0.04) 1px 4px),
     linear-gradient(180deg, rgba(96, 93, 84, 0.92), rgba(44, 43, 39, 0.96)),
     var(--button-face);
   border: 2px solid #242320;
@@ -940,7 +952,10 @@ html[data-theme="dr41n"] .search-input {
   border-left-color: #b3ac98;
   border-right-color: #1d1c19;
   border-bottom-color: #1d1c19;
-  background: rgba(25, 24, 21, 0.84);
+  background:
+    radial-gradient(circle at 18% 28%, rgba(245, 236, 209, 0.08), transparent 26%),
+    repeating-linear-gradient(38deg, rgba(255, 247, 220, 0.03) 0 1px, rgba(0, 0, 0, 0.03) 1px 5px),
+    rgba(25, 24, 21, 0.84);
   box-shadow: 0 0 0 1px rgba(215, 201, 168, 0.15) inset;
 }
 
@@ -999,6 +1014,8 @@ html[data-theme="dr41n"] .session-user {
   color: #efe6cc;
   border-color: #201f1d;
   background:
+    radial-gradient(circle at 20% 24%, rgba(248, 240, 216, 0.12), transparent 32%),
+    repeating-linear-gradient(37deg, rgba(255, 247, 222, 0.03) 0 1px, rgba(0, 0, 0, 0.03) 1px 5px),
     linear-gradient(180deg, rgba(94, 90, 79, 0.96), rgba(47, 45, 40, 0.98)),
     var(--button-face);
   box-shadow: 0 0 0 1px rgba(194, 183, 153, 0.2) inset;
