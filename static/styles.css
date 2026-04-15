@@ -2807,19 +2807,6 @@ html[data-theme="blood-red"] .tutorial-button {
 }
 
 /* Reference-image lock overrides for theme matching */
-html[data-theme="dr41n"] body {
-  background:
-    linear-gradient(180deg, rgba(12, 12, 12, 0.18), rgba(8, 8, 8, 0.32)),
-    url("/static/themes/reference%20pics/Dr41n%20Reference.png") center center / cover no-repeat,
-    var(--desktop-bg);
-}
-html[data-theme="dr41n"] body::before {
-  opacity: 0.12;
-}
-html[data-theme="dr41n"] body::after {
-  opacity: 0.1;
-}
-
 html[data-theme="camcorder-vhs"] body {
   background:
     linear-gradient(180deg, rgba(10, 7, 11, 0.34), rgba(6, 5, 8, 0.5)),
