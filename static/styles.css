@@ -1480,6 +1480,124 @@ html[data-theme="dr41n"] .search-input {
   background-blend-mode: overlay, soft-light, screen, normal;
 }
 
+/* Frostbyte final match pass (style/vibe lock-in) */
+html[data-theme="icy-blue"] body {
+  background:
+    radial-gradient(120% 70% at 50% 58%, rgba(232, 246, 255, 0.78), rgba(140, 180, 210, 0.22) 36%, rgba(24, 52, 84, 0.5) 68%, rgba(6, 18, 34, 0.92) 100%),
+    radial-gradient(56% 100% at -4% 56%, rgba(6, 20, 38, 0.86), transparent 74%),
+    radial-gradient(56% 100% at 104% 56%, rgba(6, 20, 38, 0.86), transparent 74%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' viewBox='0 0 260 260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)' opacity='0.26'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, rgba(10, 34, 58, 0.44), rgba(8, 26, 44, 0.62)),
+    var(--desktop-bg);
+  background-size: auto, auto, auto, 240px 240px, auto, auto;
+}
+
+html[data-theme="icy-blue"] .desktop {
+  filter: contrast(1.08) saturate(0.84) brightness(1.05);
+}
+
+html[data-theme="icy-blue"] .desktop::before {
+  content: "";
+  position: absolute;
+  inset: -14px -16px -18px -16px;
+  border-radius: 18px;
+  pointer-events: none;
+  z-index: 6;
+  background:
+    radial-gradient(120% 32% at 50% -8%, rgba(238, 250, 255, 0.84), transparent 70%),
+    radial-gradient(120% 32% at 50% 108%, rgba(230, 248, 255, 0.8), transparent 70%),
+    linear-gradient(90deg, rgba(230, 248, 255, 0.68), transparent 10%, transparent 90%, rgba(230, 248, 255, 0.64)),
+    linear-gradient(180deg, rgba(236, 250, 255, 0.52), transparent 12%, transparent 88%, rgba(226, 246, 255, 0.46));
+  box-shadow:
+    inset 0 0 0 3px rgba(230, 248, 255, 0.8),
+    inset 0 0 0 10px rgba(164, 212, 242, 0.36),
+    0 0 20px rgba(192, 234, 255, 0.32);
+}
+
+html[data-theme="icy-blue"] .desktop::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  pointer-events: none;
+  z-index: 7;
+  background:
+    radial-gradient(16px 40px at 5% 0%, rgba(231, 248, 255, 0.96) 35%, transparent 36%),
+    radial-gradient(13px 34px at 12% 0%, rgba(231, 248, 255, 0.92) 35%, transparent 36%),
+    radial-gradient(16px 40px at 22% 0%, rgba(231, 248, 255, 0.96) 35%, transparent 36%),
+    radial-gradient(13px 34px at 34% 0%, rgba(231, 248, 255, 0.92) 35%, transparent 36%),
+    radial-gradient(16px 40px at 46% 0%, rgba(231, 248, 255, 0.96) 35%, transparent 36%),
+    radial-gradient(13px 34px at 58% 0%, rgba(231, 248, 255, 0.92) 35%, transparent 36%),
+    radial-gradient(16px 40px at 70% 0%, rgba(231, 248, 255, 0.96) 35%, transparent 36%),
+    radial-gradient(13px 34px at 82% 0%, rgba(231, 248, 255, 0.92) 35%, transparent 36%),
+    radial-gradient(16px 40px at 94% 0%, rgba(231, 248, 255, 0.96) 35%, transparent 36%),
+    radial-gradient(170% 40% at 50% 108%, rgba(230, 248, 255, 0.9), transparent 66%);
+  opacity: 0.86;
+}
+
+html[data-theme="icy-blue"] .retro-window,
+html[data-theme="icy-blue"] .title-shell,
+html[data-theme="icy-blue"] .speech-bubble {
+  border-color: #e5f8ff;
+  border-width: 3px;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(248, 254, 255, 0.24), transparent 30%),
+    repeating-linear-gradient(34deg, rgba(247, 254, 255, 0.1) 0 1px, rgba(49, 102, 143, 0.1) 1px 5px),
+    linear-gradient(180deg, rgba(129, 179, 214, 0.76), rgba(78, 133, 173, 0.8));
+  box-shadow:
+    inset 0 0 0 1px rgba(244, 252, 255, 0.72),
+    inset 0 0 24px rgba(13, 62, 100, 0.34),
+    0 0 0 1px rgba(221, 246, 255, 0.78),
+    0 0 20px rgba(174, 230, 255, 0.44);
+}
+
+html[data-theme="icy-blue"] .retro-window::before,
+html[data-theme="icy-blue"] .title-shell::before {
+  content: "";
+  position: absolute;
+  left: -3px;
+  right: -3px;
+  top: -3px;
+  height: 26px;
+  pointer-events: none;
+  background:
+    radial-gradient(11px 26px at 8px 0, rgba(234, 249, 255, 0.98) 35%, transparent 36%),
+    radial-gradient(9px 22px at 30px 0, rgba(234, 249, 255, 0.95) 35%, transparent 36%),
+    radial-gradient(11px 26px at 56px 0, rgba(234, 249, 255, 0.98) 35%, transparent 36%),
+    radial-gradient(9px 22px at 84px 0, rgba(234, 249, 255, 0.95) 35%, transparent 36%),
+    radial-gradient(11px 26px at 112px 0, rgba(234, 249, 255, 0.98) 35%, transparent 36%),
+    radial-gradient(9px 22px at 140px 0, rgba(234, 249, 255, 0.95) 35%, transparent 36%),
+    linear-gradient(180deg, rgba(233, 249, 255, 0.78), transparent 72%);
+  opacity: 0.94;
+}
+
+html[data-theme="icy-blue"] .retro-window::after {
+  content: "";
+  position: absolute;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  height: 24px;
+  pointer-events: none;
+  background:
+    radial-gradient(12px 24px at 22px 24px, rgba(231, 248, 255, 0.96) 35%, transparent 36%),
+    radial-gradient(10px 20px at 60px 24px, rgba(231, 248, 255, 0.92) 35%, transparent 36%),
+    radial-gradient(12px 24px at 98px 24px, rgba(231, 248, 255, 0.96) 35%, transparent 36%),
+    radial-gradient(10px 20px at 136px 24px, rgba(231, 248, 255, 0.92) 35%, transparent 36%),
+    linear-gradient(0deg, rgba(223, 246, 255, 0.7), transparent 72%);
+  opacity: 0.8;
+}
+
+html[data-theme="icy-blue"] .window-title > span,
+html[data-theme="icy-blue"] .title-pill {
+  color: #f5fcff;
+  border-color: #e4f7ff;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(252, 255, 255, 0.28), transparent 30%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.16) 0 2px, rgba(64, 123, 164, 0.12) 2px 4px),
+    linear-gradient(180deg, rgba(145, 195, 227, 0.95), rgba(90, 145, 185, 0.97));
+  text-shadow: 0 0 10px rgba(200, 240, 255, 0.82);
+}
+
 .flash-stack {
   position: fixed;
   top: 10px;
