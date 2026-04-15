@@ -1006,11 +1006,23 @@
       "Chamber",
       "Waterfall",
       "Side-Pipe",
+      "Stations",
       "Size Change",
       "Steps",
       "Overflow",
       "Redbrick",
       "Bluestone",
+    ];
+    const shapes = [
+      "Round Pipe",
+      "Square",
+      "Rectangle",
+      "Balloon",
+      "Mummy",
+      "Arch",
+      "Slope-Bottom Arch",
+      "Hallway",
+      "Mushroom",
     ];
     const showDelete = drain.source === "custom" || drain.source === "synced";
 
@@ -1032,6 +1044,12 @@
         .map(
           (feature) =>
             `<label class="check-row"><input class="featureField" type="checkbox" value="${escapeHtml(feature)}" ${(drain.features || {})[feature] ? "checked" : ""}><span>${escapeHtml(feature)}</span></label>`
+        )
+        .join("")}</div></div>
+      <div class="detail-section"><div>SHAPES:</div><div class="feature-grid">${shapes
+        .map(
+          (shape) =>
+            `<label class="check-row"><input class="featureField" type="checkbox" value="${escapeHtml(shape)}" ${(drain.features || {})[shape] ? "checked" : ""}><span>${escapeHtml(shape)}</span></label>`
         )
         .join("")}</div></div>
       <div class="detail-section"><div>Difficulty</div><div class="difficulty-row">${["easy", "medium", "hard"]
