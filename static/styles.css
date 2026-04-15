@@ -1512,7 +1512,15 @@ html[data-theme="special-chaos"] .desktop::after {
   font-size: 11px;
   font-weight: 700;
   color: #000;
-  text-shadow: 0 0 2px #fff, 0 0 4px #fff;
+  text-shadow: none;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #000;
+  border-radius: 2px;
+  padding: 1px 5px;
+  display: inline-block;
+  max-width: 154px;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
   transform: translateY(-4px);
 }
