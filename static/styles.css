@@ -190,23 +190,23 @@ html[data-theme="special-chaos"] {
 
 html[data-theme="dr41n"] {
   --desktop-bg: #0a1211;
-  --window-fill: #1a2b28;
-  --line: #88e9ca;
-  --button-face: #223b36;
+  --window-fill: #1c2a28;
+  --line: #9ed8c8;
+  --button-face: #253833;
   --button-shadow: #0d1b18;
-  --button-highlight: #31564e;
-  --text: #ecfff8;
-  --dot-color: rgba(126, 232, 202, 0.26);
-  --title-stripe-light: #4f8f80;
+  --button-highlight: #3f5f58;
+  --text: #f1fff9;
+  --dot-color: rgba(162, 214, 199, 0.14);
+  --title-stripe-light: #6d9e93;
   --title-stripe-dark: #1a2f2b;
-  --title-fill: #244941;
+  --title-fill: #355a52;
   --field-bg: #152b27;
   --window-radius: 1px;
   --button-radius: 1px;
   --window-inset: 1px 1px 0 rgba(220, 255, 244, 0.16) inset, -1px -1px 0 rgba(8, 18, 16, 0.84) inset;
   --window-drop: 0 8px 24px rgba(0, 0, 0, 0.42);
-  --button-extra: 0 0 0 1px rgba(136, 233, 202, 0.18) inset;
-  --ui-filter: contrast(1.14) saturate(1.16);
+  --button-extra: 0 0 0 1px rgba(158, 214, 197, 0.16) inset;
+  --ui-filter: contrast(1.06) saturate(0.86);
 }
 
 * { box-sizing: border-box; }
@@ -364,17 +364,15 @@ html[data-theme="special-chaos"] body {
 
 html[data-theme="dr41n"] body {
   background:
-    radial-gradient(circle at 50% 66%, rgba(210, 255, 241, 0.12), rgba(2, 12, 10, 0.84) 62%),
-    linear-gradient(180deg, rgba(5, 13, 11, 0.36), rgba(4, 11, 10, 0.65)),
-    radial-gradient(circle at 22% 16%, rgba(156, 255, 225, 0.18), transparent 32%),
-    radial-gradient(circle at 84% 82%, rgba(92, 217, 177, 0.15), transparent 30%),
-    repeating-linear-gradient(0deg, rgba(151, 240, 212, 0.08) 0 1px, transparent 1px 6px),
-    repeating-linear-gradient(90deg, rgba(110, 215, 184, 0.06) 0 1px, transparent 1px 13px),
+    radial-gradient(circle at 50% 68%, rgba(236, 255, 247, 0.22), rgba(5, 15, 13, 0.7) 64%),
+    linear-gradient(180deg, rgba(13, 31, 28, 0.2), rgba(6, 14, 12, 0.48)),
+    radial-gradient(circle at 24% 18%, rgba(215, 255, 244, 0.22), transparent 38%),
+    radial-gradient(circle at 82% 78%, rgba(169, 232, 213, 0.16), transparent 34%),
     url("/static/themes/Drain_Theme_Background.png"),
     var(--desktop-bg);
-  background-position: center center, 0 0, 0 0, 0 0, 0 0, 0 0, center center, 0 0;
-  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat, repeat, no-repeat, no-repeat;
-  background-size: cover, auto, auto, auto, 100% 6px, 18px 18px, cover, auto;
+  background-position: center center, 0 0, 0 0, 0 0, center center, 0 0;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  background-size: cover, auto, auto, auto, cover, auto;
 }
 
 html[data-theme="dr41n"] body::before {
@@ -383,12 +381,11 @@ html[data-theme="dr41n"] body::before {
   inset: 0;
   pointer-events: none;
   z-index: 8;
-  opacity: 0.5;
+  opacity: 0.3;
   background:
-    radial-gradient(circle at 50% 72%, transparent 16%, rgba(0, 0, 0, 0.24) 56%, rgba(0, 0, 0, 0.72) 100%),
-    radial-gradient(circle at 12% 68%, rgba(96, 226, 180, 0.16), transparent 20%),
-    radial-gradient(circle at 82% 18%, rgba(118, 255, 212, 0.14), transparent 18%),
-    repeating-linear-gradient(101deg, rgba(10, 22, 20, 0.36) 0 2px, transparent 2px 9px);
+    radial-gradient(circle at 50% 70%, transparent 20%, rgba(0, 0, 0, 0.18) 60%, rgba(0, 0, 0, 0.48) 100%),
+    radial-gradient(circle at 18% 68%, rgba(208, 255, 239, 0.15), transparent 24%),
+    radial-gradient(circle at 78% 16%, rgba(200, 255, 235, 0.13), transparent 20%);
 }
 
 html[data-theme="dr41n"] body::after {
@@ -397,11 +394,10 @@ html[data-theme="dr41n"] body::after {
   inset: 0;
   pointer-events: none;
   z-index: 9;
-  opacity: 0.34;
+  opacity: 0.22;
   background:
-    repeating-linear-gradient(0deg, rgba(172, 255, 229, 0.11) 0 1px, transparent 1px 7px),
-    linear-gradient(175deg, transparent 50%, rgba(70, 154, 128, 0.17) 70%, rgba(23, 58, 49, 0.2) 100%);
-  animation: drainFlow 9s linear infinite;
+    linear-gradient(175deg, transparent 46%, rgba(157, 221, 201, 0.14) 72%, rgba(42, 86, 75, 0.16) 100%);
+  animation: drainFlow 12s linear infinite;
 }
 
 html[data-theme="pink-noir"] .retro-window,
@@ -867,13 +863,13 @@ html[data-theme="special-chaos"] .desktop::after {
 html[data-theme="dr41n"] .retro-window,
 html[data-theme="dr41n"] .speech-bubble,
 html[data-theme="dr41n"] .title-shell {
-  border-color: #88e9ca;
+  border-color: #9fd9ca;
   border-width: 2px;
-  box-shadow: 0 0 0 1px rgba(136, 233, 202, 0.24), 0 0 22px rgba(29, 97, 78, 0.22), var(--window-inset), var(--window-drop);
+  box-shadow: 0 0 0 1px rgba(159, 217, 202, 0.2), 0 0 14px rgba(47, 90, 78, 0.12), var(--window-inset), var(--window-drop);
   background:
-    linear-gradient(154deg, rgba(29, 61, 54, 0.34), rgba(8, 19, 16, 0.34)),
+    linear-gradient(154deg, rgba(44, 73, 66, 0.26), rgba(14, 30, 26, 0.26)),
     var(--window-fill);
-  backdrop-filter: blur(1.4px) saturate(1.08);
+  backdrop-filter: blur(1px) saturate(0.92);
 }
 
 html[data-theme="dr41n"] .window-body {
@@ -916,13 +912,12 @@ html[data-theme="dr41n"] .desktop::after {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 18% 24%, rgba(230, 112, 66, 0.08), transparent 16%),
-    radial-gradient(circle at 72% 30%, rgba(210, 81, 56, 0.08), transparent 14%),
-    radial-gradient(circle at 48% 78%, rgba(255, 158, 88, 0.08), transparent 13%),
-    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 5px),
-    linear-gradient(180deg, transparent 36%, rgba(0, 0, 0, 0.28) 100%);
-  opacity: 0.52;
-  mix-blend-mode: multiply;
+    radial-gradient(circle at 16% 22%, rgba(255, 211, 173, 0.08), transparent 20%),
+    radial-gradient(circle at 74% 30%, rgba(245, 196, 160, 0.07), transparent 18%),
+    radial-gradient(circle at 48% 78%, rgba(255, 223, 188, 0.06), transparent 16%),
+    linear-gradient(180deg, transparent 36%, rgba(0, 0, 0, 0.16) 100%);
+  opacity: 0.34;
+  mix-blend-mode: screen;
 }
 
 .flash-stack {
@@ -1886,8 +1881,8 @@ html[data-theme="dr41n"] .desktop::after {
 }
 
 @keyframes drainFlow {
-  0% { background-position: 0 0, 0 0; }
-  100% { background-position: 0 120px, 0 0; }
+  0% { background-position: 0 0; }
+  100% { background-position: 0 120px; }
 }
 
 @media (max-width: 980px) {
