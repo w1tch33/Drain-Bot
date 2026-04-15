@@ -139,8 +139,6 @@
     dr41nBackground.decoding = "async";
     const referenceImages = [
       "/static/themes/Dr41n-assets/Background.webp",
-      "/static/themes/Dr41n-assets/Dr41n%20Frame%20Overlay.webp",
-      "/static/themes/Dr41n-assets/Dr41n%20Foreground%20Mound.webp",
       "/static/themes/blood-moon-assets/Background.webp",
       "/static/themes/blood-moon-assets/Frame.webp",
     ];
