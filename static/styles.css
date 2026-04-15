@@ -365,14 +365,14 @@ html[data-theme="special-chaos"] body {
 html[data-theme="dr41n"] body {
   background:
     radial-gradient(circle at 50% 68%, rgba(236, 255, 247, 0.22), rgba(5, 15, 13, 0.7) 64%),
-    linear-gradient(180deg, rgba(13, 31, 28, 0.2), rgba(6, 14, 12, 0.48)),
+    linear-gradient(180deg, rgba(13, 31, 28, 0.14), rgba(6, 14, 12, 0.34)),
     radial-gradient(circle at 24% 18%, rgba(215, 255, 244, 0.22), transparent 38%),
     radial-gradient(circle at 82% 78%, rgba(169, 232, 213, 0.16), transparent 34%),
     url("/static/themes/Drain_Theme_Background.png?v=20260415b"),
     var(--desktop-bg);
   background-position: center center, 0 0, 0 0, 0 0, center center, 0 0;
   background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
-  background-size: cover, auto, auto, auto, cover, auto;
+  background-size: cover, auto, auto, auto, contain, auto;
 }
 
 html[data-theme="dr41n"] body::before {
@@ -381,9 +381,9 @@ html[data-theme="dr41n"] body::before {
   inset: 0;
   pointer-events: none;
   z-index: 8;
-  opacity: 0.3;
+  opacity: 0.2;
   background:
-    radial-gradient(circle at 50% 70%, transparent 20%, rgba(0, 0, 0, 0.18) 60%, rgba(0, 0, 0, 0.48) 100%),
+    radial-gradient(circle at 50% 70%, transparent 26%, rgba(0, 0, 0, 0.12) 62%, rgba(0, 0, 0, 0.36) 100%),
     radial-gradient(circle at 18% 68%, rgba(208, 255, 239, 0.15), transparent 24%),
     radial-gradient(circle at 78% 16%, rgba(200, 255, 235, 0.13), transparent 20%);
 }
@@ -394,7 +394,7 @@ html[data-theme="dr41n"] body::after {
   inset: 0;
   pointer-events: none;
   z-index: 9;
-  opacity: 0.22;
+  opacity: 0.14;
   background:
     linear-gradient(175deg, transparent 46%, rgba(157, 221, 201, 0.14) 72%, rgba(42, 86, 75, 0.16) 100%);
   animation: drainFlow 12s linear infinite;
@@ -867,15 +867,15 @@ html[data-theme="dr41n"] .title-shell {
   border-width: 2px;
   box-shadow: 0 0 0 1px rgba(159, 217, 202, 0.2), 0 0 14px rgba(47, 90, 78, 0.12), var(--window-inset), var(--window-drop);
   background:
-    linear-gradient(154deg, rgba(44, 73, 66, 0.26), rgba(14, 30, 26, 0.26)),
+    linear-gradient(154deg, rgba(44, 73, 66, 0.16), rgba(14, 30, 26, 0.16)),
     var(--window-fill);
   backdrop-filter: blur(1px) saturate(0.92);
 }
 
 html[data-theme="dr41n"] .window-body {
   background:
-    linear-gradient(180deg, rgba(36, 76, 67, 0.2), rgba(14, 34, 30, 0.22)),
-    rgba(19, 39, 35, 0.4);
+    linear-gradient(180deg, rgba(36, 76, 67, 0.12), rgba(14, 34, 30, 0.12)),
+    rgba(19, 39, 35, 0.26);
 }
 
 html[data-theme="dr41n"] .window-title > span,
