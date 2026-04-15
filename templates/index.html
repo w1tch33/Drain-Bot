@@ -1,5 +1,14 @@
 {% extends "base.html" %}
 {% block title %}DrainTool Desktop Web{% endblock %}
+{% block head %}
+  {{ super() }}
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  >
+{% endblock %}
 {% block content %}
   <div class="desktop" id="desktop" data-playlist='{{ playlist|tojson }}'>
     <div class="session-controls">
@@ -70,6 +79,7 @@
         <button class="retro-button action-button" id="routeButton" type="button">Build Route</button>
         <button class="retro-button action-button" id="addDrainButton" type="button">Add Drain</button>
         <button class="retro-button action-button" id="syncMapButton" type="button">Sync Map</button>
+        <button class="retro-button action-button" id="mapButton" type="button">Map</button>
 
         <div class="toggle-row">
           <label class="check-row">
@@ -239,5 +249,10 @@
       helpfulLinks: {{ helpful_links|tojson }}
     };
   </script>
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
   <script src="{{ url_for('static', filename='app.js') }}"></script>
 {% endblock %}

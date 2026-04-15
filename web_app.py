@@ -223,6 +223,25 @@ def visited():
     return jsonify(drain_service.visited_results(current_username()))
 
 
+@app.get("/api/map-drains")
+@login_required
+def map_drains():
+    rows = []
+    for drain in drain_service.get_all_drains(current_username()):
+        rows.append(
+            {
+                "name": drain.get("name", ""),
+                "lat": float(drain.get("lat", 0)),
+                "lon": float(drain.get("lon", 0)),
+                "visited": bool(drain.get("visited")),
+                "favorite": bool(drain.get("favorite")),
+                "source": str(drain.get("source", "")),
+                "distance_km": float(drain.get("distance_km", 0)),
+            }
+        )
+    return jsonify(rows)
+
+
 @app.get("/api/profile")
 @login_required
 def profile():

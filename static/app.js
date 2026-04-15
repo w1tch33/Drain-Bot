@@ -5,6 +5,7 @@
     currentDrain: null,
     gameCleanup: null,
     gameLoopCleanup: null,
+    mapCleanup: null,
     marqueeX: 0,
     meowTimer: null,
   };
@@ -517,6 +518,86 @@
     }
   }
 
+  function mapPopupHtml(row) {
+    const stateText = row.visited ? "Visited" : "Unvisited";
+    const distance = Number(row.distance_km || 0).toFixed(1);
+    return `
+      <div class="map-popup-title">${escapeHtml(row.name)}</div>
+      <div>${escapeHtml(stateText)} • ${distance} km</div>
+      <button class="retro-button map-open-drain" type="button" data-name="${escapeHtml(row.name)}">Open Drain</button>
+    `;
+  }
+
+  async function openMapPanel() {
+    setLoading(true);
+    try {
+      const rows = await fetchJson("/api/map-drains");
+      openModal(
+        "Drain Map",
+        `
+          <div class="map-shell">
+            <div class="map-toolbar">
+              <span><span class="map-dot visited"></span>Visited</span>
+              <span><span class="map-dot unvisited"></span>Unvisited</span>
+              <span>${rows.length} drains</span>
+            </div>
+            <div class="map-view" id="drainMapView"></div>
+          </div>
+        `
+      );
+
+      if (!window.L) {
+        modalBody.innerHTML = `<div class="profile-copy">Map library failed to load. Refresh and try again.</div>`;
+        return;
+      }
+      const mapEl = modalBody.querySelector("#drainMapView");
+      if (!mapEl) return;
+
+      const map = L.map(mapEl, { zoomControl: true, preferCanvas: true });
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "&copy; OpenStreetMap",
+      }).addTo(map);
+
+      const markers = [];
+      rows.forEach((row) => {
+        if (!Number.isFinite(row.lat) || !Number.isFinite(row.lon)) return;
+        const marker = L.circleMarker([row.lat, row.lon], {
+          radius: row.visited ? 6 : 5,
+          color: "#000",
+          weight: 1,
+          fillOpacity: 0.95,
+          fillColor: row.visited ? "#2e7d32" : "#c62828",
+        });
+        marker.bindPopup(mapPopupHtml(row));
+        marker.addTo(map);
+        marker.on("popupopen", (event) => {
+          const button = event.popup.getElement()?.querySelector(".map-open-drain");
+          if (!button) return;
+          bindPress(button, async () => {
+            await openDrain(button.dataset.name || "");
+          });
+        });
+        markers.push(marker);
+      });
+
+      if (markers.length) {
+        const group = L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.12));
+      } else {
+        map.setView([-37.8136, 144.9631], 10);
+      }
+      setTimeout(() => map.invalidateSize(), 40);
+      state.mapCleanup = () => {
+        map.remove();
+      };
+    } catch (error) {
+      drawMessage(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   function highScoreEntries(highScores) {
     return Object.values(highScores || {})
       .sort((left, right) => left.label.localeCompare(right.label))
@@ -805,6 +886,10 @@
   }
 
   function closeModal() {
+    if (state.mapCleanup) {
+      state.mapCleanup();
+      state.mapCleanup = null;
+    }
     modalLayer.classList.add("hidden");
     modalBody.innerHTML = "";
     modalWindow.classList.remove("game-modal-window");
@@ -2832,6 +2917,7 @@
   qs("#notificationsButton").addEventListener("click", openNotifications);
   if (qs("#activityButton")) qs("#activityButton").addEventListener("click", openActivity);
   qs("#addDrainButton").addEventListener("click", openAddDrain);
+  if (qs("#mapButton")) qs("#mapButton").addEventListener("click", openMapPanel);
   qs("#profileButton").addEventListener("click", openProfile);
   if (visitedCount) visitedCount.addEventListener("click", openVisitedDrains);
   if (qs("#syncMapButton")) qs("#syncMapButton").addEventListener("click", syncMap);

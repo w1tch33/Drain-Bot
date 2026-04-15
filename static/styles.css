@@ -1473,6 +1473,46 @@ html[data-theme="special-chaos"] .desktop::after {
 .photo-card { border: 2px solid var(--line); background: var(--field-bg); padding: 6px; width: 110px; }
 .photo-card img { width: 100%; height: 80px; object-fit: cover; display: block; margin-bottom: 4px; }
 .badge { display: inline-block; border: 1px solid var(--line); background: var(--field-bg); padding: 2px 6px; margin-right: 6px; margin-bottom: 4px; }
+.map-shell {
+  display: grid;
+  gap: 8px;
+}
+.map-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.map-dot {
+  width: 12px;
+  height: 12px;
+  border: 1px solid #000;
+  display: inline-block;
+  margin-right: 4px;
+}
+.map-dot.visited { background: #2e7d32; }
+.map-dot.unvisited { background: #c62828; }
+.map-view {
+  width: min(100%, 960px);
+  height: min(66vh, 560px);
+  border: 2px solid var(--line);
+  background: #d2d2d2;
+}
+.leaflet-container {
+  font-family: "ChicagoCustom", "Chicago", "Fixedsys", sans-serif;
+}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  border-radius: 0;
+}
+.leaflet-popup-content {
+  font-size: 13px;
+  line-height: 1.25;
+}
+.map-popup-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
 .game-canvas {
   width: auto;
   max-width: 100%;
@@ -1765,6 +1805,7 @@ html[data-theme="special-chaos"] .desktop::after {
     font-size: 13px;
   }
   .game-controls-row { gap: 6px; }
+  .map-view { height: min(58vh, 420px); }
   .themes-wrap {
     position: static;
     width: auto;
