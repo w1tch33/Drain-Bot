@@ -921,8 +921,26 @@
   function bindPress(element, handler) {
     if (!element) return;
     let lastTouchAt = 0;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchMoved = false;
+    const MOVE_THRESHOLD = 10;
+    const onTouchStart = (event) => {
+      const touch = event.changedTouches && event.changedTouches[0];
+      touchStartX = touch ? touch.clientX : 0;
+      touchStartY = touch ? touch.clientY : 0;
+      touchMoved = false;
+    };
+    const onTouchMove = (event) => {
+      const touch = event.changedTouches && event.changedTouches[0];
+      if (!touch) return;
+      if (Math.abs(touch.clientX - touchStartX) > MOVE_THRESHOLD || Math.abs(touch.clientY - touchStartY) > MOVE_THRESHOLD) {
+        touchMoved = true;
+      }
+    };
     const onTouchEnd = (event) => {
       lastTouchAt = Date.now();
+      if (touchMoved) return;
       event.preventDefault();
       handler(event);
     };
@@ -933,6 +951,8 @@
       }
       handler(event);
     };
+    element.addEventListener("touchstart", onTouchStart, { passive: true });
+    element.addEventListener("touchmove", onTouchMove, { passive: true });
     element.addEventListener("touchend", onTouchEnd, { passive: false });
     element.addEventListener("click", onClick);
   }
