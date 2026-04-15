@@ -368,7 +368,7 @@ html[data-theme="dr41n"] body {
     linear-gradient(180deg, rgba(13, 31, 28, 0.2), rgba(6, 14, 12, 0.48)),
     radial-gradient(circle at 24% 18%, rgba(215, 255, 244, 0.22), transparent 38%),
     radial-gradient(circle at 82% 78%, rgba(169, 232, 213, 0.16), transparent 34%),
-    url("/static/themes/Drain_Theme_Background.png"),
+    url("/static/themes/Drain_Theme_Background.png?v=20260415b"),
     var(--desktop-bg);
   background-position: center center, 0 0, 0 0, 0 0, center center, 0 0;
   background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
