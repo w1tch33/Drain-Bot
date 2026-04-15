@@ -8,6 +8,7 @@
     mapCleanup: null,
     marqueeX: 0,
     meowTimer: null,
+    lastTrackAdvanceKey: "",
   };
 
   const qs = (selector) => document.querySelector(selector);
@@ -1460,6 +1461,13 @@
     volumeValue.textContent = Number(volumeControl.value).toFixed(2);
     startSongMarquee(state.playlist[0].replace(".mp3", ""));
 
+    function advanceToNextTrack() {
+      const currentKey = audioPlayer.currentSrc || audioPlayer.src || "";
+      if (currentKey && state.lastTrackAdvanceKey === currentKey) return;
+      state.lastTrackAdvanceKey = currentKey;
+      startPlaybackAt(state.playlistIndex + 1);
+    }
+
     fadeInToTarget = function (targetVolume, duration = 650) {
       fadeToken += 1;
       const currentFade = fadeToken;
@@ -1481,6 +1489,7 @@
     };
 
     startPlaybackAt = function (index, shouldFade = true, preferMutedAutoplay = false, reloadTrack = true) {
+      state.lastTrackAdvanceKey = "";
       state.playlistIndex = (index + state.playlist.length) % state.playlist.length;
       const filename = state.playlist[state.playlistIndex];
       const nextSrc = `/audio/${encodeURIComponent(filename)}`;
@@ -1508,6 +1517,11 @@
           }
         })
         .catch(() => {
+          if (!preferMutedAutoplay) {
+            // Retry once muted; if that also fails we fall back to unlock-on-input flow.
+            startPlaybackAt(state.playlistIndex, shouldFade, true, false);
+            return;
+          }
           pendingAutoplay = true;
         });
     };
@@ -1520,7 +1534,14 @@
       else audioPlayer.pause();
     });
 
-    audioPlayer.addEventListener("ended", () => startPlaybackAt(state.playlistIndex + 1));
+    audioPlayer.addEventListener("ended", advanceToNextTrack);
+    audioPlayer.addEventListener("timeupdate", () => {
+      if (audioPlayer.paused) return;
+      if (!Number.isFinite(audioPlayer.duration) || audioPlayer.duration <= 0) return;
+      if (audioPlayer.currentTime < audioPlayer.duration - 0.12) return;
+      advanceToNextTrack();
+    });
+    audioPlayer.addEventListener("error", advanceToNextTrack);
     volumeControl.addEventListener("input", () => {
       audioPlayer.volume = Number(volumeControl.value);
       volumeValue.textContent = Number(volumeControl.value).toFixed(2);
