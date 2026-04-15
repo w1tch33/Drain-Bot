@@ -1674,6 +1674,163 @@ html[data-theme="icy-blue"] .session-user {
   background-size: 120px 120px, auto, auto, auto;
 }
 
+/* Blood Moon final lock pass: gothic cathedral + candles + deep crimson contrast */
+html[data-theme="blood-red"] {
+  --desktop-bg: #120003;
+  --window-fill: #2a0509;
+  --line: #ff3d45;
+  --button-face: #3b080f;
+  --button-shadow: #160205;
+  --button-highlight: #7b1a22;
+  --text: #ffb2aa;
+  --dot-color: rgba(255, 60, 76, 0.2);
+  --title-stripe-light: #8f1d26;
+  --title-stripe-dark: #2a060c;
+  --title-fill: #4a0b13;
+  --field-bg: #26050a;
+  --window-drop: 0 0 0 1px rgba(255, 61, 69, 0.22), 0 0 22px rgba(108, 0, 0, 0.5);
+  --button-extra: 0 0 0 1px rgba(255, 112, 112, 0.14) inset;
+  --ui-filter: contrast(1.14) saturate(1.22) brightness(0.92);
+}
+
+html[data-theme="blood-red"] body {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.86' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='320' height='320' filter='url(%23n)' opacity='0.24'/%3E%3C/svg%3E"),
+    radial-gradient(84% 74% at 50% 56%, rgba(180, 7, 20, 0.38), rgba(28, 2, 6, 0.88) 66%, rgba(8, 0, 2, 0.98) 100%),
+    radial-gradient(42% 78% at 8% 54%, rgba(0, 0, 0, 0.74), transparent 72%),
+    radial-gradient(42% 78% at 92% 54%, rgba(0, 0, 0, 0.74), transparent 72%),
+    radial-gradient(120% 78% at 50% 4%, rgba(140, 11, 20, 0.42), transparent 68%),
+    linear-gradient(180deg, rgba(44, 4, 10, 0.28), rgba(5, 0, 2, 0.8)),
+    var(--desktop-bg);
+  background-size: 300px 300px, auto, auto, auto, auto, auto, auto;
+}
+
+html[data-theme="blood-red"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0.86;
+  background:
+    radial-gradient(12px 26px at 6% 11%, rgba(255, 120, 80, 0.88) 24%, rgba(255, 18, 18, 0.64) 48%, transparent 62%),
+    radial-gradient(10px 22px at 24% 11%, rgba(255, 120, 80, 0.84) 24%, rgba(255, 18, 18, 0.58) 48%, transparent 62%),
+    radial-gradient(12px 26px at 12% 96%, rgba(255, 120, 80, 0.86) 24%, rgba(255, 18, 18, 0.62) 48%, transparent 62%),
+    radial-gradient(12px 26px at 88% 90%, rgba(255, 120, 80, 0.86) 24%, rgba(255, 18, 18, 0.62) 48%, transparent 62%),
+    radial-gradient(10px 22px at 96% 95%, rgba(255, 120, 80, 0.84) 24%, rgba(255, 18, 18, 0.58) 48%, transparent 62%),
+    linear-gradient(90deg, transparent 0 5.2%, rgba(102, 8, 16, 0.58) 5.2% 6.1%, transparent 6.1% 23.4%, rgba(102, 8, 16, 0.58) 23.4% 24.3%, transparent 24.3% 86.4%, rgba(102, 8, 16, 0.58) 86.4% 87.3%, transparent 87.3% 94.2%, rgba(102, 8, 16, 0.58) 94.2% 95.1%, transparent 95.1%),
+    linear-gradient(180deg, rgba(255, 35, 35, 0.08), transparent 16%, transparent 84%, rgba(255, 35, 35, 0.12));
+  animation: bloodCandle 2.8s ease-in-out infinite;
+}
+
+html[data-theme="blood-red"] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+  opacity: 0.46;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 82, 82, 0.08) 0 1px, transparent 1px 6px),
+    radial-gradient(circle at 50% 58%, transparent 46%, rgba(0, 0, 0, 0.56) 100%),
+    radial-gradient(circle at 16% 18%, rgba(255, 48, 48, 0.14), transparent 22%),
+    radial-gradient(circle at 84% 14%, rgba(255, 48, 48, 0.12), transparent 22%);
+}
+
+html[data-theme="blood-red"] .desktop::before {
+  content: none;
+}
+
+html[data-theme="blood-red"] .desktop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 50% 0, rgba(255, 58, 58, 0.14), transparent 66%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.4), transparent 18%, transparent 82%, rgba(0, 0, 0, 0.4));
+  mix-blend-mode: screen;
+}
+
+html[data-theme="blood-red"] .retro-window,
+html[data-theme="blood-red"] .title-shell,
+html[data-theme="blood-red"] .speech-bubble {
+  border-style: solid;
+  border-width: 3px;
+  border-color: #741018;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(190, 34, 46, 0.16), transparent 34%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.26'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, rgba(70, 6, 14, 0.82), rgba(32, 2, 7, 0.92));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 84, 84, 0.24),
+    inset 0 0 26px rgba(0, 0, 0, 0.46),
+    0 0 0 1px rgba(57, 5, 10, 0.9),
+    0 0 22px rgba(112, 0, 0, 0.38);
+}
+
+html[data-theme="blood-red"] .window-body {
+  background:
+    radial-gradient(circle at 50% 52%, rgba(174, 14, 24, 0.24), rgba(42, 3, 9, 0.88) 72%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.2'/%3E%3C/svg%3E");
+}
+
+html[data-theme="blood-red"] .window-title > span,
+html[data-theme="blood-red"] .title-pill {
+  color: #ff9a83;
+  border-color: #7f161f;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 120, 120, 0.08) 0 2px, rgba(0, 0, 0, 0.12) 2px 4px),
+    linear-gradient(180deg, rgba(89, 10, 18, 0.94), rgba(39, 3, 8, 0.98));
+  text-shadow: 0 0 10px rgba(255, 60, 60, 0.36);
+  letter-spacing: 1.2px;
+}
+
+html[data-theme="blood-red"] .retro-button,
+html[data-theme="blood-red"] .session-button,
+html[data-theme="blood-red"] .session-user {
+  border-top-color: #8d232c;
+  border-left-color: #8d232c;
+  border-right-color: #1d0307;
+  border-bottom-color: #1d0307;
+  color: #ff9b7f;
+  background:
+    radial-gradient(circle at 20% 24%, rgba(255, 136, 136, 0.16), transparent 36%),
+    linear-gradient(180deg, rgba(91, 10, 20, 0.94), rgba(35, 3, 8, 0.98));
+  box-shadow: 0 0 0 1px rgba(255, 68, 68, 0.15) inset, 0 0 8px rgba(107, 0, 0, 0.34);
+}
+
+html[data-theme="blood-red"] #notificationsButton {
+  color: #ffb28a;
+}
+
+html[data-theme="blood-red"] #activityButton {
+  color: #ffad7a;
+}
+
+html[data-theme="blood-red"] .retro-input,
+html[data-theme="blood-red"] .theme-select,
+html[data-theme="blood-red"] .search-input {
+  color: #ffbea8;
+  border-top-color: #8a1e26;
+  border-left-color: #8a1e26;
+  border-right-color: #1b0306;
+  border-bottom-color: #1b0306;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.18'/%3E%3C/svg%3E"),
+    rgba(36, 4, 10, 0.9);
+}
+
+html[data-theme="blood-red"] .links-button {
+  color: #ffb28f;
+  background: linear-gradient(180deg, rgba(111, 18, 24, 0.94), rgba(48, 5, 10, 0.98));
+}
+
+html[data-theme="blood-red"] .tutorial-button {
+  color: #ffb28f;
+  background: linear-gradient(180deg, rgba(124, 14, 26, 0.94), rgba(58, 4, 12, 0.98));
+}
+
 .flash-stack {
   position: fixed;
   top: 10px;
@@ -2619,6 +2776,11 @@ html[data-theme="icy-blue"] .session-user {
 @keyframes bloodPulse {
   0%, 100% { filter: brightness(1); }
   50% { filter: brightness(1.18); }
+}
+
+@keyframes bloodCandle {
+  0%, 100% { opacity: 0.82; filter: brightness(1); }
+  50% { opacity: 0.94; filter: brightness(1.12); }
 }
 
 @keyframes vhsWarp {
