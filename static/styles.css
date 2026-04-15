@@ -2876,20 +2876,13 @@ html[data-theme="blood-red"] .desktop::before {
 }
 
 @media (max-width: 980px) {
-  html[data-theme="camcorder-vhs"] body::before {
-    inset: 4px;
-    border-radius: 16px;
-    box-shadow:
-      inset 0 0 0 4px #58525b,
-      inset 0 0 0 12px #2a262e,
-      inset 0 0 0 20px #13121a,
-      inset 0 0 24px rgba(0, 0, 0, 0.58),
-      0 0 0 1px rgba(255, 255, 255, 0.08);
-  }
-  html[data-theme="camcorder-vhs"] body::after {
-    inset: 18px 14px 24px 14px;
-    border-radius: 12px;
-    opacity: 0.66;
+  html[data-theme="camcorder-vhs"] body::before,
+  html[data-theme="camcorder-vhs"] body::after,
+  html[data-theme="blood-red"] .desktop::before,
+  html[data-theme="icy-blue"] .desktop::before,
+  html[data-theme="icy-blue"] .desktop::after {
+    display: none !important;
+    content: none !important;
   }
   .loading-overlay,
   .modal-layer {
@@ -3009,20 +3002,4 @@ html[data-theme="blood-red"] .desktop::before {
       #130003;
   }
 
-  html[data-theme="blood-red"] .desktop {
-    overflow: visible;
-  }
-
-  html[data-theme="blood-red"] .desktop::before {
-    display: block;
-    content: "";
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 20;
-    opacity: 0.95;
-    background: url("/static/themes/blood-moon-assets/Frame.webp") center center / 100% 100% no-repeat !important;
-  }
 }
