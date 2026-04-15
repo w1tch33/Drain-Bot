@@ -61,6 +61,7 @@
     "blood-red",
     "icy-blue",
     "camcorder-vhs",
+    "dr41n",
     "special-chaos",
   ]);
   let musicMarqueeTimer = null;
