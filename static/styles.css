@@ -2838,15 +2838,25 @@ html[data-theme="icy-blue"] body::after {
 
 html[data-theme="blood-red"] body {
   background:
-    linear-gradient(180deg, rgba(20, 0, 0, 0.2), rgba(10, 0, 0, 0.42)),
-    url("/static/themes/reference%20pics/Blood%20Moon%20Reference.png") center center / cover no-repeat,
+    linear-gradient(180deg, rgba(20, 0, 0, 0.14), rgba(10, 0, 0, 0.3)),
+    url("/static/themes/blood-moon-assets/Background.png") center center / cover no-repeat,
     #130003;
 }
 html[data-theme="blood-red"] body::before {
-  opacity: 0.4;
+  inset: 0;
+  opacity: 0.96;
+  background:
+    url("/static/themes/blood-moon-assets/Frame.png") center center / cover no-repeat;
 }
 html[data-theme="blood-red"] body::after {
-  opacity: 0.18;
+  opacity: 0.14;
+  background:
+    radial-gradient(circle at 6% 10%, rgba(255, 120, 80, 0.44), transparent 7%),
+    radial-gradient(circle at 24% 10%, rgba(255, 120, 80, 0.36), transparent 6%),
+    radial-gradient(circle at 12% 93%, rgba(255, 120, 80, 0.42), transparent 7%),
+    radial-gradient(circle at 88% 86%, rgba(255, 120, 80, 0.4), transparent 7%),
+    radial-gradient(circle at 96% 93%, rgba(255, 120, 80, 0.46), transparent 8%);
+  mix-blend-mode: screen;
 }
 
 @media (max-width: 980px) {

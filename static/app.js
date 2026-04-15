@@ -142,6 +142,8 @@
       "/static/themes/reference%20pics/VHS%20Ghost%20Reference.png",
       "/static/themes/reference%20pics/Frostbyte%20Reference.png",
       "/static/themes/reference%20pics/Blood%20Moon%20Reference.png",
+      "/static/themes/blood-moon-assets/Background.png",
+      "/static/themes/blood-moon-assets/Frame.png",
     ];
     for (const src of referenceImages) {
       const img = new Image();
