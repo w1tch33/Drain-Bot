@@ -4,7 +4,7 @@
   {{ super() }}
   <link rel="preload" as="image" href="{{ url_for('static', filename='themes/Drain_Theme_Background.png') }}">
   <link rel="preload" as="image" href="{{ url_for('static', filename='themes/Dr41n-assets/Background.webp') }}">
-  <link rel="preload" as="image" href="{{ url_for('static', filename='themes/Dr41n-assets/Dr41n hump overlay.png') }}">
+  <link rel="preload" as="image" href="{{ url_for('static', filename='themes/Dr41n-assets/Dr41n hump overlay.webp') }}">
   <link rel="preload" as="image" href="{{ url_for('static', filename='themes/blood-moon-assets/Background.webp') }}">
   <link rel="preload" as="image" href="{{ url_for('static', filename='themes/blood-moon-assets/Frame.webp') }}">
   <link
@@ -104,6 +104,8 @@
       <div class="window-title"><span>Results</span></div>
       <div class="window-body panel-scroller" id="resultsPanel"></div>
     </section>
+
+    <div class="theme-hump-layer" aria-hidden="true"></div>
 
     <section class="retro-window search-window">
       <div class="window-title"><span>Search</span></div>

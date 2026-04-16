@@ -1279,15 +1279,7 @@ html[data-theme="dr41n"] .title-shell {
 }
 
 html[data-theme="dr41n"] .desktop::before {
-  content: "";
-  position: absolute;
-  left: 384px;
-  top: 538px;
-  width: 662px;
-  height: 270px;
-  pointer-events: none;
-  z-index: 3;
-  background: url("/static/themes/Dr41n-assets/Dr41n%20hump%20overlay.png") center bottom / contain no-repeat;
+  content: none;
 }
 
 html[data-theme="dr41n"] .retro-window::before,
@@ -1326,6 +1318,17 @@ html[data-theme="dr41n"] .results-window::after {
 
 html[data-theme="dr41n"] .music-window {
   z-index: 6;
+}
+
+html[data-theme="dr41n"] .theme-hump-layer {
+  position: absolute;
+  left: 388px;
+  top: 532px;
+  width: 660px;
+  height: 278px;
+  pointer-events: none;
+  z-index: 4;
+  background: url("/static/themes/Dr41n-assets/Dr41n%20hump%20overlay.webp") center bottom / contain no-repeat;
 }
 
 html[data-theme="dr41n"] .control-window,
@@ -2983,7 +2986,7 @@ html[data-theme="blood-red"] .desktop::before {
   .title-shell { margin-top: 8px; }
   .control-window, .results-window, .search-window { height: auto; min-height: 280px; }
   .music-window { height: auto; }
-  html[data-theme="dr41n"] .desktop::before {
+  html[data-theme="dr41n"] .theme-hump-layer {
     display: none !important;
     content: none !important;
   }
