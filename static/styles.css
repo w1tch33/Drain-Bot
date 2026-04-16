@@ -972,6 +972,8 @@ html[data-theme="camcorder-vhs"] body::after {
 html[data-theme="camcorder-vhs"] .desktop {
   filter: contrast(1.08) saturate(0.8) sepia(0.16) hue-rotate(6deg);
   animation: bootIn 460ms ease-out;
+  transform: perspective(1800px) rotateX(0.35deg) scaleX(0.986) scaleY(1.012);
+  transform-origin: center center;
 }
 
 html[data-theme="camcorder-vhs"] .desktop::before {
@@ -1113,13 +1115,23 @@ html[data-theme="camcorder-vhs"] .session-controls .session-button:first-child {
 }
 
 html[data-theme="camcorder-vhs"] .session-controls {
-  top: 34px;
+  top: 52px;
   right: 28px;
   z-index: 40;
 }
 
 html[data-theme="camcorder-vhs"] .flash-button {
-  top: 84px;
+  top: 102px;
+  z-index: 40;
+}
+
+html[data-theme="camcorder-vhs"] .visited-window {
+  top: 48px;
+  z-index: 40;
+}
+
+html[data-theme="camcorder-vhs"] .title-shell {
+  top: 64px;
   z-index: 40;
 }
 
