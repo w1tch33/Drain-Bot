@@ -2921,7 +2921,7 @@ html[data-theme="blood-red"] .desktop::before {
   z-index: 30;
   opacity: 1;
   filter: none;
-  background: url("/static/themes/blood-moon-assets/Frame-opaque.webp") center center / cover no-repeat !important;
+  background: url("/static/themes/blood-moon-assets/Frame-opaque-strong.webp") calc(50% + 10px) center / cover no-repeat !important;
 }
 
 html[data-theme="blood-red"] .desktop::after {
