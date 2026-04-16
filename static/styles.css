@@ -2950,15 +2950,15 @@ html[data-theme="camcorder-vhs"] body::after {
 
 html[data-theme="icy-blue"] body {
   background:
-    radial-gradient(circle at 52% 36%, rgba(215, 243, 255, 0.26), transparent 60%),
-    linear-gradient(180deg, rgba(9, 23, 37, 0.18), rgba(6, 16, 28, 0.3)),
+    linear-gradient(180deg, rgba(7, 18, 33, 0.16), rgba(5, 14, 26, 0.24)),
+    url("/static/themes/frostbyte-assets/frostbyte%20background.webp") center center / cover no-repeat,
     #091f34;
 }
 html[data-theme="icy-blue"] body::before {
-  opacity: 0.16;
+  opacity: 0.08;
 }
 html[data-theme="icy-blue"] body::after {
-  opacity: 0.24;
+  opacity: 0.14;
 }
 
 html[data-theme="blood-red"] body {

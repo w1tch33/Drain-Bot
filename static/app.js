@@ -145,6 +145,7 @@
       "/static/themes/blood-moon-assets/Background-clear.webp",
       "/static/themes/blood-moon-assets/Frame-opaque-strong.webp",
       "/static/themes/vhs-ghost-assets/VHS%20Ghost%20Background.webp",
+      "/static/themes/frostbyte-assets/frostbyte%20background.webp",
     ];
     for (const src of referenceImages) {
       const img = new Image();
