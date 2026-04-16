@@ -1322,10 +1322,10 @@ html[data-theme="dr41n"] .music-window {
 
 html[data-theme="dr41n"] .theme-hump-layer {
   position: absolute;
-  left: 388px;
-  top: 532px;
-  width: 660px;
-  height: 278px;
+  left: 316px;
+  top: 454px;
+  width: 804px;
+  height: 372px;
   pointer-events: none;
   z-index: 4;
   background: url("/static/themes/Dr41n-assets/Dr41n%20hump%20overlay.webp") center bottom / contain no-repeat;
