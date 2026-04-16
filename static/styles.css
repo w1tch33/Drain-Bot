@@ -1329,7 +1329,7 @@ html[data-theme="dr41n"] .theme-hump-layer {
   transform: translateX(calc(-50% + 220px));
   pointer-events: none;
   z-index: 4;
-  background: url("/static/themes/Dr41n-assets/Dr41n%20hump%20overlay%20cropped.webp") center bottom / 100% 100% no-repeat;
+  background: url("/static/themes/Dr41n-assets/Dr41n%20hump%20overlay%20cropped.webp") center bottom / contain no-repeat;
 }
 
 html[data-theme="dr41n"] .control-window,
