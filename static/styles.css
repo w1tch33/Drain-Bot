@@ -2915,8 +2915,8 @@ html[data-theme="blood-red"] .desktop::before {
   pointer-events: none;
   z-index: 30;
   opacity: 1;
-  filter: contrast(1.22) saturate(1.1) brightness(1.05);
-  background: url("/static/themes/blood-moon-assets/Frame-solid.webp") center center / 100% 100% no-repeat !important;
+  filter: contrast(1.06) saturate(1.02) brightness(1.01);
+  background: url("/static/themes/blood-moon-assets/Frame.webp") center center / 100% 100% no-repeat !important;
 }
 
 @media (max-width: 980px) {

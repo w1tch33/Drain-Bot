@@ -141,7 +141,7 @@
       "/static/themes/Dr41n-assets/Background.webp",
       "/static/themes/Dr41n-assets/Dr41n%20hump%20overlay%20cropped.webp",
       "/static/themes/blood-moon-assets/Background-clear.webp",
-      "/static/themes/blood-moon-assets/Frame-solid.webp",
+      "/static/themes/blood-moon-assets/Frame.webp",
     ];
     for (const src of referenceImages) {
       const img = new Image();
