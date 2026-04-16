@@ -254,7 +254,7 @@ html[data-theme="pink-noir"] body {
     var(--desktop-bg);
   background-position: 0 0, 0 0, 0 0, center center, 0 0, 0 0, 0 0;
   background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
-  background-size: auto, auto, auto, 111% auto, cover, auto, auto;
+  background-size: auto, auto, auto, 100% 100%, cover, auto, auto;
 }
 
 html[data-theme="pink-noir"] body::before {
@@ -300,17 +300,9 @@ html[data-theme="pink-noir"] .desktop::before {
   inset: 0;
   pointer-events: none;
   z-index: 26;
-  opacity: 0.56;
+  opacity: 0.88;
   background:
-    radial-gradient(circle at 4% 6%, rgba(255, 248, 252, 0.9) 0 10px, transparent 11px),
-    radial-gradient(circle at 96% 7%, rgba(255, 244, 250, 0.88) 0 10px, transparent 11px),
-    radial-gradient(circle at 6% 94%, rgba(255, 242, 249, 0.88) 0 12px, transparent 13px),
-    radial-gradient(circle at 95% 92%, rgba(255, 244, 250, 0.9) 0 11px, transparent 12px),
-    repeating-radial-gradient(circle at top, rgba(255, 244, 250, 0.58) 0 2px, transparent 2px 10px),
-    repeating-radial-gradient(circle at bottom, rgba(255, 244, 250, 0.48) 0 2px, transparent 2px 11px);
-  background-size: auto, auto, auto, auto, 24px 24px, 24px 24px;
-  background-position: 0 0, 100% 0, 0 100%, 100% 100%, center -8px, center calc(100% + 10px);
-  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat-x, repeat-x;
+    url("/static/themes/envi%27s-crush-assets/envi%27s%20crush%20frame%20rebuilt.webp") center center / 100% 100% no-repeat;
 }
 
 html[data-theme="pink-noir"] .desktop::after {
@@ -492,6 +484,15 @@ html[data-theme="pink-noir"] .speech-bubble {
     0 0 0 5px rgba(243, 180, 220, 0.48),
     var(--window-inset),
     0 10px 18px rgba(160, 52, 114, 0.22);
+}
+
+html[data-theme="pink-noir"] .window-body {
+  background:
+    radial-gradient(circle at 50% 40%, rgba(255, 244, 250, 0.34), transparent 56%),
+    radial-gradient(circle at 18% 22%, rgba(255, 255, 255, 0.18), transparent 24%),
+    radial-gradient(circle at 82% 76%, rgba(255, 206, 233, 0.22), transparent 28%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='.12'%3E%3Ccircle cx='18' cy='24' r='2'/%3E%3Ccircle cx='56' cy='78' r='1.8'/%3E%3Ccircle cx='122' cy='40' r='2'/%3E%3Ccircle cx='136' cy='118' r='1.8'/%3E%3Ccircle cx='88' cy='132' r='2'/%3E%3C/g%3E%3Cg fill='%23ffd6ef' fill-opacity='.16'%3E%3Cpath d='M34 44c3-6 12-3 12 3 0 5-5 8-12 13-7-5-12-8-12-13 0-6 9-9 12-3z'/%3E%3Cpath d='M108 96c3-5 10-3 10 3 0 4-4 7-10 11-6-4-10-7-10-11 0-6 7-8 10-3z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(180deg, rgba(255, 233, 246, 0.82), rgba(255, 202, 229, 0.72));
 }
 
 html[data-theme="pink-noir"] .retro-button {
@@ -3077,8 +3078,8 @@ html[data-theme="icy-blue"] .desktop::before {
   z-index: 30;
   opacity: 0.36;
   background: linear-gradient(180deg, #f1f8ff, #a8c8e8) !important;
-  -webkit-mask: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / 132% 116% no-repeat;
-  mask: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / 132% 116% no-repeat;
+  -webkit-mask: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / 152% 116% no-repeat;
+  mask: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / 152% 116% no-repeat;
 }
 
 html[data-theme="icy-blue"] .desktop::after {
@@ -3090,7 +3091,7 @@ html[data-theme="icy-blue"] .desktop::after {
   pointer-events: none;
   z-index: 31;
   opacity: 0.36;
-  background: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / 132% 116% no-repeat !important;
+  background: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / 152% 116% no-repeat !important;
 }
 
 html[data-theme="blood-red"] body {
