@@ -254,7 +254,7 @@ html[data-theme="pink-noir"] body {
     var(--desktop-bg);
   background-position: 0 0, 0 0, 0 0, center center, 0 0, 0 0, 0 0;
   background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
-  background-size: auto, auto, auto, 94% auto, cover, auto, auto;
+  background-size: auto, auto, auto, 101% auto, cover, auto, auto;
 }
 
 html[data-theme="blood-red"] body {
@@ -2983,8 +2983,8 @@ html[data-theme="icy-blue"] .desktop::before {
   z-index: 30;
   opacity: 1;
   background: linear-gradient(180deg, #f1f8ff, #a8c8e8) !important;
-  -webkit-mask: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / 84% auto no-repeat;
-  mask: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / 84% auto no-repeat;
+  -webkit-mask: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / 100% 100% no-repeat;
+  mask: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / 100% 100% no-repeat;
 }
 
 html[data-theme="icy-blue"] .desktop::after {
@@ -2996,7 +2996,7 @@ html[data-theme="icy-blue"] .desktop::after {
   pointer-events: none;
   z-index: 31;
   opacity: 1;
-  background: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / 84% auto no-repeat !important;
+  background: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / 100% 100% no-repeat !important;
 }
 
 html[data-theme="blood-red"] body {
