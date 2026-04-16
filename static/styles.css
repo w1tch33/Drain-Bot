@@ -2930,12 +2930,12 @@ html[data-theme="camcorder-vhs"] body {
     #100d15;
 }
 html[data-theme="camcorder-vhs"] body::before {
-  inset: 8px;
+  inset: 4px;
   border-radius: 28px;
   opacity: 0.92;
 }
 html[data-theme="camcorder-vhs"] body::after {
-  inset: 44px 54px 88px 54px;
+  inset: 38px 48px 80px 48px;
   opacity: 0.66;
 }
 

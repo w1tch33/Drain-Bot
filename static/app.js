@@ -106,7 +106,9 @@
     const activeTheme = document.documentElement.getAttribute("data-theme") || "mac-system-1";
     const themeScale = activeTheme === "camcorder-vhs" ? 0.95 : 1;
     const scale = Math.min(window.innerWidth / BASE_WIDTH, window.innerHeight / BASE_HEIGHT, 1) * themeScale;
-    desktop.style.transform = `scale(${scale})`;
+    desktop.style.transform = activeTheme === "camcorder-vhs"
+      ? `translateY(-48px) scale(${scale})`
+      : `scale(${scale})`;
   }
 
   function applyTheme(themeName) {
