@@ -142,6 +142,7 @@
       "/static/themes/Dr41n-assets/Dr41n%20hump%20overlay%20cropped.webp",
       "/static/themes/blood-moon-assets/Background-clear.webp",
       "/static/themes/blood-moon-assets/Frame-opaque-strong.webp",
+      "/static/themes/vhs-ghost-assets/VHS%20Ghost%20Background.webp",
     ];
     for (const src of referenceImages) {
       const img = new Image();

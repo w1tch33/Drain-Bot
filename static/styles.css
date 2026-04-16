@@ -2925,9 +2925,8 @@ html[data-theme="dr41n"] body {
 
 html[data-theme="camcorder-vhs"] body {
   background:
-    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0 1px, rgba(0, 0, 0, 0.06) 1px 3px),
-    radial-gradient(circle at 50% 32%, rgba(176, 166, 206, 0.18), transparent 58%),
-    linear-gradient(180deg, rgba(10, 7, 11, 0.34), rgba(6, 5, 8, 0.5)),
+    linear-gradient(180deg, rgba(13, 11, 16, 0.28), rgba(7, 6, 10, 0.42)),
+    url("/static/themes/vhs-ghost-assets/VHS%20Ghost%20Background.webp") center center / cover no-repeat,
     #100d15;
 }
 html[data-theme="camcorder-vhs"] body::before {
