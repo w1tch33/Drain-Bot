@@ -1112,6 +1112,17 @@ html[data-theme="camcorder-vhs"] .session-controls .session-button:first-child {
   box-shadow: inset 0 0 0 1px rgba(255, 144, 144, 0.34), 0 0 8px rgba(120, 26, 35, 0.44);
 }
 
+html[data-theme="camcorder-vhs"] .session-controls {
+  top: 34px;
+  right: 28px;
+  z-index: 40;
+}
+
+html[data-theme="camcorder-vhs"] .flash-button {
+  top: 84px;
+  z-index: 40;
+}
+
 html[data-theme="camcorder-vhs"] #notificationsButton {
   box-shadow: inset 0 0 0 1px rgba(179, 241, 190, 0.34), 0 0 8px rgba(42, 94, 58, 0.36);
 }
