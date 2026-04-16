@@ -245,16 +245,50 @@ html[data-theme="crt-green"] body {
 
 html[data-theme="pink-noir"] body {
   background:
-    linear-gradient(180deg, rgba(15, 3, 12, 0.06), rgba(20, 0, 16, 0.12)),
-    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.1), transparent 24%),
-    radial-gradient(circle at 82% 72%, rgba(255, 128, 214, 0.1), transparent 28%),
+    linear-gradient(180deg, rgba(255, 235, 246, 0.2), rgba(255, 171, 221, 0.12)),
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.22), transparent 24%),
+    radial-gradient(circle at 82% 72%, rgba(255, 162, 224, 0.18), transparent 28%),
     url("/static/themes/envi%27s-crush-assets/envi%27s%20crush%20background.webp"),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='900' viewBox='0 0 1400 900'%3E%3Cg fill='%230f000a' fill-opacity='0.42'%3E%3Cpath d='M86 120c12-24 48-14 48 13 0 20-20 34-48 54-28-20-48-34-48-54 0-27 36-37 48-13z'/%3E%3Cpath d='M268 204c10-20 40-12 40 10 0 17-16 28-40 44-24-16-40-27-40-44 0-22 30-30 40-10z'/%3E%3Cpath d='M1014 188c11-22 43-13 43 11 0 18-17 30-43 48-26-18-43-30-43-48 0-24 32-33 43-11z'/%3E%3Cpath d='M898 558c12-24 48-14 48 13 0 20-20 34-48 54-28-20-48-34-48-54 0-27 36-37 48-13z'/%3E%3Cpath d='M222 612c10-20 40-12 40 10 0 17-16 28-40 44-24-16-40-27-40-44 0-22 30-30 40-10z'/%3E%3Cpath d='M1234 470c9-18 36-11 36 9 0 15-14 25-36 40-22-15-36-25-36-40 0-20 27-27 36-9z'/%3E%3Cpath d='M620 356c8-16 33-10 33 8 0 14-13 23-33 36-20-13-33-22-33-36 0-18 25-24 33-8z'/%3E%3Cpath d='M470 756c8-16 33-10 33 8 0 14-13 23-33 36-20-13-33-22-33-36 0-18 25-24 33-8z'/%3E%3Cpolygon points='470,90 478,112 502,112 482,126 490,148 470,134 450,148 458,126 438,112 462,112'/%3E%3Cpolygon points='760,146 768,168 792,168 772,182 780,204 760,190 740,204 748,182 728,168 752,168'/%3E%3Cpolygon points='1060,332 1068,354 1092,354 1072,368 1080,390 1060,376 1040,390 1048,368 1028,354 1052,354'/%3E%3Cpolygon points='612,622 620,644 644,644 624,658 632,680 612,666 592,680 600,658 580,644 604,644'/%3E%3Cpolygon points='340,500 348,522 372,522 352,536 360,558 340,544 320,558 328,536 308,522 332,522'/%3E%3Cpolygon points='1322,172 1330,194 1354,194 1334,208 1342,230 1322,216 1302,230 1310,208 1290,194 1314,194'/%3E%3Cpolygon points='148,420 156,442 180,442 160,456 168,478 148,464 128,478 136,456 116,442 140,442'/%3E%3Cpolygon points='844,742 852,764 876,764 856,778 864,800 844,786 824,800 832,778 812,764 836,764'/%3E%3Cpolygon points='520,250 528,272 552,272 532,286 540,308 520,294 500,308 508,286 488,272 512,272'/%3E%3C/g%3E%3C/svg%3E"),
-    linear-gradient(155deg, rgba(255, 230, 246, 0.1), rgba(255, 72, 188, 0.06) 45%, rgba(255, 170, 225, 0.08) 80%),
+    linear-gradient(155deg, rgba(255, 244, 250, 0.22), rgba(255, 140, 212, 0.1) 45%, rgba(255, 201, 236, 0.16) 80%),
     var(--desktop-bg);
   background-position: 0 0, 0 0, 0 0, center center, 0 0, 0 0, 0 0;
   background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
-  background-size: auto, auto, auto, 101% auto, cover, auto, auto;
+  background-size: auto, auto, auto, 108% auto, cover, auto, auto;
+}
+
+html[data-theme="pink-noir"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8;
+  opacity: 0.5;
+  background:
+    radial-gradient(circle at 8% 14%, rgba(255, 255, 255, 0.95) 0 2px, transparent 3px),
+    radial-gradient(circle at 19% 7%, rgba(255, 255, 255, 0.88) 0 1.5px, transparent 2.8px),
+    radial-gradient(circle at 34% 19%, rgba(255, 246, 251, 0.9) 0 2px, transparent 3px),
+    radial-gradient(circle at 68% 18%, rgba(255, 255, 255, 0.92) 0 2px, transparent 3px),
+    radial-gradient(circle at 84% 14%, rgba(255, 248, 252, 0.88) 0 1.6px, transparent 2.6px),
+    radial-gradient(circle at 74% 43%, rgba(255, 250, 253, 0.9) 0 2px, transparent 3px),
+    radial-gradient(circle at 29% 58%, rgba(255, 255, 255, 0.84) 0 1.4px, transparent 2.5px),
+    radial-gradient(circle at 63% 68%, rgba(255, 249, 252, 0.88) 0 1.8px, transparent 2.8px),
+    radial-gradient(circle at 12% 86%, rgba(255, 246, 251, 0.92) 0 2px, transparent 3px),
+    radial-gradient(circle at 91% 82%, rgba(255, 250, 253, 0.88) 0 1.8px, transparent 2.8px),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.2), transparent 54%);
+}
+
+html[data-theme="pink-noir"] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9;
+  opacity: 0.26;
+  background:
+    radial-gradient(circle at 14% 28%, rgba(255, 255, 255, 0.46), transparent 22%),
+    radial-gradient(circle at 82% 72%, rgba(255, 224, 244, 0.38), transparent 26%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 7px);
 }
 
 html[data-theme="blood-red"] body {
@@ -412,11 +446,15 @@ html[data-theme="pink-noir"] .retro-window,
 html[data-theme="pink-noir"] .title-shell,
 html[data-theme="pink-noir"] .speech-bubble {
   border-width: 3px;
+  background: rgba(255, 225, 242, 0.68);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.34), var(--window-inset), 0 10px 18px rgba(160, 52, 114, 0.22);
 }
 
 html[data-theme="pink-noir"] .retro-button {
   font-weight: 700;
   letter-spacing: 0.2px;
+  background: linear-gradient(180deg, rgba(255, 205, 232, 0.96), rgba(255, 139, 203, 0.96));
+  box-shadow: inset 0 0 0 1px rgba(255, 246, 251, 0.6), 0 4px 10px rgba(170, 58, 122, 0.24);
 }
 
 html[data-theme="pink-noir"] .window-title > span,
@@ -434,6 +472,7 @@ html[data-theme="pink-noir"] .retro-input,
 html[data-theme="pink-noir"] .theme-select,
 html[data-theme="pink-noir"] .theme-select option {
   color: #18000f;
+  background: rgba(255, 234, 245, 0.9);
 }
 
 html[data-theme="blood-red"] .retro-window,
@@ -2981,10 +3020,10 @@ html[data-theme="icy-blue"] .desktop::before {
   height: 100%;
   pointer-events: none;
   z-index: 30;
-  opacity: 1;
+  opacity: 0.52;
   background: linear-gradient(180deg, #f1f8ff, #a8c8e8) !important;
-  -webkit-mask: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / 100% 100% no-repeat;
-  mask: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / 100% 100% no-repeat;
+  -webkit-mask: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / 116% 118% no-repeat;
+  mask: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / 116% 118% no-repeat;
 }
 
 html[data-theme="icy-blue"] .desktop::after {
@@ -2995,8 +3034,8 @@ html[data-theme="icy-blue"] .desktop::after {
   height: 100%;
   pointer-events: none;
   z-index: 31;
-  opacity: 1;
-  background: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / 100% 100% no-repeat !important;
+  opacity: 0.52;
+  background: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / 116% 118% no-repeat !important;
 }
 
 html[data-theme="blood-red"] body {
