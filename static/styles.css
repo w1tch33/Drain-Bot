@@ -265,7 +265,7 @@ html[data-theme="pink-noir"] body::before {
   z-index: 10;
   opacity: 0.92;
   background:
-    url("/static/themes/envi%27s-crush-assets/envi%27s%20crush%20frame%20rebuilt.webp") center center / 100% 100% no-repeat,
+    url("/static/themes/envi%27s-crush-assets/envi%27s%20crush%20frame.png") center center / 100% 100% no-repeat,
     radial-gradient(circle at 8% 14%, rgba(255, 255, 255, 0.95) 0 2px, transparent 3px),
     radial-gradient(circle at 19% 7%, rgba(255, 255, 255, 0.88) 0 1.5px, transparent 2.8px),
     radial-gradient(circle at 34% 19%, rgba(255, 246, 251, 0.9) 0 2px, transparent 3px),

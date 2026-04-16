@@ -67,7 +67,7 @@
   const THEME_ASSET_MAP = {
     "pink-noir": [
       "/static/themes/envi%27s-crush-assets/envi%27s%20crush%20background.webp",
-      "/static/themes/envi%27s-crush-assets/envi%27s%20crush%20frame%20rebuilt.webp",
+      "/static/themes/envi%27s-crush-assets/envi%27s%20crush%20frame.png",
     ],
     dr41n: [
       "/static/themes/Dr41n-assets/Background.webp",
