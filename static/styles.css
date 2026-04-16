@@ -1323,7 +1323,7 @@ html[data-theme="dr41n"] .music-window {
 html[data-theme="dr41n"] .theme-hump-layer {
   position: absolute;
   left: 50%;
-  top: 90px;
+  top: 70px;
   width: 1388px;
   height: 720px;
   transform: translateX(calc(-50% + 260px));
