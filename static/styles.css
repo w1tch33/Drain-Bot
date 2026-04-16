@@ -972,7 +972,7 @@ html[data-theme="camcorder-vhs"] body::after {
 html[data-theme="camcorder-vhs"] .desktop {
   filter: contrast(1.08) saturate(0.8) sepia(0.16) hue-rotate(6deg);
   animation: bootIn 460ms ease-out;
-  transform: translateY(-38px) perspective(1800px) rotateX(0.35deg) scaleX(0.986) scaleY(1.012);
+  transform: translateY(-58px) perspective(1800px) rotateX(0.35deg) scaleX(0.986) scaleY(1.012);
   transform-origin: center center;
 }
 
