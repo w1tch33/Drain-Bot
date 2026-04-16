@@ -2916,7 +2916,7 @@ html[data-theme="blood-red"] .desktop::before {
   z-index: 30;
   opacity: 1;
   filter: contrast(1.06) saturate(1.02) brightness(1.01);
-  background: url("/static/themes/blood-moon-assets/Frame.webp") center center / cover no-repeat !important;
+  background: url("/static/themes/blood-moon-assets/Frame-opaque.webp") center center / cover no-repeat !important;
 }
 
 @media (max-width: 980px) {
