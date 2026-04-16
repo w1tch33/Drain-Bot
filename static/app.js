@@ -617,9 +617,9 @@
             <div class="map-pin-label">${escapeHtml(row.name)}</div>
             <div class="map-pin-marker ${row.visited ? "visited" : "unvisited"}"></div>
           `,
-          iconSize: [160, 54],
-          iconAnchor: [80, 50],
-          popupAnchor: [0, -42],
+          iconSize: [160, 42],
+          iconAnchor: [80, 38],
+          popupAnchor: [0, -34],
         });
         const marker = L.marker([row.lat, row.lon], { icon: markerIcon });
         marker.bindPopup(mapPopupHtml(row));

@@ -2571,6 +2571,11 @@ html[data-theme="blood-red"] .tutorial-button {
 .map-pin-wrap {
   background: transparent !important;
   border: 0 !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1px;
 }
 .map-pin-label {
   text-align: center;
@@ -2588,7 +2593,7 @@ html[data-theme="blood-red"] .tutorial-button {
   text-overflow: ellipsis;
   white-space: nowrap;
   margin: 0 auto;
-  transform: translateY(-1px);
+  line-height: 1.05;
 }
 .map-pin-marker {
   width: 18px;
@@ -2915,8 +2920,12 @@ html[data-theme="blood-red"] .desktop::before {
   pointer-events: none;
   z-index: 30;
   opacity: 1;
-  filter: contrast(1.06) saturate(1.02) brightness(1.01);
+  filter: none;
   background: url("/static/themes/blood-moon-assets/Frame-opaque.webp") center center / cover no-repeat !important;
+}
+
+html[data-theme="blood-red"] .desktop::after {
+  content: none;
 }
 
 @media (max-width: 980px) {
