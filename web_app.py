@@ -508,6 +508,7 @@ def update_drain(name: str):
     drain_service.update_drain(
         name,
         current_username(),
+        display_name=str(payload.get("display_name", "")),
         visited=visited_flag,
         favorite=str(payload.get("favorite", "")).lower() in {"1", "true", "on", "yes"},
         description=str(payload.get("description", "")),
@@ -519,7 +520,8 @@ def update_drain(name: str):
     )
     if visited_flag and not was_visited:
         drain_service.add_activity(current_username(), f"Visited {name}", "visit")
-    return jsonify({"ok": True, "stats": drain_service.stats_summary(current_username())})
+    updated = drain_service.get_drain(str(payload.get("display_name", "")).strip() or name, current_username())
+    return jsonify({"ok": True, "stats": drain_service.stats_summary(current_username()), "drain": updated})
 
 
 @app.post("/api/drains/<path:name>/delete")

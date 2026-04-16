@@ -1567,6 +1567,9 @@ def _custom_drains(metadata: dict[str, Any]) -> list[dict[str, Any]]:
 def _merge_metadata(base: dict[str, Any], item: dict[str, Any] | None) -> dict[str, Any]:
     merged = dict(base)
     meta = item if isinstance(item, dict) else {}
+    merged["storage_name"] = base.get("name", "")
+    if meta.get("display_name"):
+        merged["name"] = str(meta.get("display_name", "")).strip() or merged["name"]
     if meta.get("description"):
         merged["description"] = meta["description"]
     merged["visited"] = bool(meta.get("visited"))
@@ -1578,6 +1581,13 @@ def _merge_metadata(base: dict[str, Any], item: dict[str, Any] | None) -> dict[s
     merged["notes"] = meta.get("witch_notes") or meta.get("notes") or ""
     merged["features"] = meta.get("features", {})
     return merged
+
+
+def resolve_storage_name(name: str, username: str | None = None) -> str | None:
+    for drain in get_all_drains(username):
+        if drain["name"] == name:
+            return str(drain.get("storage_name") or drain["name"])
+    return None
 
 
 def _apply_origin(drain: dict[str, Any], origin_lat: float, origin_lon: float) -> dict[str, Any]:
@@ -1835,6 +1845,7 @@ def update_drain(
     name: str,
     username: str | None = None,
     *,
+    display_name: str | None = None,
     visited: bool | None = None,
     favorite: bool | None = None,
     description: str | None = None,
@@ -1847,9 +1858,14 @@ def update_drain(
     if not username:
         raise ValueError("A user account is required.")
     metadata = load_user_metadata(username)
-    current = metadata.get(name, {})
+    storage_name = resolve_storage_name(name, username) or name
+    current = metadata.get(storage_name, {})
     if not isinstance(current, dict):
         current = {}
+
+    if display_name is not None:
+        cleaned_name = display_name.strip()
+        current["display_name"] = cleaned_name or storage_name
 
     if visited is not None:
         current["visited"] = 1 if visited else 0
@@ -1868,7 +1884,7 @@ def update_drain(
     if features is not None:
         current["features"] = {key: 1 if value else 0 for key, value in features.items()}
 
-    metadata[name] = current
+    metadata[storage_name] = current
     save_user_metadata(username, metadata)
     return True
 
@@ -1999,7 +2015,8 @@ def remove_photo(name: str, username: str, path: str) -> None:
 
 def delete_user_drain(username: str, name: str) -> bool:
     metadata = load_user_metadata(username)
-    current = metadata.get(name)
+    storage_name = resolve_storage_name(name, username) or name
+    current = metadata.get(storage_name)
     if not isinstance(current, dict):
         return False
     if not (current.get("custom") or current.get("synced")):
@@ -2011,7 +2028,7 @@ def delete_user_drain(username: str, name: str) -> bool:
             if os.path.exists(absolute):
                 os.remove(absolute)
 
-    metadata.pop(name, None)
+    metadata.pop(storage_name, None)
     save_user_metadata(username, metadata)
     return True
 

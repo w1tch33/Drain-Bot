@@ -1249,6 +1249,7 @@
         <label class="check-row"><input id="favoriteField" type="checkbox" ${drain.favorite ? "checked" : ""}><span>Favorite</span></label>
         <label class="check-row"><input id="visitedField" type="checkbox" ${drain.visited ? "checked" : ""}><span>Visited</span></label>
       </div>
+      <div class="detail-section"><label>Name</label><input class="retro-input" id="nameField" type="text" value="${escapeHtml(drain.name || "")}"></div>
       <div class="detail-section"><label>Description</label><textarea class="retro-textarea" id="descriptionField" rows="6">${escapeHtml(drain.description || "")}</textarea></div>
       <div class="detail-section"><label>Notes</label><textarea class="retro-textarea" id="notesField" rows="5">${escapeHtml(drain.notes || "")}</textarea></div>
       <div class="detail-section"><div>FEATURES:</div><div class="feature-grid">${features
@@ -1357,6 +1358,7 @@
 
     function captureDraft() {
       return {
+        display_name: modalBody.querySelector("#nameField")?.value || "",
         favorite: modalBody.querySelector("#favoriteField")?.checked || false,
         visited: modalBody.querySelector("#visitedField")?.checked || false,
         description: modalBody.querySelector("#descriptionField")?.value || "",
@@ -1375,10 +1377,12 @@
       if (!draft) return;
       const favoriteField = modalBody.querySelector("#favoriteField");
       const visitedField = modalBody.querySelector("#visitedField");
+      const nameField = modalBody.querySelector("#nameField");
       const descriptionField = modalBody.querySelector("#descriptionField");
       const notesField = modalBody.querySelector("#notesField");
       if (favoriteField) favoriteField.checked = !!draft.favorite;
       if (visitedField) visitedField.checked = !!draft.visited;
+      if (nameField) nameField.value = draft.display_name || "";
       if (descriptionField) descriptionField.value = draft.description || "";
       if (notesField) notesField.value = draft.notes || "";
       modalBody.querySelectorAll(".difficulty-button").forEach((button) => button.classList.toggle("active", button.dataset.value === draft.difficulty));
@@ -1443,10 +1447,11 @@
       if (saveStatus) saveStatus.textContent = "Saving...";
       setLoading(true);
       try {
-        await fetchJson(`/api/drains/${encodeURIComponent(name)}/update`, {
+        const response = await fetchJson(`/api/drains/${encodeURIComponent(name)}/update`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            display_name: modalBody.querySelector("#nameField").value,
             favorite: modalBody.querySelector("#favoriteField").checked,
             visited: modalBody.querySelector("#visitedField").checked,
             description: modalBody.querySelector("#descriptionField").value,
@@ -1466,6 +1471,11 @@
           setTimeout(() => {
             if (saveStatus.textContent === "Saved!") saveStatus.textContent = "";
           }, 1500);
+        }
+        const newName = response?.drain?.name;
+        if (newName && newName !== name) {
+          await openDrain(newName);
+          return;
         }
       } finally {
         setLoading(false);

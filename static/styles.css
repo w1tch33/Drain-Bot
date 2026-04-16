@@ -3079,6 +3079,23 @@ html[data-theme="blood-red"] .desktop::after {
     display: none !important;
     content: none !important;
   }
+  html[data-theme="camcorder-vhs"] .desktop {
+    transform: none !important;
+    filter: none !important;
+  }
+  html[data-theme="camcorder-vhs"] .session-controls,
+  html[data-theme="camcorder-vhs"] .visited-window,
+  html[data-theme="camcorder-vhs"] .title-shell,
+  html[data-theme="camcorder-vhs"] .flash-button {
+    top: auto !important;
+    right: auto !important;
+    z-index: auto !important;
+  }
+  html[data-theme="camcorder-vhs"] .music-window::after,
+  html[data-theme="camcorder-vhs"] .desktop > .title-shell::after {
+    display: none !important;
+    content: none !important;
+  }
   .smiley-zone { width: 100%; height: 240px; }
   .smiley-frame { left: 0; }
   .speech-bubble { left: 170px; width: min(230px, calc(100% - 180px)); }
