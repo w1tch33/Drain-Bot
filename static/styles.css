@@ -2955,10 +2955,15 @@ html[data-theme="icy-blue"] body {
     #091f34;
 }
 html[data-theme="icy-blue"] body::before {
-  opacity: 0.08;
+  background:
+    url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / cover no-repeat !important;
+  opacity: 0.94;
 }
 html[data-theme="icy-blue"] body::after {
-  opacity: 0.14;
+  background:
+    radial-gradient(circle at 52% 34%, rgba(215, 243, 255, 0.14), transparent 58%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(180, 220, 255, 0.04)) !important;
+  opacity: 0.18;
 }
 
 html[data-theme="blood-red"] body {
