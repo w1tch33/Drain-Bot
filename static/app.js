@@ -64,6 +64,24 @@
     "dr41n",
     "special-chaos",
   ]);
+  const THEME_ASSET_MAP = {
+    dr41n: [
+      "/static/themes/Dr41n-assets/Background.webp",
+      "/static/themes/Dr41n-assets/Dr41n%20hump%20overlay%20cropped.webp",
+    ],
+    "blood-red": [
+      "/static/themes/blood-moon-assets/Background-clear.webp",
+      "/static/themes/blood-moon-assets/Frame-opaque-strong.webp",
+    ],
+    "camcorder-vhs": [
+      "/static/themes/vhs-ghost-assets/VHS%20Ghost%20Background.webp",
+    ],
+    "icy-blue": [
+      "/static/themes/frostbyte-assets/frostbyte%20background.webp",
+      "/static/themes/frostbyte-assets/frostbyte%20frame.webp",
+    ],
+  };
+  const preloadedThemeAssets = new Set();
   let musicMarqueeTimer = null;
   let audioUnlocked = false;
   let pendingAutoplay = false;
@@ -127,7 +145,20 @@
     } catch (_error) {
       // Ignore storage failures (private mode, blocked storage).
     }
+    preloadThemeAssets(theme);
     fitDesktop();
+  }
+
+  function preloadThemeAssets(theme) {
+    const assets = THEME_ASSET_MAP[theme] || [];
+    for (const src of assets) {
+      if (preloadedThemeAssets.has(src)) continue;
+      const img = new Image();
+      img.src = src;
+      img.decoding = "async";
+      img.fetchPriority = "high";
+      preloadedThemeAssets.add(src);
+    }
   }
 
   function setupThemes() {
@@ -139,21 +170,6 @@
     dr41nBackground.src = "/static/themes/Drain_Theme_Background.png?v=20260415b";
     dr41nBackground.fetchPriority = "high";
     dr41nBackground.decoding = "async";
-    const referenceImages = [
-      "/static/themes/Dr41n-assets/Background.webp",
-      "/static/themes/Dr41n-assets/Dr41n%20hump%20overlay%20cropped.webp",
-      "/static/themes/blood-moon-assets/Background-clear.webp",
-      "/static/themes/blood-moon-assets/Frame-opaque-strong.webp",
-      "/static/themes/vhs-ghost-assets/VHS%20Ghost%20Background.webp",
-      "/static/themes/frostbyte-assets/frostbyte%20background.webp",
-      "/static/themes/frostbyte-assets/frostbyte%20frame.webp",
-    ];
-    for (const src of referenceImages) {
-      const img = new Image();
-      img.src = src;
-      img.fetchPriority = "high";
-      img.decoding = "async";
-    }
     let storedTheme = "mac-system-1";
     try {
       storedTheme = localStorage.getItem(THEME_STORAGE_KEY) || "mac-system-1";
