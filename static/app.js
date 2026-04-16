@@ -65,6 +65,9 @@
     "special-chaos",
   ]);
   const THEME_ASSET_MAP = {
+    "pink-noir": [
+      "/static/themes/envi%27s-crush-assets/envi%27s%20crush%20background.webp",
+    ],
     dr41n: [
       "/static/themes/Dr41n-assets/Background.webp",
       "/static/themes/Dr41n-assets/Dr41n%20hump%20overlay%20cropped.webp",
