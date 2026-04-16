@@ -1323,9 +1323,9 @@ html[data-theme="dr41n"] .music-window {
 html[data-theme="dr41n"] .theme-hump-layer {
   position: absolute;
   left: 50%;
-  top: 236px;
-  width: 1268px;
-  height: 640px;
+  top: 190px;
+  width: 1388px;
+  height: 720px;
   transform: translateX(calc(-50% + 220px));
   pointer-events: none;
   z-index: 4;
