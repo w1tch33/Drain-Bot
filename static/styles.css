@@ -2983,8 +2983,8 @@ html[data-theme="icy-blue"] .desktop::before {
   z-index: 30;
   opacity: 1;
   background: linear-gradient(180deg, #f1f8ff, #a8c8e8) !important;
-  -webkit-mask: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / cover no-repeat;
-  mask: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / cover no-repeat;
+  -webkit-mask: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / contain no-repeat;
+  mask: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / contain no-repeat;
 }
 
 html[data-theme="icy-blue"] .desktop::after {
@@ -2996,7 +2996,7 @@ html[data-theme="icy-blue"] .desktop::after {
   pointer-events: none;
   z-index: 31;
   opacity: 1;
-  background: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / cover no-repeat !important;
+  background: url("/static/themes/frostbyte-assets/frostbyte%20frame.webp") center center / contain no-repeat !important;
 }
 
 html[data-theme="blood-red"] body {
