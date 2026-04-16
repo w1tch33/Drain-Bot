@@ -1322,13 +1322,13 @@ html[data-theme="dr41n"] .music-window {
 
 html[data-theme="dr41n"] .theme-hump-layer {
   position: absolute;
-  left: 316px;
-  top: 454px;
-  width: 804px;
-  height: 372px;
+  left: 214px;
+  top: 406px;
+  width: 1048px;
+  height: 430px;
   pointer-events: none;
   z-index: 4;
-  background: url("/static/themes/Dr41n-assets/Dr41n%20hump%20overlay.webp") center bottom / contain no-repeat;
+  background: url("/static/themes/Dr41n-assets/Dr41n%20hump%20overlay%20cropped.webp") center bottom / contain no-repeat;
 }
 
 html[data-theme="dr41n"] .control-window,
