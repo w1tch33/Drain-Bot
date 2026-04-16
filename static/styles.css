@@ -263,22 +263,9 @@ html[data-theme="pink-noir"] body::before {
   inset: 0;
   pointer-events: none;
   z-index: 10;
-  opacity: 0.92;
+  opacity: 1;
   background:
-    url("/static/themes/envi%27s-crush-assets/envi%27s%20crush%20frame.png") center center / 100% 100% no-repeat,
-    radial-gradient(circle at 8% 14%, rgba(255, 255, 255, 0.95) 0 2px, transparent 3px),
-    radial-gradient(circle at 19% 7%, rgba(255, 255, 255, 0.88) 0 1.5px, transparent 2.8px),
-    radial-gradient(circle at 34% 19%, rgba(255, 246, 251, 0.9) 0 2px, transparent 3px),
-    radial-gradient(circle at 68% 18%, rgba(255, 255, 255, 0.92) 0 2px, transparent 3px),
-    radial-gradient(circle at 84% 14%, rgba(255, 248, 252, 0.88) 0 1.6px, transparent 2.6px),
-    radial-gradient(circle at 74% 43%, rgba(255, 250, 253, 0.9) 0 2px, transparent 3px),
-    radial-gradient(circle at 29% 58%, rgba(255, 255, 255, 0.84) 0 1.4px, transparent 2.5px),
-    radial-gradient(circle at 63% 68%, rgba(255, 249, 252, 0.88) 0 1.8px, transparent 2.8px),
-    radial-gradient(circle at 12% 86%, rgba(255, 246, 251, 0.92) 0 2px, transparent 3px),
-    radial-gradient(circle at 91% 82%, rgba(255, 250, 253, 0.88) 0 1.8px, transparent 2.8px),
-    radial-gradient(circle at 48% 12%, rgba(255, 255, 255, 0.96) 0 2px, transparent 3px),
-    radial-gradient(circle at 54% 76%, rgba(255, 244, 250, 0.9) 0 1.8px, transparent 2.8px),
-    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.24), transparent 54%);
+    url("/static/themes/envi%27s-crush-assets/envis-crush-frame-original.png") center center / 100% 100% no-repeat;
 }
 
 html[data-theme="pink-noir"] body::after {
@@ -287,7 +274,7 @@ html[data-theme="pink-noir"] body::after {
   inset: 0;
   pointer-events: none;
   z-index: 9;
-  opacity: 0.26;
+  opacity: 0.34;
   background:
     radial-gradient(circle at 14% 28%, rgba(255, 255, 255, 0.46), transparent 22%),
     radial-gradient(circle at 82% 72%, rgba(255, 224, 244, 0.38), transparent 26%),
