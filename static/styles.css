@@ -1279,7 +1279,15 @@ html[data-theme="dr41n"] .title-shell {
 }
 
 html[data-theme="dr41n"] .desktop::before {
-  content: none;
+  content: "";
+  position: absolute;
+  left: 384px;
+  top: 538px;
+  width: 662px;
+  height: 270px;
+  pointer-events: none;
+  z-index: 3;
+  background: url("/static/themes/Dr41n-assets/Dr41n%20hump%20overlay.png") center bottom / contain no-repeat;
 }
 
 html[data-theme="dr41n"] .retro-window::before,
@@ -1313,20 +1321,21 @@ html[data-theme="dr41n"] .results-window {
 }
 
 html[data-theme="dr41n"] .results-window::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: -110px;
-  width: 136%;
-  height: 270px;
-  transform: translateX(-50%);
-  pointer-events: none;
-  z-index: 3;
-  background: url("/static/themes/Dr41n-assets/Dr41n%20hump%20overlay.png") center bottom / contain no-repeat;
-  opacity: 1;
+  content: none;
 }
 
 html[data-theme="dr41n"] .music-window {
+  z-index: 6;
+}
+
+html[data-theme="dr41n"] .control-window,
+html[data-theme="dr41n"] .search-window,
+html[data-theme="dr41n"] .smiley-zone,
+html[data-theme="dr41n"] .visited-window,
+html[data-theme="dr41n"] .title-shell,
+html[data-theme="dr41n"] .flash-button,
+html[data-theme="dr41n"] .credit,
+html[data-theme="dr41n"] .session-controls {
   z-index: 5;
 }
 
@@ -2974,10 +2983,9 @@ html[data-theme="blood-red"] .desktop::before {
   .title-shell { margin-top: 8px; }
   .control-window, .results-window, .search-window { height: auto; min-height: 280px; }
   .music-window { height: auto; }
-  html[data-theme="dr41n"] .results-window::after {
-    width: 112%;
-    height: 180px;
-    bottom: -78px;
+  html[data-theme="dr41n"] .desktop::before {
+    display: none !important;
+    content: none !important;
   }
   .smiley-zone { width: 100%; height: 240px; }
   .smiley-frame { left: 0; }
