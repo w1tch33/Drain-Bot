@@ -1238,6 +1238,10 @@
     const showDelete = drain.source === "custom" || drain.source === "synced";
 
     return `
+      <div class="detail-section detail-name-section">
+        <label>Drain Name</label>
+        <input class="retro-input" id="nameField" type="text" value="${escapeHtml(drain.name || "")}">
+      </div>
       <div class="detail-section detail-actions">
         <button class="retro-button" type="button" id="nearbyButton">Nearby</button>
         <button class="retro-button" type="button" id="routeFromHereButton">Build Route</button>
@@ -1249,7 +1253,6 @@
         <label class="check-row"><input id="favoriteField" type="checkbox" ${drain.favorite ? "checked" : ""}><span>Favorite</span></label>
         <label class="check-row"><input id="visitedField" type="checkbox" ${drain.visited ? "checked" : ""}><span>Visited</span></label>
       </div>
-      <div class="detail-section"><label>Name</label><input class="retro-input" id="nameField" type="text" value="${escapeHtml(drain.name || "")}"></div>
       <div class="detail-section"><label>Description</label><textarea class="retro-textarea" id="descriptionField" rows="6">${escapeHtml(drain.description || "")}</textarea></div>
       <div class="detail-section"><label>Notes</label><textarea class="retro-textarea" id="notesField" rows="5">${escapeHtml(drain.notes || "")}</textarea></div>
       <div class="detail-section"><div>FEATURES:</div><div class="feature-grid">${features
