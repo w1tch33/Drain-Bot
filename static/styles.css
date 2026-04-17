@@ -236,11 +236,13 @@ body {
 
 html[data-theme="crt-green"] body {
   background:
+    linear-gradient(180deg, rgba(8, 34, 18, 0.78), rgba(4, 16, 9, 0.88)),
+    radial-gradient(circle at 20% 14%, rgba(91, 255, 154, 0.12), transparent 26%),
+    url("/static/themes/crt-green-assets/CRT%20Green%20Background.png") center center / cover no-repeat,
     linear-gradient(180deg, rgba(8, 34, 18, 0.95), rgba(4, 16, 9, 0.98)),
     linear-gradient(to right, rgba(91, 255, 154, 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(91, 255, 154, 0.08) 1px, transparent 1px),
-    radial-gradient(circle at 20% 14%, rgba(91, 255, 154, 0.12), transparent 26%);
-  background-size: auto, 20px 20px, 20px 20px, auto;
+    linear-gradient(to bottom, rgba(91, 255, 154, 0.08) 1px, transparent 1px);
+  background-size: auto, auto, cover, auto, 20px 20px, 20px 20px;
 }
 
 html[data-theme="pink-noir"] body {

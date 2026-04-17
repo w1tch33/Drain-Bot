@@ -65,6 +65,9 @@
     "special-chaos",
   ]);
   const THEME_ASSET_MAP = {
+    "crt-green": [
+      "/static/themes/crt-green-assets/CRT%20Green%20Background.png",
+    ],
     "pink-noir": [
       "/static/themes/envi%27s-crush-assets/envi%27s%20crush%20background.webp",
       "/static/themes/envi%27s-crush-assets/envis-crush-frame-original.png",
