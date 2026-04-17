@@ -580,14 +580,17 @@
   }
 
   function mapLinePopupHtml(line) {
-    const deleteButton =
+    const editButtons =
       line.source === "user"
-        ? `<button class="retro-button map-delete-line" type="button" data-id="${escapeHtml(line.id)}">Delete Line</button>`
+        ? `
+            <button class="retro-button map-edit-line" type="button" data-id="${escapeHtml(line.id)}">Edit Points</button>
+            <button class="retro-button map-delete-line" type="button" data-id="${escapeHtml(line.id)}">Delete Line</button>
+          `
         : "";
     return `
       <div class="map-popup-title">${escapeHtml(line.name || "Measurement Line")}</div>
       <div>Underground route</div>
-      ${deleteButton}
+      ${editButtons}
     `;
   }
 
@@ -673,11 +676,18 @@
       let drawingLine = false;
       let draftPoints = [];
       let draftLine = null;
+      let editingLineId = "";
+      let editingPoints = [];
+      let editHandles = [];
 
       function refreshMapStatus(message = "") {
         if (!mapStatus) return;
         if (message) {
           mapStatus.textContent = message;
+          return;
+        }
+        if (editingLineId) {
+          mapStatus.textContent = `Editing measurement line: ${editingPoints.length} point${editingPoints.length === 1 ? "" : "s"}. Drag the dots, then click Save Edit.`;
           return;
         }
         if (drawingLine) {
@@ -688,12 +698,23 @@
       }
 
       function updateDrawControls() {
-        if (drawLineButton) drawLineButton.textContent = drawingLine ? "Drawing..." : "Draw Line";
-        if (undoPointButton) undoPointButton.disabled = !drawingLine || draftPoints.length === 0;
-        if (saveLineButton) saveLineButton.disabled = !drawingLine || draftPoints.length < 2;
-        if (cancelLineButton) cancelLineButton.disabled = !drawingLine;
-        if (lineNameInput) lineNameInput.disabled = !drawingLine;
+        const editing = Boolean(editingLineId);
+        if (drawLineButton) {
+          drawLineButton.textContent = drawingLine ? "Drawing..." : editing ? "Edit Active" : "Draw Line";
+          drawLineButton.disabled = editing || drawingLine;
+        }
+        if (undoPointButton) undoPointButton.disabled = editing || !drawingLine || draftPoints.length === 0;
+        if (saveLineButton) {
+          saveLineButton.textContent = editing ? "Save Edit" : "Save Line";
+          saveLineButton.disabled = editing ? editingPoints.length < 2 : !drawingLine || draftPoints.length < 2;
+        }
+        if (cancelLineButton) {
+          cancelLineButton.textContent = editing ? "Cancel Edit" : "Cancel Draw";
+          cancelLineButton.disabled = editing ? false : !drawingLine;
+        }
+        if (lineNameInput) lineNameInput.disabled = editing || !drawingLine;
         mapEl.classList.toggle("map-drawing", drawingLine);
+        mapEl.classList.toggle("map-editing", editing);
         refreshMapStatus();
       }
 
@@ -705,6 +726,71 @@
         }
         drawingLine = false;
         updateDrawControls();
+      }
+
+      function findMeasurementLine(lineId) {
+        return measurementLines.find((item) => item.id === lineId) || null;
+      }
+
+      function clearEditHandles() {
+        editHandles.forEach((handle) => handle.remove());
+        editHandles = [];
+      }
+
+      function syncEditingLine() {
+        if (!editingLineId) return;
+        const layer = lineLayers.get(editingLineId);
+        if (layer) {
+          layer.setLatLngs(editingPoints);
+          layer.bringToFront();
+        }
+      }
+
+      function stopEditingLine(options = {}) {
+        const { restore = false, message = "" } = options;
+        const original = restore ? findMeasurementLine(editingLineId) : null;
+        if (restore && original) {
+          editingPoints = Array.isArray(original.points) ? original.points.map((point) => [...point]) : [];
+          syncEditingLine();
+        }
+        clearEditHandles();
+        editingLineId = "";
+        editingPoints = [];
+        updateDrawControls();
+        if (message) refreshMapStatus(message);
+      }
+
+      function startEditingLine(line) {
+        if (!line || line.source !== "user") return;
+        if (drawingLine) clearDraftLine();
+        if (editingLineId === line.id) return;
+        stopEditingLine();
+        editingLineId = line.id;
+        editingPoints = Array.isArray(line.points) ? line.points.map((point) => [...point]) : [];
+        clearEditHandles();
+        editingPoints.forEach((point, index) => {
+          const handle = L.marker(point, {
+            draggable: true,
+            keyboard: false,
+            zIndexOffset: 1200,
+            icon: L.divIcon({
+              className: "map-edit-handle",
+              iconSize: [18, 18],
+              iconAnchor: [9, 9],
+            }),
+          });
+          handle.on("drag", (event) => {
+            const latLng = event.target.getLatLng();
+            editingPoints[index] = [Number(latLng.lat.toFixed(6)), Number(latLng.lng.toFixed(6))];
+            syncEditingLine();
+            refreshMapStatus();
+          });
+          handle.addTo(map);
+          editHandles.push(handle);
+        });
+        syncEditingLine();
+        updateDrawControls();
+        refreshMapStatus(`Editing "${line.name || "Measurement Line"}". Drag the points, then click Save Edit.`);
       }
 
       function ensureDraftLine() {
@@ -722,30 +808,46 @@
 
       function bindLinePopup(layer, line) {
         layer.on("popupopen", (event) => {
+          const editButton = event.popup.getElement()?.querySelector(".map-edit-line");
           const deleteButton = event.popup.getElement()?.querySelector(".map-delete-line");
-          if (!deleteButton) return;
-          bindPress(deleteButton, async () => {
-            try {
-              await fetchJson(`/api/map-lines/${encodeURIComponent(deleteButton.dataset.id || "")}/delete`, {
-                method: "POST",
-              });
-              const existing = lineLayers.get(line.id);
-              if (existing) {
-                existing.remove();
-                lineLayers.delete(line.id);
+          if (editButton) {
+            bindPress(editButton, () => {
+              map.closePopup();
+              startEditingLine(line);
+            });
+          }
+          if (deleteButton) {
+            bindPress(deleteButton, async () => {
+              try {
+                if (editingLineId === line.id) {
+                  stopEditingLine();
+                }
+                await fetchJson(`/api/map-lines/${encodeURIComponent(deleteButton.dataset.id || "")}/delete`, {
+                  method: "POST",
+                });
+                const existing = lineLayers.get(line.id);
+                if (existing) {
+                  existing.remove();
+                  lineLayers.delete(line.id);
+                }
+                const index = measurementLines.findIndex((item) => item.id === line.id);
+                if (index >= 0) measurementLines.splice(index, 1);
+                refreshMapStatus("Measurement line deleted.");
+              } catch (error) {
+                refreshMapStatus(error.message);
               }
-              const index = measurementLines.findIndex((item) => item.id === line.id);
-              if (index >= 0) measurementLines.splice(index, 1);
-              refreshMapStatus("Measurement line deleted.");
-            } catch (error) {
-              refreshMapStatus(error.message);
-            }
-          });
+            });
+          }
         });
       }
 
       function addMeasurementLine(line) {
         if (!Array.isArray(line?.points) || line.points.length < 2) return;
+        const existingLayer = lineLayers.get(line.id);
+        if (existingLayer) {
+          existingLayer.remove();
+          lineLayers.delete(line.id);
+        }
         const layer = L.polyline(line.points, {
           color: line.color || "#fbc02d",
           weight: line.source === "user" ? 5 : 4,
@@ -828,7 +930,7 @@
       }
 
       map.on("click", (event) => {
-        if (!drawingLine) return;
+        if (!drawingLine || editingLineId) return;
         const point = [Number(event.latlng.lat.toFixed(6)), Number(event.latlng.lng.toFixed(6))];
         draftPoints.push(point);
         ensureDraftLine().setLatLngs(draftPoints);
@@ -837,7 +939,7 @@
 
       if (drawLineButton) {
         bindPress(drawLineButton, () => {
-          if (drawingLine) return;
+          if (drawingLine || editingLineId) return;
           drawingLine = true;
           draftPoints = [];
           if (draftLine) {
@@ -867,6 +969,10 @@
 
       if (cancelLineButton) {
         bindPress(cancelLineButton, () => {
+          if (editingLineId) {
+            stopEditingLine({ restore: true, message: "Edit cancelled." });
+            return;
+          }
           clearDraftLine();
           refreshMapStatus("Draw cancelled.");
         });
@@ -874,6 +980,30 @@
 
       if (saveLineButton) {
         bindPress(saveLineButton, async () => {
+          if (editingLineId) {
+            try {
+              const result = await fetchJson(`/api/map-lines/${encodeURIComponent(editingLineId)}/update`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  points: editingPoints,
+                }),
+              });
+              if (result?.line) {
+                const index = measurementLines.findIndex((line) => line.id === result.line.id);
+                if (index >= 0) {
+                  measurementLines[index] = result.line;
+                } else {
+                  measurementLines.push(result.line);
+                }
+                addMeasurementLine(result.line);
+              }
+              stopEditingLine({ message: "Measurement line updated." });
+            } catch (error) {
+              refreshMapStatus(error.message);
+            }
+            return;
+          }
           if (!drawingLine || draftPoints.length < 2) {
             refreshMapStatus("Add at least 2 points before saving.");
             return;
@@ -938,6 +1068,7 @@
       setTimeout(() => map.invalidateSize(), 40);
       updateDrawControls();
       state.mapCleanup = () => {
+        stopEditingLine();
         map.remove();
       };
     } catch (error) {

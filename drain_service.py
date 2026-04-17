@@ -1340,6 +1340,48 @@ def save_user_measurement_line(username: str, name: str, points: Any, color: str
     return line
 
 
+def update_user_measurement_line(
+    username: str,
+    line_id: str,
+    points: Any,
+    name: str | None = None,
+    color: str | None = None,
+) -> dict[str, Any]:
+    target = str(line_id or "").strip()
+    if not target:
+        raise ValueError("Measurement line not found.")
+    normalized_points = _normalize_measurement_points(points)
+    if len(normalized_points) < 2:
+        raise ValueError("A measurement line needs at least 2 points.")
+    metadata = load_user_metadata(username)
+    existing = metadata.get("_measurement_lines", [])
+    if not isinstance(existing, list) or not existing:
+        raise ValueError("Measurement line not found.")
+    updated_line = None
+    for item in existing:
+        if str(item.get("id", "")).strip() != target:
+            continue
+        item["points"] = normalized_points
+        if name is not None:
+            cleaned_name = clean_description(str(name)).strip()
+            if cleaned_name:
+                item["name"] = cleaned_name
+        if color is not None:
+            cleaned_color = str(color).strip()
+            if cleaned_color:
+                item["color"] = cleaned_color
+        item["source"] = "user"
+        updated_line = _normalize_measurement_line(item, default_source="user")
+        if updated_line:
+            item.update(updated_line)
+        break
+    if not updated_line:
+        raise ValueError("Measurement line not found.")
+    metadata["_measurement_lines"] = existing
+    save_user_metadata(username, metadata)
+    return updated_line
+
+
 def delete_user_measurement_line(username: str, line_id: str) -> bool:
     target = str(line_id or "").strip()
     if not target:

@@ -2875,6 +2875,21 @@ html[data-theme="blood-red"] .tutorial-button {
 .map-delete-line {
   margin-top: 6px;
 }
+.map-edit-line {
+  margin-top: 6px;
+  margin-right: 8px;
+}
+.map-edit-handle {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid #111;
+  background: #fff59d;
+  box-shadow: 0 0 0 2px rgba(255, 192, 45, 0.35);
+}
+.map-view.map-editing {
+  cursor: grab;
+}
 .game-canvas {
   width: auto;
   max-width: 100%;

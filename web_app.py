@@ -282,6 +282,23 @@ def save_map_line():
     return jsonify({"ok": True, "line": line})
 
 
+@app.post("/api/map-lines/<line_id>/update")
+@login_required
+def update_map_line(line_id: str):
+    payload = request.get_json(silent=True) or request.form
+    try:
+        line = drain_service.update_user_measurement_line(
+            current_username(),
+            line_id,
+            payload.get("points"),
+            payload.get("name"),
+            payload.get("color"),
+        )
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
+    return jsonify({"ok": True, "line": line})
+
+
 @app.post("/api/map-lines/<line_id>/delete")
 @login_required
 def delete_map_line(line_id: str):
