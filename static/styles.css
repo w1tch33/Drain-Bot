@@ -513,6 +513,17 @@ html[data-theme="pink-noir"] .theme-select option {
   background: rgba(255, 234, 245, 0.9);
 }
 
+html[data-theme="pink-noir"] .links-button,
+html[data-theme="pink-noir"] .tutorial-button,
+html[data-theme="pink-noir"] .themes-wrap,
+html[data-theme="pink-noir"] .map-panel-button {
+  right: 14px;
+}
+
+html[data-theme="pink-noir"] .results-window .window-title {
+  transform: translateX(calc(-50% + 12px));
+}
+
 html[data-theme="blood-red"] .retro-window,
 html[data-theme="blood-red"] .speech-bubble {
   border-style: double;
