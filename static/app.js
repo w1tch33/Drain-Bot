@@ -1031,6 +1031,7 @@
     if (typeof content === "string") modalBody.innerHTML = content;
     else modalBody.appendChild(content);
     modalLayer.classList.remove("hidden");
+    document.body.classList.add("modal-open");
   }
 
   function closeModal() {
@@ -1046,17 +1047,24 @@
       state.gameCleanup();
       state.gameCleanup = null;
     }
+    if (imagePreviewLayer.classList.contains("hidden")) {
+      document.body.classList.remove("modal-open");
+    }
   }
 
   function openImagePreview(title, url) {
     imagePreviewTitle.innerHTML = `<span>${escapeHtml(title)}</span>`;
     imagePreviewBody.innerHTML = `<img src="${escapeHtml(url)}" alt="${escapeHtml(title)}">`;
     imagePreviewLayer.classList.remove("hidden");
+    document.body.classList.add("modal-open");
   }
 
   function closeImagePreview() {
     imagePreviewLayer.classList.add("hidden");
     imagePreviewBody.innerHTML = "";
+    if (modalLayer.classList.contains("hidden")) {
+      document.body.classList.remove("modal-open");
+    }
   }
 
   function setupLoadingDots() {

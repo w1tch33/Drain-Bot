@@ -282,6 +282,12 @@ html[data-theme="pink-noir"] body::after {
     repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 7px);
 }
 
+html[data-theme="pink-noir"] body.modal-open::before,
+html[data-theme="pink-noir"] body.modal-open::after {
+  display: none !important;
+  content: none !important;
+}
+
 html[data-theme="pink-noir"] .desktop::before {
   content: none;
   display: none;
@@ -550,9 +556,9 @@ html[data-theme="pink-noir"] .game-modal-window::after {
 html[data-theme="pink-noir"] .retro-textarea,
 html[data-theme="pink-noir"] #descriptionField,
 html[data-theme="pink-noir"] #notesField {
-  border-radius: 8px;
-  padding: 8px 10px;
-  line-height: 1.28;
+  border-radius: 2px;
+  padding: 10px 12px;
+  line-height: 1.34;
 }
 
 html[data-theme="pink-noir"] .links-button,
