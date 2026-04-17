@@ -2783,6 +2783,12 @@ html[data-theme="blood-red"] .tutorial-button {
   min-height: 30px;
   padding: 4px 8px;
 }
+.map-line-name-input {
+  min-width: 190px;
+  max-width: 260px;
+  height: 30px;
+  padding: 4px 8px;
+}
 .map-dot {
   width: 12px;
   height: 12px;
@@ -2797,6 +2803,9 @@ html[data-theme="blood-red"] .tutorial-button {
   height: min(66vh, 560px);
   border: 2px solid var(--line);
   background: #d2d2d2;
+}
+.map-view.map-drawing {
+  cursor: crosshair;
 }
 .map-pin-wrap {
   background: transparent !important;
@@ -2862,6 +2871,9 @@ html[data-theme="blood-red"] .tutorial-button {
 .map-popup-title {
   font-weight: 700;
   margin-bottom: 4px;
+}
+.map-delete-line {
+  margin-top: 6px;
 }
 .game-canvas {
   width: auto;
@@ -3326,6 +3338,11 @@ html[data-theme="blood-red"] .desktop::after {
   .game-controls-row { gap: 6px; }
   .map-view { height: min(58vh, 420px); }
   .map-toolbar .retro-button { min-height: 34px; }
+  .map-line-name-input {
+    width: min(100%, 240px);
+    max-width: 100%;
+    min-width: 0;
+  }
   .themes-wrap {
     position: static;
     width: auto;

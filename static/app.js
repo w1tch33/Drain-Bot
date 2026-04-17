@@ -579,10 +579,24 @@
     `;
   }
 
+  function mapLinePopupHtml(line) {
+    const deleteButton =
+      line.source === "user"
+        ? `<button class="retro-button map-delete-line" type="button" data-id="${escapeHtml(line.id)}">Delete Line</button>`
+        : "";
+    return `
+      <div class="map-popup-title">${escapeHtml(line.name || "Measurement Line")}</div>
+      <div>Underground route</div>
+      ${deleteButton}
+    `;
+  }
+
   async function openMapPanel(focusDrainName = "") {
     setLoading(true);
     try {
-      const rows = await fetchJson("/api/map-drains");
+      const payload = await fetchJson("/api/map-data");
+      const rows = Array.isArray(payload?.drains) ? payload.drains : [];
+      const measurementLines = Array.isArray(payload?.measurement_lines) ? payload.measurement_lines : [];
       openModal(
         "Drain Map",
         `
@@ -591,9 +605,15 @@
               <span><span class="map-dot visited"></span>Visited</span>
               <span><span class="map-dot unvisited"></span>Unvisited</span>
               <span>${rows.length} drains</span>
+              <span>${measurementLines.length} routes</span>
               <button class="retro-button" id="mapLocateButton" type="button">My Location</button>
               <button class="retro-button" id="mapStyleToggleButton" type="button">Satellite</button>
               <button class="retro-button" id="mapLabelsToggleButton" type="button">Labels On</button>
+              <button class="retro-button" id="mapDrawLineButton" type="button">Draw Line</button>
+              <button class="retro-button" id="mapUndoPointButton" type="button">Undo Point</button>
+              <button class="retro-button" id="mapSaveLineButton" type="button">Save Line</button>
+              <button class="retro-button" id="mapCancelLineButton" type="button">Cancel Draw</button>
+              <input class="retro-input map-line-name-input" id="mapLineNameInput" type="text" placeholder="Measurement line name">
             </div>
             <div class="map-view" id="drainMapView"></div>
             <div class="profile-copy" id="mapStatusText"></div>
@@ -610,9 +630,19 @@
       const locateButton = modalBody.querySelector("#mapLocateButton");
       const styleButton = modalBody.querySelector("#mapStyleToggleButton");
       const labelsButton = modalBody.querySelector("#mapLabelsToggleButton");
+      const drawLineButton = modalBody.querySelector("#mapDrawLineButton");
+      const undoPointButton = modalBody.querySelector("#mapUndoPointButton");
+      const saveLineButton = modalBody.querySelector("#mapSaveLineButton");
+      const cancelLineButton = modalBody.querySelector("#mapCancelLineButton");
+      const lineNameInput = modalBody.querySelector("#mapLineNameInput");
       const mapStatus = modalBody.querySelector("#mapStatusText");
 
       const map = L.map(mapEl, { zoomControl: true, preferCanvas: true, maxZoom: 22 });
+      map.createPane("measurementLines");
+      map.getPane("measurementLines").style.zIndex = "360";
+      map.createPane("customMeasurementLines");
+      map.getPane("customMeasurementLines").style.zIndex = "370";
+
       const streetLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         maxNativeZoom: 19,
@@ -637,8 +667,100 @@
       labelsLayer.addTo(map);
       map.setView([-37.8136, 144.9631], 11);
 
-      const markers = [];
+      const lineRenderer = L.canvas({ padding: 0.5 });
       const markerByName = new Map();
+      const lineLayers = new Map();
+      let drawingLine = false;
+      let draftPoints = [];
+      let draftLine = null;
+
+      function refreshMapStatus(message = "") {
+        if (!mapStatus) return;
+        if (message) {
+          mapStatus.textContent = message;
+          return;
+        }
+        if (drawingLine) {
+          mapStatus.textContent = `Drawing line: ${draftPoints.length} point${draftPoints.length === 1 ? "" : "s"}. Tap the map to add points.`;
+          return;
+        }
+        mapStatus.textContent = `${rows.length} drains and ${measurementLines.length} underground routes loaded.`;
+      }
+
+      function updateDrawControls() {
+        if (drawLineButton) drawLineButton.textContent = drawingLine ? "Drawing..." : "Draw Line";
+        if (undoPointButton) undoPointButton.disabled = !drawingLine || draftPoints.length === 0;
+        if (saveLineButton) saveLineButton.disabled = !drawingLine || draftPoints.length < 2;
+        if (cancelLineButton) cancelLineButton.disabled = !drawingLine;
+        if (lineNameInput) lineNameInput.disabled = !drawingLine;
+        mapEl.classList.toggle("map-drawing", drawingLine);
+        refreshMapStatus();
+      }
+
+      function clearDraftLine() {
+        draftPoints = [];
+        if (draftLine) {
+          draftLine.remove();
+          draftLine = null;
+        }
+        drawingLine = false;
+        updateDrawControls();
+      }
+
+      function ensureDraftLine() {
+        if (draftLine) return draftLine;
+        draftLine = L.polyline([], {
+          color: "#ffe066",
+          weight: 4,
+          opacity: 0.95,
+          dashArray: "8 6",
+          pane: "customMeasurementLines",
+          renderer: lineRenderer,
+        }).addTo(map);
+        return draftLine;
+      }
+
+      function bindLinePopup(layer, line) {
+        layer.on("popupopen", (event) => {
+          const deleteButton = event.popup.getElement()?.querySelector(".map-delete-line");
+          if (!deleteButton) return;
+          bindPress(deleteButton, async () => {
+            try {
+              await fetchJson(`/api/map-lines/${encodeURIComponent(deleteButton.dataset.id || "")}/delete`, {
+                method: "POST",
+              });
+              const existing = lineLayers.get(line.id);
+              if (existing) {
+                existing.remove();
+                lineLayers.delete(line.id);
+              }
+              const index = measurementLines.findIndex((item) => item.id === line.id);
+              if (index >= 0) measurementLines.splice(index, 1);
+              refreshMapStatus("Measurement line deleted.");
+            } catch (error) {
+              refreshMapStatus(error.message);
+            }
+          });
+        });
+      }
+
+      function addMeasurementLine(line) {
+        if (!Array.isArray(line?.points) || line.points.length < 2) return;
+        const layer = L.polyline(line.points, {
+          color: line.color || "#fbc02d",
+          weight: line.source === "user" ? 5 : 4,
+          opacity: line.source === "user" ? 0.95 : 0.82,
+          pane: line.source === "user" ? "customMeasurementLines" : "measurementLines",
+          renderer: lineRenderer,
+          smoothFactor: 1,
+        });
+        layer.bindPopup(mapLinePopupHtml(line));
+        bindLinePopup(layer, line);
+        layer.addTo(map);
+        lineLayers.set(line.id, layer);
+      }
+
+      measurementLines.forEach(addMeasurementLine);
       rows.forEach((row) => {
         if (!Number.isFinite(row.lat) || !Number.isFinite(row.lon)) return;
         const markerIcon = L.divIcon({
@@ -662,7 +784,6 @@
             await openDrain(button.dataset.name || "");
           });
         });
-        markers.push(marker);
       });
 
       if (focusDrainName) {
@@ -681,12 +802,12 @@
             if (map.hasLayer(streetLayer)) map.removeLayer(streetLayer);
             satelliteLayer.addTo(map);
             styleButton.textContent = "Street";
-            if (mapStatus) mapStatus.textContent = "Satellite view on.";
+            refreshMapStatus("Satellite view on.");
           } else {
             if (map.hasLayer(satelliteLayer)) map.removeLayer(satelliteLayer);
             streetLayer.addTo(map);
             styleButton.textContent = "Satellite";
-            if (mapStatus) mapStatus.textContent = "Street map view on.";
+            refreshMapStatus("Street map view on.");
           }
         });
       }
@@ -697,11 +818,85 @@
           if (labelsEnabled) {
             labelsLayer.addTo(map);
             labelsButton.textContent = "Labels On";
-            if (mapStatus) mapStatus.textContent = usingSatellite ? "Satellite + labels." : "Street + labels.";
+            refreshMapStatus(usingSatellite ? "Satellite + labels." : "Street + labels.");
           } else {
             if (map.hasLayer(labelsLayer)) map.removeLayer(labelsLayer);
             labelsButton.textContent = "Labels Off";
-            if (mapStatus) mapStatus.textContent = usingSatellite ? "Satellite without labels." : "Street without labels.";
+            refreshMapStatus(usingSatellite ? "Satellite without labels." : "Street without labels.");
+          }
+        });
+      }
+
+      map.on("click", (event) => {
+        if (!drawingLine) return;
+        const point = [Number(event.latlng.lat.toFixed(6)), Number(event.latlng.lng.toFixed(6))];
+        draftPoints.push(point);
+        ensureDraftLine().setLatLngs(draftPoints);
+        updateDrawControls();
+      });
+
+      if (drawLineButton) {
+        bindPress(drawLineButton, () => {
+          if (drawingLine) return;
+          drawingLine = true;
+          draftPoints = [];
+          if (draftLine) {
+            draftLine.remove();
+            draftLine = null;
+          }
+          if (lineNameInput && !lineNameInput.value.trim()) {
+            lineNameInput.value = `Measurement ${measurementLines.filter((line) => line.source === "user").length + 1}`;
+          }
+          updateDrawControls();
+        });
+      }
+
+      if (undoPointButton) {
+        bindPress(undoPointButton, () => {
+          if (!drawingLine || draftPoints.length === 0) return;
+          draftPoints.pop();
+          if (draftPoints.length) {
+            ensureDraftLine().setLatLngs(draftPoints);
+          } else if (draftLine) {
+            draftLine.remove();
+            draftLine = null;
+          }
+          updateDrawControls();
+        });
+      }
+
+      if (cancelLineButton) {
+        bindPress(cancelLineButton, () => {
+          clearDraftLine();
+          refreshMapStatus("Draw cancelled.");
+        });
+      }
+
+      if (saveLineButton) {
+        bindPress(saveLineButton, async () => {
+          if (!drawingLine || draftPoints.length < 2) {
+            refreshMapStatus("Add at least 2 points before saving.");
+            return;
+          }
+          try {
+            const result = await fetchJson("/api/map-lines", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                name: lineNameInput?.value || "",
+                points: draftPoints,
+                color: "#fbc02d",
+              }),
+            });
+            if (result?.line) {
+              measurementLines.push(result.line);
+              addMeasurementLine(result.line);
+            }
+            clearDraftLine();
+            if (lineNameInput) lineNameInput.value = "";
+            refreshMapStatus("Measurement line saved.");
+          } catch (error) {
+            refreshMapStatus(error.message);
           }
         });
       }
@@ -710,10 +905,10 @@
       if (locateButton) {
         bindPress(locateButton, () => {
           if (!navigator.geolocation) {
-            if (mapStatus) mapStatus.textContent = "Location not supported on this device/browser.";
+            refreshMapStatus("Location not supported on this device/browser.");
             return;
           }
-          if (mapStatus) mapStatus.textContent = "Finding your location...";
+          refreshMapStatus("Finding your location...");
           navigator.geolocation.getCurrentPosition(
             (position) => {
               const lat = position.coords.latitude;
@@ -730,10 +925,10 @@
                   fillOpacity: 0.95,
                 }).addTo(map);
               }
-              if (mapStatus) mapStatus.textContent = "Centered on your location.";
+              refreshMapStatus("Centered on your location.");
             },
             () => {
-              if (mapStatus) mapStatus.textContent = "Couldn't access your location.";
+              refreshMapStatus("Couldn't access your location.");
             },
             { enableHighAccuracy: true, timeout: 9000, maximumAge: 120000 }
           );
@@ -741,6 +936,7 @@
       }
 
       setTimeout(() => map.invalidateSize(), 40);
+      updateDrawControls();
       state.mapCleanup = () => {
         map.remove();
       };

@@ -242,6 +242,55 @@ def map_drains():
     return jsonify(rows)
 
 
+@app.get("/api/map-data")
+@login_required
+def map_data():
+    rows = []
+    for drain in drain_service.get_all_drains(current_username()):
+        rows.append(
+            {
+                "name": drain.get("name", ""),
+                "lat": float(drain.get("lat", 0)),
+                "lon": float(drain.get("lon", 0)),
+                "visited": bool(drain.get("visited")),
+                "favorite": bool(drain.get("favorite")),
+                "source": str(drain.get("source", "")),
+                "distance_km": float(drain.get("distance_km", 0)),
+            }
+        )
+    return jsonify(
+        {
+            "drains": rows,
+            "measurement_lines": drain_service.get_map_measurement_lines(current_username()),
+        }
+    )
+
+
+@app.post("/api/map-lines")
+@login_required
+def save_map_line():
+    payload = request.get_json(silent=True) or request.form
+    try:
+        line = drain_service.save_user_measurement_line(
+            current_username(),
+            str(payload.get("name", "")),
+            payload.get("points"),
+            str(payload.get("color", "#fbc02d")),
+        )
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
+    return jsonify({"ok": True, "line": line})
+
+
+@app.post("/api/map-lines/<line_id>/delete")
+@login_required
+def delete_map_line(line_id: str):
+    deleted = drain_service.delete_user_measurement_line(current_username(), line_id)
+    if not deleted:
+        return jsonify({"error": "Measurement line not found."}), 404
+    return jsonify({"ok": True})
+
+
 @app.get("/api/profile")
 @login_required
 def profile():

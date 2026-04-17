@@ -39,6 +39,7 @@ KML_FILE = os.getenv("DRAINTOOL_KML_FILE", os.path.join(DATA_DIR, "your_map.kml"
 UPLOAD_DIR = os.getenv("DRAINTOOL_UPLOAD_DIR", os.path.join(DATA_DIR, "uploads"))
 ACCOUNTS_FILE = os.getenv("DRAINTOOL_ACCOUNTS_FILE", os.path.join(DATA_DIR, "accounts.json"))
 USERS_DIR = os.getenv("DRAINTOOL_USERS_DIR", os.path.join(DATA_DIR, "users"))
+SHARED_MEASUREMENT_LINES_FILE = os.path.join(BASE_DIR, "static", "data", "shared_measurement_lines.json")
 DEFAULT_KML_SYNC_URL = "https://earth.google.com/earth/d/1jhOxgKG18OSMNaiIXuqAdBXAaV3SMhfC?usp=drive_link"
 KML_SYNC_URL = os.getenv("DRAINTOOL_KML_SYNC_URL", DEFAULT_KML_SYNC_URL)
 PHOTO_DIR_CANDIDATES = [
@@ -60,6 +61,7 @@ _CACHE_LOCK = threading.Lock()
 _METADATA_CACHE: dict[str, Any] = {"stamp": None, "value": {}}
 _USER_METADATA_CACHE: dict[str, tuple[float | None, dict[str, Any]]] = {}
 _KML_DRAINS_CACHE: dict[str, Any] = {"stamp": None, "value": []}
+_SHARED_MEASUREMENT_LINES_CACHE: dict[str, Any] = {"stamp": None, "value": []}
 
 
 def ensure_runtime_dirs() -> None:
@@ -1234,6 +1236,124 @@ def save_user_origin(username: str, lat: float, lon: float) -> None:
     metadata = load_user_metadata(username)
     metadata["_origin"] = {"lat": float(lat), "lon": float(lon)}
     save_user_metadata(username, metadata)
+
+
+def _normalize_measurement_points(points: Any) -> list[list[float]]:
+    normalized: list[list[float]] = []
+    if not isinstance(points, list):
+        return normalized
+    for point in points:
+        if not isinstance(point, (list, tuple)) or len(point) < 2:
+            continue
+        try:
+            lat = round(float(point[0]), 6)
+            lon = round(float(point[1]), 6)
+        except (TypeError, ValueError):
+            continue
+        normalized.append([lat, lon])
+    return normalized
+
+
+def _normalize_measurement_line(item: Any, *, default_source: str) -> dict[str, Any] | None:
+    if not isinstance(item, dict):
+        return None
+    points = _normalize_measurement_points(item.get("points"))
+    if len(points) < 2:
+        return None
+    name = clean_description(str(item.get("name", "")).strip()) or "Measurement Line"
+    line_id = str(item.get("id", "")).strip() or str(uuid.uuid4())
+    color = str(item.get("color", "")).strip() or "#fbc02d"
+    source = str(item.get("source", "")).strip() or default_source
+    return {
+        "id": line_id,
+        "name": name,
+        "points": points,
+        "color": color,
+        "source": source,
+    }
+
+
+def get_shared_measurement_lines() -> list[dict[str, Any]]:
+    if not os.path.exists(SHARED_MEASUREMENT_LINES_FILE):
+        return []
+    try:
+        stamp = os.path.getmtime(SHARED_MEASUREMENT_LINES_FILE)
+    except OSError:
+        stamp = None
+    with _CACHE_LOCK:
+        if _SHARED_MEASUREMENT_LINES_CACHE.get("stamp") == stamp:
+            cached = _SHARED_MEASUREMENT_LINES_CACHE.get("value", [])
+            return [dict(item) for item in cached]
+    try:
+        with open(SHARED_MEASUREMENT_LINES_FILE, "r", encoding="utf-8") as handle:
+            payload = json.load(handle)
+    except (OSError, json.JSONDecodeError):
+        payload = []
+    lines = []
+    if isinstance(payload, list):
+        for item in payload:
+            normalized = _normalize_measurement_line(item, default_source="shared")
+            if normalized:
+                lines.append(normalized)
+    with _CACHE_LOCK:
+        _SHARED_MEASUREMENT_LINES_CACHE["stamp"] = stamp
+        _SHARED_MEASUREMENT_LINES_CACHE["value"] = [dict(item) for item in lines]
+    return lines
+
+
+def get_user_measurement_lines(username: str | None) -> list[dict[str, Any]]:
+    metadata = load_user_metadata(username)
+    payload = metadata.get("_measurement_lines", [])
+    if not isinstance(payload, list):
+        return []
+    lines = []
+    for item in payload:
+        normalized = _normalize_measurement_line(item, default_source="user")
+        if normalized:
+            lines.append(normalized)
+    return lines
+
+
+def get_map_measurement_lines(username: str | None) -> list[dict[str, Any]]:
+    return get_shared_measurement_lines() + get_user_measurement_lines(username)
+
+
+def save_user_measurement_line(username: str, name: str, points: Any, color: str = "#fbc02d") -> dict[str, Any]:
+    normalized_name = clean_description(name).strip() or f"Measurement {datetime.now().strftime('%H:%M')}"
+    normalized_points = _normalize_measurement_points(points)
+    if len(normalized_points) < 2:
+        raise ValueError("A measurement line needs at least 2 points.")
+    metadata = load_user_metadata(username)
+    existing = metadata.get("_measurement_lines", [])
+    if not isinstance(existing, list):
+        existing = []
+    line = {
+        "id": str(uuid.uuid4()),
+        "name": normalized_name,
+        "points": normalized_points,
+        "color": str(color or "#fbc02d").strip() or "#fbc02d",
+        "source": "user",
+    }
+    existing.append(line)
+    metadata["_measurement_lines"] = existing
+    save_user_metadata(username, metadata)
+    return line
+
+
+def delete_user_measurement_line(username: str, line_id: str) -> bool:
+    target = str(line_id or "").strip()
+    if not target:
+        return False
+    metadata = load_user_metadata(username)
+    existing = metadata.get("_measurement_lines", [])
+    if not isinstance(existing, list) or not existing:
+        return False
+    kept = [item for item in existing if str(item.get("id", "")).strip() != target]
+    if len(kept) == len(existing):
+        return False
+    metadata["_measurement_lines"] = kept
+    save_user_metadata(username, metadata)
+    return True
 
 
 def distance_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
