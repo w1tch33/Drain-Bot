@@ -239,7 +239,7 @@ html[data-theme="crt-green"] body {
     linear-gradient(180deg, rgba(6, 28, 14, 0.2), rgba(3, 12, 7, 0.36)),
     radial-gradient(circle at 20% 14%, rgba(91, 255, 154, 0.16), transparent 26%),
     radial-gradient(circle at 78% 68%, rgba(77, 255, 146, 0.12), transparent 28%),
-    url("/static/themes/crt-green-assets/CRT%20Green%20Background.png?v=20260417a") center center / cover no-repeat,
+    url("/static/themes/crt-green-assets/CRT%20Green%20Background.webp?v=20260417b") center center / cover no-repeat,
     #07160c;
   background-size: auto, auto, auto, cover, auto;
   background-blend-mode: screen, screen, screen, normal, normal;
