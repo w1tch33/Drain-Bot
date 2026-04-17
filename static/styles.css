@@ -236,15 +236,13 @@ body {
 
 html[data-theme="crt-green"] body {
   background:
-    linear-gradient(180deg, rgba(8, 34, 18, 0.32), rgba(4, 16, 9, 0.52)),
-    radial-gradient(circle at 20% 14%, rgba(91, 255, 154, 0.2), transparent 26%),
-    radial-gradient(circle at 78% 68%, rgba(77, 255, 146, 0.16), transparent 28%),
-    url("/static/themes/crt-green-assets/CRT%20Green%20Background.png") center center / cover no-repeat,
-    linear-gradient(180deg, rgba(8, 34, 18, 0.42), rgba(4, 16, 9, 0.68)),
-    linear-gradient(to right, rgba(91, 255, 154, 0.12) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(91, 255, 154, 0.12) 1px, transparent 1px);
-  background-size: auto, auto, auto, cover, auto, 20px 20px, 20px 20px;
-  background-blend-mode: screen, screen, screen, normal, multiply, normal, normal;
+    linear-gradient(180deg, rgba(6, 28, 14, 0.2), rgba(3, 12, 7, 0.36)),
+    radial-gradient(circle at 20% 14%, rgba(91, 255, 154, 0.16), transparent 26%),
+    radial-gradient(circle at 78% 68%, rgba(77, 255, 146, 0.12), transparent 28%),
+    url("/static/themes/crt-green-assets/CRT%20Green%20Background.png?v=20260417a") center center / cover no-repeat,
+    #07160c;
+  background-size: auto, auto, auto, cover, auto;
+  background-blend-mode: screen, screen, screen, normal, normal;
 }
 
 html[data-theme="pink-noir"] body {
@@ -1314,10 +1312,10 @@ html[data-theme="crt-green"] body::after {
   inset: 0;
   pointer-events: none;
   z-index: 8;
-  opacity: 0.46;
+  opacity: 0.52;
   background:
-    repeating-linear-gradient(0deg, rgba(132, 255, 182, 0.18) 0 1px, rgba(0, 0, 0, 0.03) 1px 3px),
-    radial-gradient(circle at 50% 50%, transparent 58%, rgba(0, 0, 0, 0.42) 100%);
+    repeating-linear-gradient(0deg, rgba(132, 255, 182, 0.2) 0 1px, rgba(0, 0, 0, 0.03) 1px 3px),
+    radial-gradient(circle at 50% 50%, transparent 62%, rgba(0, 0, 0, 0.34) 100%);
   animation: crtRoll 4.8s linear infinite;
 }
 
@@ -1342,10 +1340,11 @@ html[data-theme="crt-green"] body::before {
   inset: 0;
   pointer-events: none;
   z-index: 7;
-  opacity: 0.34;
+  opacity: 0.42;
   background:
-    repeating-linear-gradient(90deg, rgba(91, 255, 154, 0.12) 0 2px, transparent 2px 9px),
-    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0 1px, transparent 1px 4px);
+    linear-gradient(180deg, rgba(18, 255, 130, 0.06), rgba(0, 0, 0, 0.16)),
+    repeating-linear-gradient(90deg, rgba(91, 255, 154, 0.14) 0 2px, transparent 2px 9px),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 4px);
 }
 
 html[data-theme="crt-green"] .window-title > span,

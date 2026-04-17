@@ -66,7 +66,7 @@
   ]);
   const THEME_ASSET_MAP = {
     "crt-green": [
-      "/static/themes/crt-green-assets/CRT%20Green%20Background.png",
+      "/static/themes/crt-green-assets/CRT%20Green%20Background.png?v=20260417a",
     ],
     "pink-noir": [
       "/static/themes/envi%27s-crush-assets/envi%27s%20crush%20background.webp",
