@@ -513,6 +513,48 @@ html[data-theme="pink-noir"] .theme-select option {
   background: rgba(255, 234, 245, 0.9);
 }
 
+html[data-theme="pink-noir"] .modal-layer {
+  background: rgba(255, 230, 244, 0.34);
+}
+
+html[data-theme="pink-noir"] .modal-window,
+html[data-theme="pink-noir"] .image-preview-window,
+html[data-theme="pink-noir"] .game-modal-window {
+  background: rgba(255, 239, 247, 0.98);
+  box-shadow:
+    0 0 0 2px rgba(255, 247, 251, 0.9),
+    0 0 0 5px rgba(243, 180, 220, 0.5),
+    var(--window-inset),
+    0 12px 22px rgba(160, 52, 114, 0.24);
+}
+
+html[data-theme="pink-noir"] .modal-window .window-body,
+html[data-theme="pink-noir"] .image-preview-window .window-body,
+html[data-theme="pink-noir"] .game-modal-window .window-body,
+html[data-theme="pink-noir"] .modal-body,
+html[data-theme="pink-noir"] .game-modal-body,
+html[data-theme="pink-noir"] .image-preview-body {
+  background: rgba(255, 242, 249, 0.98);
+}
+
+html[data-theme="pink-noir"] .modal-window::before,
+html[data-theme="pink-noir"] .modal-window::after,
+html[data-theme="pink-noir"] .image-preview-window::before,
+html[data-theme="pink-noir"] .image-preview-window::after,
+html[data-theme="pink-noir"] .game-modal-window::before,
+html[data-theme="pink-noir"] .game-modal-window::after {
+  display: none !important;
+  content: none !important;
+}
+
+html[data-theme="pink-noir"] .retro-textarea,
+html[data-theme="pink-noir"] #descriptionField,
+html[data-theme="pink-noir"] #notesField {
+  border-radius: 8px;
+  padding: 8px 10px;
+  line-height: 1.28;
+}
+
 html[data-theme="pink-noir"] .links-button,
 html[data-theme="pink-noir"] .tutorial-button,
 html[data-theme="pink-noir"] .themes-wrap,
