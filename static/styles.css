@@ -517,11 +517,11 @@ html[data-theme="pink-noir"] .links-button,
 html[data-theme="pink-noir"] .tutorial-button,
 html[data-theme="pink-noir"] .themes-wrap,
 html[data-theme="pink-noir"] .map-panel-button {
-  right: 14px;
+  right: 22px;
 }
 
 html[data-theme="pink-noir"] .results-window .window-title {
-  transform: translateX(calc(-50% + 12px));
+  transform: translateX(calc(-50% + 24px));
 }
 
 html[data-theme="blood-red"] .retro-window,
