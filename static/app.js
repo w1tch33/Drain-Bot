@@ -149,7 +149,7 @@
     } catch (_error) {
       // Ignore storage failures (private mode, blocked storage).
     }
-    preloadThemeAssets(theme);
+    scheduleThemePreload(theme);
     fitDesktop();
   }
 
@@ -160,20 +160,22 @@
       const img = new Image();
       img.src = src;
       img.decoding = "async";
-      img.fetchPriority = "high";
+      img.loading = "eager";
+      img.fetchPriority = "low";
       preloadedThemeAssets.add(src);
     }
   }
 
+  function scheduleThemePreload(theme) {
+    const startPreload = () => preloadThemeAssets(theme);
+    if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(startPreload, { timeout: 1200 });
+    } else {
+      window.setTimeout(startPreload, 180);
+    }
+  }
+
   function setupThemes() {
-    const castleImage = new Image();
-    castleImage.src = "/static/themes/blood-moon-castle.webp";
-    castleImage.fetchPriority = "high";
-    castleImage.decoding = "async";
-    const dr41nBackground = new Image();
-    dr41nBackground.src = "/static/themes/Drain_Theme_Background.png?v=20260415b";
-    dr41nBackground.fetchPriority = "high";
-    dr41nBackground.decoding = "async";
     let storedTheme = "mac-system-1";
     try {
       storedTheme = localStorage.getItem(THEME_STORAGE_KEY) || "mac-system-1";

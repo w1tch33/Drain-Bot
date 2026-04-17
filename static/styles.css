@@ -3190,9 +3190,13 @@ html[data-theme="blood-red"] .desktop::after {
 }
 
 @media (max-width: 980px) {
+  html[data-theme="pink-noir"] body::before,
+  html[data-theme="pink-noir"] body::after,
+  html[data-theme="pink-noir"] .desktop::after,
   html[data-theme="camcorder-vhs"] body::before,
   html[data-theme="camcorder-vhs"] body::after,
   html[data-theme="blood-red"] .desktop::before,
+  html[data-theme="blood-red"] .desktop::after,
   html[data-theme="icy-blue"] .desktop::before,
   html[data-theme="icy-blue"] .desktop::after {
     display: none !important;
