@@ -2565,7 +2565,14 @@ html[data-theme="blood-red"] .tutorial-button {
 }
 .music-controls { display: flex; gap: 10px; margin-top: 0; }
 .icon-button { width: 32px; height: 30px; padding: 2px 0; font-size: 14px; }
-.playlist-button { min-width: 92px; margin-top: 2px; }
+.music-bottom-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 2px;
+}
+.playlist-button { min-width: 92px; margin-top: 18px; }
 .volume-wrap { width: 112px; text-align: center; }
 .volume-label { margin-bottom: 0; font-size: 14px; }
 .volume-range {
