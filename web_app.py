@@ -287,7 +287,7 @@ def save_map_line():
 def update_map_line(line_id: str):
     payload = request.get_json(silent=True) or request.form
     try:
-        line = drain_service.update_user_measurement_line(
+        line = drain_service.save_measurement_line_update(
             current_username(),
             line_id,
             payload.get("points"),
@@ -302,7 +302,7 @@ def update_map_line(line_id: str):
 @app.post("/api/map-lines/<line_id>/delete")
 @login_required
 def delete_map_line(line_id: str):
-    deleted = drain_service.delete_user_measurement_line(current_username(), line_id)
+    deleted = drain_service.delete_measurement_line(current_username(), line_id)
     if not deleted:
         return jsonify({"error": "Measurement line not found."}), 404
     return jsonify({"ok": True})

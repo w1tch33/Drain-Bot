@@ -1314,8 +1314,18 @@ def get_user_measurement_lines(username: str | None) -> list[dict[str, Any]]:
     return lines
 
 
+def get_hidden_measurement_line_ids(username: str | None) -> set[str]:
+    metadata = load_user_metadata(username)
+    payload = metadata.get("_hidden_measurement_line_ids", [])
+    if not isinstance(payload, list):
+        return set()
+    return {str(item).strip() for item in payload if str(item).strip()}
+
+
 def get_map_measurement_lines(username: str | None) -> list[dict[str, Any]]:
-    return get_shared_measurement_lines() + get_user_measurement_lines(username)
+    hidden_ids = get_hidden_measurement_line_ids(username)
+    shared = [line for line in get_shared_measurement_lines() if str(line.get("id", "")).strip() not in hidden_ids]
+    return shared + get_user_measurement_lines(username)
 
 
 def save_user_measurement_line(username: str, name: str, points: Any, color: str = "#fbc02d") -> dict[str, Any]:
@@ -1338,6 +1348,29 @@ def save_user_measurement_line(username: str, name: str, points: Any, color: str
     metadata["_measurement_lines"] = existing
     save_user_metadata(username, metadata)
     return line
+
+
+def clone_shared_measurement_line_to_user(
+    username: str,
+    line_id: str,
+    points: Any,
+    name: str | None = None,
+    color: str | None = None,
+) -> dict[str, Any]:
+    target = str(line_id or "").strip()
+    if not target:
+        raise ValueError("Measurement line not found.")
+    shared_line = next((line for line in get_shared_measurement_lines() if str(line.get("id", "")).strip() == target), None)
+    if not shared_line:
+        raise ValueError("Measurement line not found.")
+    created = save_user_measurement_line(
+        username,
+        name if name is not None else str(shared_line.get("name", "")),
+        points if points is not None else shared_line.get("points"),
+        color if color is not None else str(shared_line.get("color", "#fbc02d")),
+    )
+    hide_measurement_line(username, target)
+    return created
 
 
 def update_user_measurement_line(
@@ -1380,6 +1413,46 @@ def update_user_measurement_line(
     metadata["_measurement_lines"] = existing
     save_user_metadata(username, metadata)
     return updated_line
+
+
+def save_measurement_line_update(
+    username: str,
+    line_id: str,
+    points: Any,
+    name: str | None = None,
+    color: str | None = None,
+) -> dict[str, Any]:
+    target = str(line_id or "").strip()
+    if not target:
+        raise ValueError("Measurement line not found.")
+    if target.startswith("shared-"):
+        return clone_shared_measurement_line_to_user(username, target, points, name=name, color=color)
+    return update_user_measurement_line(username, target, points, name=name, color=color)
+
+
+def hide_measurement_line(username: str, line_id: str) -> bool:
+    target = str(line_id or "").strip()
+    if not target:
+        return False
+    metadata = load_user_metadata(username)
+    hidden = metadata.get("_hidden_measurement_line_ids", [])
+    if not isinstance(hidden, list):
+        hidden = []
+    if target in hidden:
+        return True
+    hidden.append(target)
+    metadata["_hidden_measurement_line_ids"] = hidden
+    save_user_metadata(username, metadata)
+    return True
+
+
+def delete_measurement_line(username: str, line_id: str) -> bool:
+    target = str(line_id or "").strip()
+    if not target:
+        return False
+    if target.startswith("shared-"):
+        return hide_measurement_line(username, target)
+    return delete_user_measurement_line(username, target)
 
 
 def delete_user_measurement_line(username: str, line_id: str) -> bool:

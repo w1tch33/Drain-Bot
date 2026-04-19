@@ -580,17 +580,13 @@
   }
 
   function mapLinePopupHtml(line) {
-    const editButtons =
-      line.source === "user"
-        ? `
-            <button class="retro-button map-edit-line" type="button" data-id="${escapeHtml(line.id)}">Edit Line</button>
-            <button class="retro-button map-delete-line" type="button" data-id="${escapeHtml(line.id)}">Delete Line</button>
-          `
-        : "";
+    const editLabel = line.source === "user" ? "Edit Line" : "Edit Line";
+    const deleteLabel = line.source === "user" ? "Delete Line" : "Hide Line";
     return `
       <div class="map-popup-title">${escapeHtml(line.name || "Measurement Line")}</div>
       <div>Underground route</div>
-      ${editButtons}
+      <button class="retro-button map-edit-line" type="button" data-id="${escapeHtml(line.id)}">${editLabel}</button>
+      <button class="retro-button map-delete-line" type="button" data-id="${escapeHtml(line.id)}">${deleteLabel}</button>
     `;
   }
 
@@ -772,7 +768,7 @@
       }
 
       function startEditingLine(line) {
-        if (!line || line.source !== "user") return;
+        if (!line) return;
         if (drawingLine) clearDraftLine();
         if (editingLineId === line.id) return;
         stopEditingLine();
@@ -849,7 +845,7 @@
                 }
                 const index = measurementLines.findIndex((item) => item.id === line.id);
                 if (index >= 0) measurementLines.splice(index, 1);
-                refreshMapStatus("Measurement line deleted.");
+                refreshMapStatus(line.source === "shared" ? "Measurement line hidden." : "Measurement line deleted.");
               } catch (error) {
                 refreshMapStatus(error.message);
               }
@@ -1010,7 +1006,7 @@
             }
             const index = measurementLines.findIndex((item) => item.id === lineId);
             if (index >= 0) measurementLines.splice(index, 1);
-            stopEditingLine({ message: "Measurement line deleted." });
+            stopEditingLine({ message: lineId.startsWith("shared-") ? "Measurement line hidden." : "Measurement line deleted." });
           } catch (error) {
             refreshMapStatus(error.message);
           }
