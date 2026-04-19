@@ -583,7 +583,7 @@
     const editButtons =
       line.source === "user"
         ? `
-            <button class="retro-button map-edit-line" type="button" data-id="${escapeHtml(line.id)}">Edit Points</button>
+            <button class="retro-button map-edit-line" type="button" data-id="${escapeHtml(line.id)}">Edit Line</button>
             <button class="retro-button map-delete-line" type="button" data-id="${escapeHtml(line.id)}">Delete Line</button>
           `
         : "";
@@ -616,6 +616,7 @@
               <button class="retro-button" id="mapUndoPointButton" type="button">Undo Point</button>
               <button class="retro-button" id="mapSaveLineButton" type="button">Save Line</button>
               <button class="retro-button" id="mapCancelLineButton" type="button">Cancel Draw</button>
+              <button class="retro-button" id="mapDeleteLineButton" type="button">Delete Line</button>
               <input class="retro-input map-line-name-input" id="mapLineNameInput" type="text" placeholder="Measurement line name">
             </div>
             <div class="map-view" id="drainMapView"></div>
@@ -637,6 +638,7 @@
       const undoPointButton = modalBody.querySelector("#mapUndoPointButton");
       const saveLineButton = modalBody.querySelector("#mapSaveLineButton");
       const cancelLineButton = modalBody.querySelector("#mapCancelLineButton");
+      const deleteLineButton = modalBody.querySelector("#mapDeleteLineButton");
       const lineNameInput = modalBody.querySelector("#mapLineNameInput");
       const mapStatus = modalBody.querySelector("#mapStatusText");
 
@@ -712,7 +714,8 @@
           cancelLineButton.textContent = editing ? "Cancel Edit" : "Cancel Draw";
           cancelLineButton.disabled = editing ? false : !drawingLine;
         }
-        if (lineNameInput) lineNameInput.disabled = editing || !drawingLine;
+        if (deleteLineButton) deleteLineButton.disabled = !editing;
+        if (lineNameInput) lineNameInput.disabled = !drawingLine && !editing;
         mapEl.classList.toggle("map-drawing", drawingLine);
         mapEl.classList.toggle("map-editing", editing);
         refreshMapStatus();
@@ -752,10 +755,12 @@
         if (restore && original) {
           editingPoints = Array.isArray(original.points) ? original.points.map((point) => [...point]) : [];
           syncEditingLine();
+          if (lineNameInput) lineNameInput.value = original.name || "";
         }
         clearEditHandles();
         editingLineId = "";
         editingPoints = [];
+        if (!drawingLine && lineNameInput) lineNameInput.value = "";
         updateDrawControls();
         if (message) refreshMapStatus(message);
       }
@@ -767,6 +772,7 @@
         stopEditingLine();
         editingLineId = line.id;
         editingPoints = Array.isArray(line.points) ? line.points.map((point) => [...point]) : [];
+        if (lineNameInput) lineNameInput.value = line.name || "";
         clearEditHandles();
         editingPoints.forEach((point, index) => {
           const handle = L.marker(point, {
@@ -978,6 +984,28 @@
         });
       }
 
+      if (deleteLineButton) {
+        bindPress(deleteLineButton, async () => {
+          if (!editingLineId) return;
+          try {
+            const lineId = editingLineId;
+            await fetchJson(`/api/map-lines/${encodeURIComponent(lineId)}/delete`, {
+              method: "POST",
+            });
+            const existing = lineLayers.get(lineId);
+            if (existing) {
+              existing.remove();
+              lineLayers.delete(lineId);
+            }
+            const index = measurementLines.findIndex((item) => item.id === lineId);
+            if (index >= 0) measurementLines.splice(index, 1);
+            stopEditingLine({ message: "Measurement line deleted." });
+          } catch (error) {
+            refreshMapStatus(error.message);
+          }
+        });
+      }
+
       if (saveLineButton) {
         bindPress(saveLineButton, async () => {
           if (editingLineId) {
@@ -986,6 +1014,7 @@
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                  name: lineNameInput?.value || "",
                   points: editingPoints,
                 }),
               });
