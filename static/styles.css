@@ -2565,6 +2565,7 @@ html[data-theme="blood-red"] .tutorial-button {
 }
 .music-controls { display: flex; gap: 10px; margin-top: 0; }
 .icon-button { width: 32px; height: 30px; padding: 2px 0; font-size: 14px; }
+.playlist-button { min-width: 92px; margin-top: 2px; }
 .volume-wrap { width: 112px; text-align: center; }
 .volume-label { margin-bottom: 0; font-size: 14px; }
 .volume-range {
@@ -2722,6 +2723,14 @@ html[data-theme="blood-red"] .tutorial-button {
   gap: 4px;
 }
 .profile-copy { font-size: 13px; }
+.playlist-row { align-items: center; }
+.playlist-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .profile-score-list { gap: 4px; }
 .profile-score-row { font-size: 13px; }
 .badge-grid {

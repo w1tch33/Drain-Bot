@@ -28,6 +28,7 @@
   const meowPlayer = qs("#meowPlayer");
   const meowFlash = qs("#meowFlash");
   const songMarquee = qs("#songMarquee");
+  const playlistButton = qs("#playlistButton");
   const searchInput = qs("#searchInput");
   const minDistance = qs("#minDistance");
   const maxDistance = qs("#maxDistance");
@@ -261,6 +262,11 @@
 
   function drawMessage(text) {
     resultsPanel.innerHTML = `<div>${escapeHtml(text)}</div>`;
+  }
+
+  function formatTrackTitle(filename) {
+    const clean = String(filename || "").trim();
+    return clean.replace(/\.[^.]+$/, "");
   }
 
   function resultButton(row) {
@@ -1918,13 +1924,16 @@
 
   function setupMusic() {
     state.playlist = JSON.parse(qs("#desktop").dataset.playlist);
-    if (!state.playlist.length) return;
-
     audioPlayer.volume = 0;
     volumeValue.textContent = Number(volumeControl.value).toFixed(2);
-    startSongMarquee(state.playlist[0].replace(".mp3", ""));
+    if (state.playlist.length) {
+      startSongMarquee(formatTrackTitle(state.playlist[0]));
+    } else {
+      startSongMarquee("No song");
+    }
 
     function advanceToNextTrack() {
+      if (!state.playlist.length) return;
       const currentKey = audioPlayer.currentSrc || audioPlayer.src || "";
       if (currentKey && state.lastTrackAdvanceKey === currentKey) return;
       state.lastTrackAdvanceKey = currentKey;
@@ -1952,6 +1961,13 @@
     };
 
     startPlaybackAt = function (index, shouldFade = true, preferMutedAutoplay = false, reloadTrack = true) {
+      if (!state.playlist.length) {
+        audioPlayer.pause();
+        audioPlayer.removeAttribute("src");
+        audioPlayer.load();
+        startSongMarquee("No song");
+        return;
+      }
       state.lastTrackAdvanceKey = "";
       state.playlistIndex = (index + state.playlist.length) % state.playlist.length;
       const filename = state.playlist[state.playlistIndex];
@@ -1959,7 +1975,7 @@
       if (reloadTrack || audioPlayer.src !== new URL(nextSrc, window.location.href).href) {
         audioPlayer.src = nextSrc;
       }
-      startSongMarquee(filename.replace(".mp3", ""));
+      startSongMarquee(formatTrackTitle(filename));
       const targetVolume = Number(volumeControl.value);
       audioPlayer.muted = !!preferMutedAutoplay;
       if (shouldFade) {
@@ -2010,12 +2026,14 @@
       volumeValue.textContent = Number(volumeControl.value).toFixed(2);
     });
 
-    startPlaybackAt(0, true, true);
-    window.setTimeout(() => {
-      if (!audioUnlocked && audioPlayer.paused) {
-        startPlaybackAt(state.playlistIndex, true, true, false);
-      }
-    }, 500);
+    if (state.playlist.length) {
+      startPlaybackAt(0, true, true);
+      window.setTimeout(() => {
+        if (!audioUnlocked && audioPlayer.paused) {
+          startPlaybackAt(state.playlistIndex, true, true, false);
+        }
+      }, 500);
+    }
   }
 
   let fadeInToTarget = () => {};
@@ -2027,6 +2045,103 @@
 
   function openTutorial() {
     openModal("Tutorial", qs("#tutorialTemplate").content.cloneNode(true));
+  }
+
+  function playlistHtml(playlist, status = "") {
+    const rows = playlist.length
+      ? playlist
+          .map(
+            (name) => `
+              <div class="profile-row playlist-row">
+                <div class="playlist-name">${escapeHtml(formatTrackTitle(name))}</div>
+                <button class="retro-button playlist-remove" type="button" data-filename="${escapeHtml(name)}">Remove</button>
+              </div>
+            `
+          )
+          .join("")
+      : `<div class="profile-copy">No songs in the playlist yet.</div>`;
+    return `
+      <div class="profile-section">
+        <div class="profile-heading">Manage Playlist</div>
+        <form class="modal-form" id="playlistUploadForm">
+          <input class="retro-input" id="playlistUploadInput" name="file" type="file" accept=".mp3,.wav,.ogg,.m4a,.aac,.flac" required>
+          <button class="retro-button" type="submit">Upload Song</button>
+        </form>
+        <div class="profile-copy" id="playlistStatus">${escapeHtml(status)}</div>
+      </div>
+      <div class="profile-section">
+        <div class="profile-heading">Songs</div>
+        <div class="profile-list" id="playlistList">${rows}</div>
+      </div>
+    `;
+  }
+
+  function applyPlaylist(playlist, preserveCurrent = true) {
+    const currentName = state.playlist[state.playlistIndex] || "";
+    state.playlist = Array.isArray(playlist) ? playlist.slice() : [];
+    qs("#desktop").dataset.playlist = JSON.stringify(state.playlist);
+    if (!state.playlist.length) {
+      state.playlistIndex = 0;
+      audioPlayer.pause();
+      audioPlayer.removeAttribute("src");
+      audioPlayer.load();
+      startSongMarquee("No song");
+      return;
+    }
+    const nextIndex = preserveCurrent ? state.playlist.indexOf(currentName) : -1;
+    state.playlistIndex = nextIndex >= 0 ? nextIndex : Math.min(state.playlistIndex, state.playlist.length - 1);
+    startSongMarquee(formatTrackTitle(state.playlist[state.playlistIndex]));
+    if (audioPlayer.src && !audioPlayer.paused) {
+      startPlaybackAt(state.playlistIndex, false, false, true);
+    }
+  }
+
+  async function openPlaylistManager(status = "") {
+    let payload = { playlist: state.playlist.slice() };
+    try {
+      payload = await fetchJson("/api/playlist");
+      applyPlaylist(payload.playlist || [], true);
+    } catch (_error) {
+      // If the fetch fails we can still show current local playlist state.
+    }
+    openModal("Playlist", playlistHtml(payload.playlist || [], status));
+    const uploadForm = modalBody.querySelector("#playlistUploadForm");
+    const uploadInput = modalBody.querySelector("#playlistUploadInput");
+    const statusNode = modalBody.querySelector("#playlistStatus");
+    uploadForm?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!uploadInput?.files?.length) return;
+      const formData = new FormData();
+      formData.append("file", uploadInput.files[0]);
+      if (statusNode) statusNode.textContent = "Uploading song...";
+      try {
+        const result = await fetchJson("/api/playlist/upload", {
+          method: "POST",
+          body: formData,
+        });
+        applyPlaylist(result.playlist || [], false);
+        await openPlaylistManager(`Added ${result.added || "song"}.`);
+      } catch (error) {
+        if (statusNode) statusNode.textContent = error.message;
+      }
+    });
+    modalBody.querySelectorAll(".playlist-remove").forEach((button) => {
+      bindPress(button, async () => {
+        const filename = button.dataset.filename || "";
+        if (!filename) return;
+        try {
+          const result = await fetchJson("/api/playlist/remove", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ filename }),
+          });
+          applyPlaylist(result.playlist || [], true);
+          await openPlaylistManager(`Removed ${formatTrackTitle(result.removed || filename)}.`);
+        } catch (error) {
+          if (statusNode) statusNode.textContent = error.message;
+        }
+      });
+    });
   }
 
   function openAddDrain() {
@@ -3474,6 +3589,7 @@
   qs("#routeButton").addEventListener("click", buildRoute);
   qs("#linksButton").addEventListener("click", openLinks);
   qs("#tutorialButton").addEventListener("click", openTutorial);
+  if (playlistButton) playlistButton.addEventListener("click", () => openPlaylistManager());
   qs("#notificationsButton").addEventListener("click", openNotifications);
   if (qs("#activityButton")) qs("#activityButton").addEventListener("click", openActivity);
   qs("#addDrainButton").addEventListener("click", openAddDrain);

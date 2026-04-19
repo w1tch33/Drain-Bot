@@ -1,4 +1,5 @@
 import os
+import json
 from pathlib import Path
 from functools import wraps
 from datetime import timedelta
@@ -15,6 +16,76 @@ app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
 APPROVAL_PASSWORD = os.getenv("DRAINBOT_APPROVAL_PASSWORD") or app.config["SECRET_KEY"]
 
 drain_service.ensure_runtime_dirs()
+
+LEGACY_PLAYLIST = [
+    "By Your Side.mp3",
+    "222  Unknowable.mp3",
+    "G Jones - Maybe (Official Audio).mp3",
+    "G Jones - Dancing On The Edge (Official Audio).mp3",
+    "Get Hot - G Jones Remix.mp3",
+    "G Jones - Which Way (Official Audio).mp3",
+    "G Jones - Immortal Light (Official Audio).mp3",
+    "Iridescent Leaves Floating Downstream.mp3",
+    "G Jones - Remnant (Official Audio).mp3",
+]
+MUSIC_DIR = Path(drain_service.DATA_DIR) / "music"
+PLAYLIST_FILE = Path(drain_service.DATA_DIR) / "playlist.json"
+ALLOWED_AUDIO_EXTENSIONS = {".mp3", ".wav", ".ogg", ".m4a", ".aac", ".flac"}
+MUSIC_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def _music_entries_from_disk() -> list[str]:
+    names: list[str] = []
+    if MUSIC_DIR.exists():
+        for path in sorted(MUSIC_DIR.iterdir(), key=lambda item: item.name.lower()):
+            if path.is_file() and path.suffix.lower() in ALLOWED_AUDIO_EXTENSIONS:
+                names.append(path.name)
+    return names
+
+
+def get_playlist_entries() -> list[str]:
+    playlist: list[str] = []
+    if PLAYLIST_FILE.exists():
+        try:
+            payload = json.loads(PLAYLIST_FILE.read_text(encoding="utf-8"))
+            if isinstance(payload, list):
+                playlist = [str(item).strip() for item in payload if str(item).strip()]
+        except (OSError, json.JSONDecodeError):
+            playlist = []
+    if not playlist:
+        playlist = list(LEGACY_PLAYLIST)
+    seen: set[str] = set()
+    available: list[str] = []
+    for name in playlist + _music_entries_from_disk():
+        clean = str(name).strip()
+        if not clean or clean in seen:
+            continue
+        music_path = MUSIC_DIR / clean
+        legacy_path = Path(app.root_path) / clean
+        if music_path.exists() or legacy_path.exists():
+            available.append(clean)
+            seen.add(clean)
+    return available
+
+
+def save_playlist_entries(entries: list[str]) -> list[str]:
+    cleaned = [str(item).strip() for item in entries if str(item).strip()]
+    PLAYLIST_FILE.write_text(json.dumps(cleaned, indent=2, ensure_ascii=False), encoding="utf-8")
+    return cleaned
+
+
+def build_unique_music_name(filename: str) -> str:
+    source_name = secure_filename(Path(filename).name)
+    stem = Path(source_name).stem or "track"
+    suffix = Path(source_name).suffix.lower()
+    if suffix not in ALLOWED_AUDIO_EXTENSIONS:
+        raise ValueError("Unsupported audio format.")
+    candidate = f"{stem}{suffix}"
+    index = 2
+    while (MUSIC_DIR / candidate).exists():
+        candidate = f"{stem}-{index}{suffix}"
+        index += 1
+    return candidate
 
 
 def _float_arg(name: str, default: float) -> float:
@@ -190,17 +261,7 @@ def index():
     return render_template(
         "index.html",
         stats=drain_service.stats_summary(current_username()),
-        playlist=[
-            "By Your Side.mp3",
-            "222  Unknowable.mp3",
-            "G Jones - Maybe (Official Audio).mp3",
-            "G Jones - Dancing On The Edge (Official Audio).mp3",
-            "Get Hot - G Jones Remix.mp3",
-            "G Jones - Which Way (Official Audio).mp3",
-            "G Jones - Immortal Light (Official Audio).mp3",
-            "Iridescent Leaves Floating Downstream.mp3",
-            "G Jones - Remnant (Official Audio).mp3",
-        ],
+        playlist=get_playlist_entries(),
         helpful_links=[
             ("Melbourne Radar", "https://www.bom.gov.au/products/IDR023.loop.shtml"),
             ("Lewis VR Tours", "https://tour.panoee.net/67b282e6ed02439d5b29889b/67b2869ec8fccb419f15cbba"),
@@ -209,6 +270,48 @@ def index():
             ("Melbourne Waterways Map", "https://melbournewater.maps.arcgis.com/apps/webappviewer/index.html?id=c6c2ea5762f04ba1a76936e702a9ed28"),
         ],
     )
+
+
+@app.get("/api/playlist")
+@login_required
+def playlist_data():
+    return jsonify({"playlist": get_playlist_entries()})
+
+
+@app.post("/api/playlist/upload")
+@login_required
+def upload_playlist_track():
+    file = request.files.get("file")
+    if not file or not file.filename:
+        return jsonify({"error": "Choose a song file first."}), 400
+    try:
+        filename = build_unique_music_name(file.filename)
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
+    target = MUSIC_DIR / filename
+    file.save(target)
+    playlist = get_playlist_entries()
+    playlist.append(filename)
+    save_playlist_entries(playlist)
+    return jsonify({"ok": True, "playlist": get_playlist_entries(), "added": filename})
+
+
+@app.post("/api/playlist/remove")
+@login_required
+def remove_playlist_track():
+    payload = request.get_json(silent=True) or request.form
+    filename = str(payload.get("filename", "")).strip()
+    if not filename:
+        return jsonify({"error": "Song not found."}), 400
+    playlist = [item for item in get_playlist_entries() if item != filename]
+    save_playlist_entries(playlist)
+    music_path = MUSIC_DIR / filename
+    if music_path.exists():
+        try:
+            music_path.unlink()
+        except OSError:
+            pass
+    return jsonify({"ok": True, "playlist": get_playlist_entries(), "removed": filename})
 
 
 @app.get("/api/stats")
@@ -687,7 +790,14 @@ def photo_file(filename: str):
 @app.get("/audio/<path:filename>")
 @login_required
 def audio_asset(filename: str):
-    return send_from_directory(app.root_path, filename)
+    safe_name = Path(filename).name
+    music_path = MUSIC_DIR / safe_name
+    if music_path.exists():
+        return send_from_directory(MUSIC_DIR, safe_name)
+    legacy_path = Path(app.root_path) / safe_name
+    if legacy_path.exists():
+        return send_from_directory(app.root_path, safe_name)
+    abort(404)
 
 
 if __name__ == "__main__":
