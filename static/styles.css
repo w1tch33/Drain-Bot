@@ -2783,6 +2783,9 @@ html[data-theme="blood-red"] .tutorial-button {
   min-height: 30px;
   padding: 4px 8px;
 }
+.map-tool-conditional[hidden] {
+  display: none !important;
+}
 .map-line-name-input {
   min-width: 190px;
   max-width: 260px;

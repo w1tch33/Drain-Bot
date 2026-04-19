@@ -613,11 +613,11 @@
               <button class="retro-button" id="mapStyleToggleButton" type="button">Satellite</button>
               <button class="retro-button" id="mapLabelsToggleButton" type="button">Labels On</button>
               <button class="retro-button" id="mapDrawLineButton" type="button">Draw Line</button>
-              <button class="retro-button" id="mapUndoPointButton" type="button">Undo Point</button>
-              <button class="retro-button" id="mapSaveLineButton" type="button">Save Line</button>
-              <button class="retro-button" id="mapCancelLineButton" type="button">Cancel Draw</button>
-              <button class="retro-button" id="mapDeleteLineButton" type="button">Delete Line</button>
-              <input class="retro-input map-line-name-input" id="mapLineNameInput" type="text" placeholder="Measurement line name">
+              <button class="retro-button map-tool-conditional" id="mapUndoPointButton" type="button" hidden>Undo Point</button>
+              <button class="retro-button map-tool-conditional" id="mapSaveLineButton" type="button" hidden>Save Line</button>
+              <button class="retro-button map-tool-conditional" id="mapCancelLineButton" type="button" hidden>Cancel Draw</button>
+              <button class="retro-button map-tool-conditional" id="mapDeleteLineButton" type="button" hidden>Delete Line</button>
+              <input class="retro-input map-line-name-input map-tool-conditional" id="mapLineNameInput" type="text" placeholder="Measurement line name" hidden>
             </div>
             <div class="map-view" id="drainMapView"></div>
             <div class="profile-copy" id="mapStatusText"></div>
@@ -701,20 +701,26 @@
 
       function updateDrawControls() {
         const editing = Boolean(editingLineId);
+        const activeLineMode = editing || drawingLine;
         if (drawLineButton) {
           drawLineButton.textContent = drawingLine ? "Drawing..." : editing ? "Edit Active" : "Draw Line";
           drawLineButton.disabled = editing || drawingLine;
         }
+        if (undoPointButton) undoPointButton.hidden = !drawingLine;
         if (undoPointButton) undoPointButton.disabled = editing || !drawingLine || draftPoints.length === 0;
+        if (saveLineButton) saveLineButton.hidden = !activeLineMode;
         if (saveLineButton) {
           saveLineButton.textContent = editing ? "Save Edit" : "Save Line";
           saveLineButton.disabled = editing ? editingPoints.length < 2 : !drawingLine || draftPoints.length < 2;
         }
+        if (cancelLineButton) cancelLineButton.hidden = !activeLineMode;
         if (cancelLineButton) {
           cancelLineButton.textContent = editing ? "Cancel Edit" : "Cancel Draw";
           cancelLineButton.disabled = editing ? false : !drawingLine;
         }
+        if (deleteLineButton) deleteLineButton.hidden = !editing;
         if (deleteLineButton) deleteLineButton.disabled = !editing;
+        if (lineNameInput) lineNameInput.hidden = !activeLineMode;
         if (lineNameInput) lineNameInput.disabled = !drawingLine && !editing;
         mapEl.classList.toggle("map-drawing", drawingLine);
         mapEl.classList.toggle("map-editing", editing);
@@ -814,16 +820,21 @@
 
       function bindLinePopup(layer, line) {
         layer.on("popupopen", (event) => {
-          const editButton = event.popup.getElement()?.querySelector(".map-edit-line");
-          const deleteButton = event.popup.getElement()?.querySelector(".map-delete-line");
+          const popupEl = event.popup.getElement();
+          const editButton = popupEl?.querySelector(".map-edit-line");
+          const deleteButton = popupEl?.querySelector(".map-delete-line");
           if (editButton) {
-            bindPress(editButton, () => {
+            editButton.addEventListener("click", (clickEvent) => {
+              clickEvent.preventDefault();
+              clickEvent.stopPropagation();
               map.closePopup();
               startEditingLine(line);
-            });
+            }, { once: true });
           }
           if (deleteButton) {
-            bindPress(deleteButton, async () => {
+            deleteButton.addEventListener("click", async (clickEvent) => {
+              clickEvent.preventDefault();
+              clickEvent.stopPropagation();
               try {
                 if (editingLineId === line.id) {
                   stopEditingLine();
@@ -842,7 +853,7 @@
               } catch (error) {
                 refreshMapStatus(error.message);
               }
-            });
+            }, { once: true });
           }
         });
       }
