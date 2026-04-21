@@ -2334,6 +2334,7 @@ html[data-theme="blood-red"] .tutorial-button {
 .links-button { position: absolute; top: 48px; right: 8px; width: 78px; height: 32px; padding: 4px 2px; font-size: 12px; }
 .tutorial-button { position: absolute; top: 86px; right: 8px; width: 78px; height: 32px; padding: 4px 1px; font-size: 11px; }
 .tutorial-flash-button { animation: invertFlash 2.4s step-end infinite; }
+.updates-flash-button { animation: invertFlash 2.4s step-end infinite; }
 .themes-wrap { position: absolute; top: 124px; right: 8px; width: 120px; }
 .map-panel-button { position: absolute; top: 198px; right: 8px; width: 78px; height: 32px; padding: 4px 2px; font-size: 12px; }
 .themes-label { margin: 0 0 4px; text-align: left; font-size: 12px; }
