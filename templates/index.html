@@ -10,7 +10,7 @@
   >
 {% endblock %}
 {% block content %}
-  <div class="desktop" id="desktop" data-playlist='{{ playlist|tojson }}'>
+  <div class="desktop" id="desktop" data-playlist='{{ playlist|tojson }}' data-updates='{{ app_updates|tojson }}'>
     <div class="session-controls">
       {% if is_witch_account %}
         {% if admin_verified %}
@@ -19,6 +19,7 @@
           <a class="retro-button session-button" href="{{ url_for('admin_login') }}">Admin</a>
         {% endif %}
       {% endif %}
+      <button class="retro-button session-button" id="updatesButton" type="button">Updates</button>
       <button class="retro-button session-button notify-button" id="notificationsButton" type="button">
         Notifications
         <span class="notify-badge hidden" id="notificationsBadge">0</span>

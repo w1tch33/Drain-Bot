@@ -2730,6 +2730,14 @@ html[data-theme="blood-red"] .tutorial-button {
   gap: 4px;
 }
 .profile-copy { font-size: 13px; }
+.update-entry {
+  border: 2px solid var(--line);
+  background: var(--field-bg);
+  padding: 8px 10px;
+}
+.update-item::before {
+  content: "• ";
+}
 .playlist-row { align-items: center; }
 .playlist-name {
   flex: 1 1 auto;

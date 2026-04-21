@@ -33,6 +33,45 @@ PLAYLIST_FILE = Path(drain_service.DATA_DIR) / "playlist.json"
 ALLOWED_AUDIO_EXTENSIONS = {".mp3", ".wav", ".ogg", ".m4a", ".aac", ".flac"}
 MUSIC_DIR.mkdir(parents=True, exist_ok=True)
 
+APP_UPDATES = [
+    {
+        "date": "2026-04-21",
+        "title": "Playlist Manager",
+        "items": [
+            "Added a Playlist button inside the music panel.",
+            "You can now upload new songs directly from the app.",
+            "Songs can be removed from the playlist without breaking the music player.",
+        ],
+    },
+    {
+        "date": "2026-04-19",
+        "title": "Map Line Editing",
+        "items": [
+            "Measurement lines can now be edited by dragging their points.",
+            "Shared yellow KML routes now have account-safe actions when clicked.",
+            "Draw controls only show while drawing or editing a line.",
+        ],
+    },
+    {
+        "date": "2026-04-17",
+        "title": "Map Upgrades",
+        "items": [
+            "Added underground measurement lines from the shared KML to the in-app map.",
+            "You can draw and save your own custom measurement lines on the map.",
+            "Custom lines save to your account and follow you across devices.",
+        ],
+    },
+    {
+        "date": "2026-04-15",
+        "title": "Themes And Visual Pass",
+        "items": [
+            "Expanded the themed UI with custom visual treatments and overlays.",
+            "Refined the mobile layout and theme handling for web use.",
+            "Improved several panel layouts and map styling details.",
+        ],
+    },
+]
+
 
 def _music_entries_from_disk() -> list[str]:
     names: list[str] = []
@@ -262,6 +301,7 @@ def index():
         "index.html",
         stats=drain_service.stats_summary(current_username()),
         playlist=get_playlist_entries(),
+        app_updates=APP_UPDATES,
         helpful_links=[
             ("Melbourne Radar", "https://www.bom.gov.au/products/IDR023.loop.shtml"),
             ("Lewis VR Tours", "https://tour.panoee.net/67b282e6ed02439d5b29889b/67b2869ec8fccb419f15cbba"),

@@ -41,6 +41,7 @@
   const volumeValue = qs("#volumeValue");
   const notificationsBadge = qs("#notificationsBadge");
   const desktop = qs("#desktop");
+  const appUpdates = JSON.parse(desktop.dataset.updates || "[]");
   const BASE_WIDTH = 1433;
   const BASE_HEIGHT = 768;
   const DRAIN_MAN_HIGH_SCORE_KEY = "draintool-drainman-high-score";
@@ -262,6 +263,31 @@
 
   function drawMessage(text) {
     resultsPanel.innerHTML = `<div>${escapeHtml(text)}</div>`;
+  }
+
+  function updatesHtml() {
+    if (!Array.isArray(appUpdates) || !appUpdates.length) {
+      return '<div class="profile-copy">No recent updates yet.</div>';
+    }
+    return appUpdates
+      .map(
+        (entry) => `
+          <div class="profile-section update-entry">
+            <div class="profile-heading">${escapeHtml(entry.title || "Update")}</div>
+            <div class="profile-copy">${escapeHtml(entry.date || "")}</div>
+            <div class="profile-list">
+              ${(Array.isArray(entry.items) ? entry.items : [])
+                .map((item) => `<div class="profile-copy update-item">${escapeHtml(String(item))}</div>`)
+                .join("")}
+            </div>
+          </div>
+        `
+      )
+      .join("");
+  }
+
+  function openUpdates() {
+    openModal("Recent Updates", updatesHtml());
   }
 
   function formatTrackTitle(filename) {
@@ -3604,6 +3630,7 @@
   qs("#routeButton").addEventListener("click", buildRoute);
   qs("#linksButton").addEventListener("click", openLinks);
   qs("#tutorialButton").addEventListener("click", openTutorial);
+  if (qs("#updatesButton")) qs("#updatesButton").addEventListener("click", openUpdates);
   if (playlistButton) playlistButton.addEventListener("click", () => openPlaylistManager());
   qs("#notificationsButton").addEventListener("click", openNotifications);
   if (qs("#activityButton")) qs("#activityButton").addEventListener("click", openActivity);
