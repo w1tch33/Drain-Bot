@@ -36,11 +36,21 @@ MUSIC_DIR.mkdir(parents=True, exist_ok=True)
 APP_UPDATES = [
     {
         "date": "2026-04-21",
+        "title": "Recent Polish",
+        "items": [
+            "Added a Directions button in each drain menu to open Google Maps directions.",
+            "The Updates button now flashes so people notice new changes more easily.",
+            "The tutorial was refreshed to explain map lines, playlist tools, and the updates panel.",
+        ],
+    },
+    {
+        "date": "2026-04-21",
         "title": "Playlist Manager",
         "items": [
             "Added a Playlist button inside the music panel.",
             "You can now upload new songs directly from the app.",
             "Songs can be removed from the playlist without breaking the music player.",
+            "The mobile file picker was reworked so choosing a song works better on phones.",
         ],
     },
     {
@@ -50,6 +60,7 @@ APP_UPDATES = [
             "Measurement lines can now be edited by dragging their points.",
             "Shared yellow KML routes now have account-safe actions when clicked.",
             "Draw controls only show while drawing or editing a line.",
+            "Line popups now expose edit and hide/delete actions more clearly.",
         ],
     },
     {
