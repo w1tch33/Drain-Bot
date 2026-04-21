@@ -1675,6 +1675,7 @@
       <div class="detail-section detail-actions">
         <button class="retro-button" type="button" id="nearbyButton">Nearby</button>
         <button class="retro-button" type="button" id="routeFromHereButton">Build Route</button>
+        <button class="retro-button" type="button" id="directionsButton">Directions</button>
         <button class="retro-button" type="button" id="showOnMapButton">Show On Map</button>
         ${showDelete ? '<button class="retro-button" type="button" id="deleteDrainButton">Delete Drain</button>' : ""}
       </div>
@@ -1757,6 +1758,14 @@
     bindPress(modalBody.querySelector("#routeFromHereButton"), async () => {
       renderRoute(await fetchJson(`/api/drains/${encodeURIComponent(name)}/route`));
       closeModal();
+    });
+    bindPress(modalBody.querySelector("#directionsButton"), () => {
+      const lat = Number(state.currentDrain?.lat);
+      const lon = Number(state.currentDrain?.lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+      const destination = `${lat},${lon}`;
+      const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}&travelmode=driving`;
+      window.open(url, "_blank", "noopener,noreferrer");
     });
     bindPress(modalBody.querySelector("#showOnMapButton"), async () => {
       await openMapPanel(name);
