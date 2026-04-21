@@ -2064,7 +2064,9 @@
       <div class="profile-section">
         <div class="profile-heading">Manage Playlist</div>
         <form class="modal-form" id="playlistUploadForm">
-          <input class="retro-input" id="playlistUploadInput" name="file" type="file" accept=".mp3,.wav,.ogg,.m4a,.aac,.flac" required>
+          <input class="playlist-file-input" id="playlistUploadInput" name="file" type="file" accept=".mp3,.wav,.ogg,.m4a,.aac,.flac" required>
+          <button class="retro-button" id="playlistChooseButton" type="button">Choose File</button>
+          <div class="profile-copy" id="playlistFileName">No file chosen</div>
           <button class="retro-button" type="submit">Upload Song</button>
         </form>
         <div class="profile-copy" id="playlistStatus">${escapeHtml(status)}</div>
@@ -2107,7 +2109,20 @@
     openModal("Playlist", playlistHtml(payload.playlist || [], status));
     const uploadForm = modalBody.querySelector("#playlistUploadForm");
     const uploadInput = modalBody.querySelector("#playlistUploadInput");
+    const chooseButton = modalBody.querySelector("#playlistChooseButton");
+    const fileNameNode = modalBody.querySelector("#playlistFileName");
     const statusNode = modalBody.querySelector("#playlistStatus");
+    const syncChosenFile = () => {
+      const file = uploadInput?.files?.[0];
+      if (fileNameNode) fileNameNode.textContent = file ? file.name : "No file chosen";
+    };
+    if (chooseButton && uploadInput) {
+      bindPress(chooseButton, () => {
+        uploadInput.click();
+      });
+      uploadInput.addEventListener("change", syncChosenFile);
+      syncChosenFile();
+    }
     uploadForm?.addEventListener("submit", async (event) => {
       event.preventDefault();
       if (!uploadInput?.files?.length) return;

@@ -2738,6 +2738,13 @@ html[data-theme="blood-red"] .tutorial-button {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.playlist-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
 .profile-score-list { gap: 4px; }
 .profile-score-row { font-size: 13px; }
 .badge-grid {
